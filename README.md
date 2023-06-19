@@ -7,4 +7,14 @@ Please refer [here](https://github.com/Yuheng-Li/UniversalFakeDetect#data) for t
 ![image](https://github.com/chandlerbing65nm/UniversalFakeDetection/assets/62779617/613606f9-6c61-424f-ae13-5135d0a7efcb)
 
 
+# Citation
 
+If you find our work helpful in your research, please cite it using the following:
+```bibtex
+@inproceedings{ojha2023fakedetect,
+      title={Towards Universal Fake Image Detectors that Generalize Across Generative Models}, 
+      author={Ojha, Utkarsh and Li, Yuheng and Lee, Yong Jae},
+      booktitle={CVPR},
+      year={2023},
+}
+```
