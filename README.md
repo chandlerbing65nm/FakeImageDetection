@@ -4,6 +4,7 @@ This is the unofficial implementation of CVPR 2023 paper titled "[Towards Univer
 
 Please refer [here](https://github.com/Yuheng-Li/UniversalFakeDetect#data) for the official implementation.
 
-![image](https://github.com/chandlerbing65nm/UniversalFakeDetection/assets/62779617/f0a84b7e-9b9c-4fe6-8929-c031466adeb0)
+![image](https://github.com/chandlerbing65nm/UniversalFakeDetection/assets/62779617/613606f9-6c61-424f-ae13-5135d0a7efcb)
+
 
 
