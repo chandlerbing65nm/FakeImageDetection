@@ -45,15 +45,15 @@ class WangEtAlDataset(Dataset):
 
 
 class DiffusionDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        self.root_dir = root_dir
+    def __init__(self, fake_dir, real_dir, transform=None):
         self.transform = transform
         self.data = []
         self.fake_index = 1  # Index of 'fake' in ['real', 'fake']
+        self.real_index = 0  # Index of 'real' in ['real', 'fake']
 
         # Iterate over the 'fake' folders
-        for folder in os.listdir(root_dir):
-            folder_path = os.path.join(root_dir, folder)
+        for folder in os.listdir(fake_dir):
+            folder_path = os.path.join(fake_dir, folder)
 
             # Iterate over files
             for file_name in os.listdir(folder_path):
@@ -61,6 +61,17 @@ class DiffusionDataset(Dataset):
 
                 # Append a tuple (file_path, fake_index)
                 self.data.append((file_path, self.fake_index))
+
+        # Iterate over the 'real' folders
+        for folder in os.listdir(real_dir):
+            folder_path = os.path.join(real_dir, folder)
+
+            # Iterate over files
+            for file_name in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file_name)
+
+                # Append a tuple (file_path, real_index)
+                self.data.append((file_path, self.real_index))
 
     def __len__(self):
         return len(self.data)

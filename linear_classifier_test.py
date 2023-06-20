@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import torchvision.transforms as transforms
-from sklearn.metrics import average_precision_score, precision_score
+from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
 import numpy as np
 from PIL import Image
 import os
@@ -20,7 +20,9 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
 
-    test_dataset = DiffusionDataset('/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/DALLE', transform=transform)
+    real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
+    fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/TAMING-TRANSFORMERS'
+    test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
     test_dataloader = DataLoader(test_dataset, batch_size=128, shuffle=False, num_workers=4)
 
     test_real_embeddings, test_fake_embeddings = CLIPFeatureExtractor().extract_features(test_dataloader)
@@ -69,11 +71,19 @@ if __name__ == "__main__":
     # Apply threshold to predictions to get binary label
     preds_binary = (preds_array > 0.5).astype(int)
 
-    # Calculate precision for each class
+    # Calculate metrics for each class
     if np.any(labels_array == 0):
         precision_real = precision_score(labels_array, preds_binary, pos_label=0) # assuming 0 label represents 'real'
+        recall_real = recall_score(labels_array, preds_binary, pos_label=0) # assuming 0 label represents 'real'
         print(f'Precision (Real): {precision_real}')
+        print(f'Recall (Real): {recall_real}')
 
     if np.any(labels_array == 1):
         precision_fake = precision_score(labels_array, preds_binary, pos_label=1) # assuming 1 label represents 'fake'
+        recall_fake = recall_score(labels_array, preds_binary, pos_label=1) # assuming 1 label represents 'fake'
         print(f'Precision (Fake): {precision_fake}')
+        print(f'Recall (Fake): {recall_fake}')
+
+    # Calculate accuracy
+    accuracy = accuracy_score(labels_array, preds_binary)
+    print(f'Accuracy: {accuracy}')
