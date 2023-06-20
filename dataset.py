@@ -42,3 +42,37 @@ class WangEtAlDataset(Dataset):
             image = self.transform(image)
 
         return image, label
+
+
+class DiffusionDataset(Dataset):
+    def __init__(self, root_dir, transform=None):
+        self.root_dir = root_dir
+        self.transform = transform
+        self.data = []
+        self.fake_index = 1  # Index of 'fake' in ['real', 'fake']
+
+        # Iterate over the 'fake' folders
+        for folder in os.listdir(root_dir):
+            folder_path = os.path.join(root_dir, folder)
+
+            # Iterate over files
+            for file_name in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file_name)
+
+                # Append a tuple (file_path, fake_index)
+                self.data.append((file_path, self.fake_index))
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        img_path, label = self.data[index]
+
+        # Load image
+        image = Image.open(img_path).convert("RGB")
+
+        # Apply transforms if any
+        if self.transform:
+            image = self.transform(image)
+
+        return image, label
