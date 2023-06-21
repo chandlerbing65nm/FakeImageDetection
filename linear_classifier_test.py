@@ -8,8 +8,8 @@ import os
 from clip import load
 from tqdm import tqdm
 
-from dataset import WangEtAlDataset, DiffusionDataset
-from extract_features import CLIPFeatureExtractor
+from dataset import WangEtAlDataset, DiffusionDataset, ForenSynths
+from extract_features import CLIPFeatureExtractor, ImageNetFeatureExtractor
 from linear_classifier_train import BinaryClassifier
 
 if __name__ == "__main__":
@@ -21,12 +21,17 @@ if __name__ == "__main__":
     ])
 
     real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
-    fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/TAMING-TRANSFORMERS'
+    fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/DALLE'
     test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
-    test_dataloader = DataLoader(test_dataset, batch_size=128, shuffle=False, num_workers=4)
 
-    test_real_embeddings, test_fake_embeddings = CLIPFeatureExtractor().extract_features(test_dataloader)
+    # root_dir = '/home/paperspace/Documents/chandler/ForenSynths/imle'
+    # test_dataset = ForenSynths(root_dir, transform=transform)
 
+    test_dataloader = DataLoader(test_dataset, batch_size=128, shuffle=False, num_workers=8)
+
+    test_real_embeddings, test_fake_embeddings = ImageNetFeatureExtractor().extract_features(test_dataloader)
+    print(test_real_embeddings.shape)
+    print(test_fake_embeddings.shape)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # Load model
     feature_size = test_fake_embeddings.shape[1] # Inspect the size of the embeddings

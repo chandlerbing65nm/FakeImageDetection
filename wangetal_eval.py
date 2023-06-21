@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 from wangetal_classifier import resnet50
 from wangetal_augment import ImageAugmentor
-from dataset import DiffusionDataset
+from dataset import DiffusionDataset, ForenSynths
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -38,10 +38,14 @@ transform = augmentor.create_transform()
 #     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
 # ])
 
-real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
-fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/TAMING-TRANSFORMERS'
-test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
-test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+# real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
+# fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/TAMING-TRANSFORMERS'
+# test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
+
+root_dir = '/home/paperspace/Documents/chandler/ForenSynths/san'
+test_dataset = ForenSynths(root_dir, transform=transform)
+
+test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False, num_workers=4)
 
 # Running inference
 predictions, labels = [], []
