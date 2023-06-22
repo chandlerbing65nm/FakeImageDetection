@@ -20,23 +20,22 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
 
-    real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
-    fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/DALLE'
-    test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
+    # real_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/REAL'
+    # fake_dir = '/home/paperspace/Documents/chandler/UniversalFakeDetection/DiffusionImages/TAMING-TRANSFORMERS'
+    # test_dataset = DiffusionDataset(fake_dir, real_dir, transform=transform)
 
-    # root_dir = '/home/paperspace/Documents/chandler/ForenSynths/imle'
-    # test_dataset = ForenSynths(root_dir, transform=transform)
+    root_dir = '/home/paperspace/Documents/chandler/ForenSynths/imle'
+    test_dataset = ForenSynths(root_dir, transform=transform)
 
-    test_dataloader = DataLoader(test_dataset, batch_size=128, shuffle=False, num_workers=8)
+    test_dataloader = DataLoader(test_dataset, batch_size=256, shuffle=False, num_workers=8)
 
     test_real_embeddings, test_fake_embeddings = ImageNetFeatureExtractor().extract_features(test_dataloader)
-    print(test_real_embeddings.shape)
-    print(test_fake_embeddings.shape)
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     # Load model
     feature_size = test_fake_embeddings.shape[1] # Inspect the size of the embeddings
     model = BinaryClassifier(input_size=feature_size).to(device)
-    model.load_state_dict(torch.load('checkpoints/best_model.pt'))
+    model.load_state_dict(torch.load('checkpoints/rn50_in1k_best_model.pt'))
 
     # Handle the possibility that there might be only one class in the dataset
     if test_real_embeddings.size != 0 and test_fake_embeddings.size != 0:

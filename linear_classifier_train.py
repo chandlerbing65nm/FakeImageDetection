@@ -11,7 +11,7 @@ import pickle
 from sklearn.metrics import average_precision_score
 
 from dataset import WangEtAlDataset
-from extract_features import CLIPFeatureExtractor
+from extract_features import CLIPFeatureExtractor, ImageNetFeatureExtractor
 
 class BinaryClassifier(nn.Module):
     def __init__(self, input_size):
@@ -54,11 +54,14 @@ class EarlyStopping:
     def save_checkpoint(self, val_loss, model):
         if self.verbose:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), 'checkpoints/best_model.pt')
+        torch.save(model.state_dict(), 'checkpoints/rn50_in1k_best_model.pt')
         self.val_loss_min = val_loss
 
 
 def train_model(model, criterion, optimizer, train_loader, val_loader, num_epochs=25):
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    
     early_stopping = EarlyStopping(patience=7, verbose=True)
     for epoch in range(num_epochs):
         print(f'Epoch {epoch+1}/{num_epochs}')
@@ -118,7 +121,7 @@ if __name__ == "__main__":
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
     # Load embeddings
-    with open('embeddings.pkl', 'rb') as f:
+    with open('embeddings/r50_in1k_embeddings.pkl', 'rb') as f:
         real_embeddings, fake_embeddings = pickle.load(f)
 
     # Creating training dataset from embeddings
@@ -129,8 +132,8 @@ if __name__ == "__main__":
 
     # Extracting features from validation set
     val_dataset = WangEtAlDataset('/home/paperspace/Documents/chandler/ForenSynths/wang_et_al/validation', transform=transform)
-    val_dataloader = DataLoader(val_dataset, batch_size=128, shuffle=False, num_workers=4)
-    val_real_embeddings, val_fake_embeddings = CLIPFeatureExtractor().extract_features(val_dataloader)
+    val_dataloader = DataLoader(val_dataset, batch_size=256, shuffle=False, num_workers=4)
+    val_real_embeddings, val_fake_embeddings = ImageNetFeatureExtractor().extract_features(val_dataloader)
 
     # Creating validation dataset from embeddings
     val_embeddings = np.concatenate((val_real_embeddings, val_fake_embeddings), axis=0)

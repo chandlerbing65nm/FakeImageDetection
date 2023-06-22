@@ -1,20 +1,24 @@
 import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+from torchvision.models import resnet50
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 import os
-from clip import load
+import clip
 import pickle
 import timm
+import joblib
+import h5py
+import torch.nn as nn
 
 from dataset import WangEtAlDataset
 
 class CLIPFeatureExtractor:
-    def __init__(self, model_name='ViT-L/14'):
+    def __init__(self, model_name='RN50'): # ViT-L/14
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model, _ = load(model_name, device=self.device, jit=False)
+        self.model, _ = clip.load(model_name, device=self.device, jit=False)
         self.model.eval()
 
     def extract_features(self, dataloader):
@@ -38,9 +42,11 @@ class CLIPFeatureExtractor:
         return np.array(real_embeddings), np.array(fake_embeddings)
 
 class ImageNetFeatureExtractor:
-    def __init__(self, model_name='vit_base_patch16_224.augreg_in21k'):
+    def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = timm.create_model(model_name, pretrained=True).to(self.device)
+        self.model = resnet50(pretrained=True)
+        self.model.fc = nn.Identity()  # Remove the final fully connected layer
+        self.model = self.model.to(self.device)
         self.model.eval()
 
     def extract_features(self, dataloader):
@@ -51,8 +57,8 @@ class ImageNetFeatureExtractor:
             for imgs, labels in tqdm(dataloader):
                 imgs = imgs.to(self.device)
                 labels = labels.to(self.device)
-                
-                features = self.model.forward_features(imgs)
+
+                features = self.model(imgs)
                 features = features.cpu().numpy()
 
                 for feature, label in zip(features, labels):
@@ -71,10 +77,11 @@ if __name__ == "__main__":
     ])
 
     dataset = WangEtAlDataset('/home/paperspace/Documents/chandler/ForenSynths/wang_et_al/training', transform=transform)
-    dataloader = DataLoader(dataset, batch_size=512, shuffle=False, num_workers=8)
+    dataloader = DataLoader(dataset, batch_size=256, shuffle=False, num_workers=4)
 
-    feature_extractor = ImageNetFeatureExtractor()
+    feature_extractor = CLIPFeatureExtractor()
+    # feature_extractor = ImageNetFeatureExtractor()
     real_embeddings, fake_embeddings = feature_extractor.extract_features(dataloader)
 
-    with open('in21k_embeddings.pkl', 'wb') as f:
+    with open('embeddings/r50_clip_embeddings.pkl', 'wb') as f:
         pickle.dump((real_embeddings, fake_embeddings), f)

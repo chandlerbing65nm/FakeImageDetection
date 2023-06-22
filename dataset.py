@@ -6,6 +6,7 @@ from typing import Any, Callable, Optional
 import os
 from PIL import Image
 import numpy as np
+from tqdm import tqdm
 
 class WangEtAlDataset(Dataset):
     def __init__(self, root_dir, transform=None):
