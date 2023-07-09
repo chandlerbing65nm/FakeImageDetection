@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 from random import random, choice
 from scipy.ndimage.filters import gaussian_filter
+import torchvision.transforms.functional as F
 from io import BytesIO
 import torch
 import torchvision.transforms as transforms
@@ -11,6 +12,10 @@ class ImageAugmentor:
     def __init__(self, opt):
         self.opt = opt
         self.jpeg_dict = {'cv2': self.cv2_jpg, 'pil': self.pil_jpg}
+        self.rz_dict = {'bilinear': Image.BILINEAR,
+                        'bicubic': Image.BICUBIC,
+                        'lanczos': Image.LANCZOS,
+                        'nearest': Image.NEAREST}
 
     def cv2_jpg(self, img, compress_val):
         img_cv2 = img[:,:,::-1]
@@ -53,6 +58,9 @@ class ImageAugmentor:
 
     def data_augment(self, img):
         img = np.array(img)
+        if img.ndim == 2:
+            img = np.expand_dims(img, axis=2)
+            img = np.repeat(img, 3, axis=2)
 
         if random() < self.opt['blur_prob']:
             sig = self.sample_continuous(self.opt['blur_sig'])
@@ -65,12 +73,16 @@ class ImageAugmentor:
 
         return Image.fromarray(img)
 
+    def custom_resize(self, img):
+        interp = self.sample_discrete(self.opt['rz_interp'])
+        return F.resize(img, self.opt['loadSize'], interpolation=self.rz_dict[interp])
+
     def create_transform(self):
         transform = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.Resize((224, 224)),
-            transforms.RandomCrop(224, padding=4),
-            transforms.Lambda(lambda img: self.data_augment(img)),  # Pass opt dictionary here
+            # transforms.RandomHorizontalFlip(),
+            transforms.CenterCrop(224),
+            # transforms.Resize((224, 224)),
+            # transforms.Lambda(lambda img: self.data_augment(img)),  # Pass opt dictionary here
             transforms.ToTensor(),
             transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),  # Normalize image data to [-1, 1]
         ])

@@ -13,7 +13,8 @@ import joblib
 import h5py
 import torch.nn as nn
 
-from dataset import WangEtAlDataset
+from dataset import WangEtAlDataset, CorviEtAlDataset
+from wangetal_augment import ImageAugmentor
 
 class CLIPFeatureExtractor:
     def __init__(self, model_name='RN50'): # ViT-L/14
@@ -69,19 +70,39 @@ class ImageNetFeatureExtractor:
 
         return np.array(real_embeddings), np.array(fake_embeddings)
 
-if __name__ == "__main__":
+def create_transform(augmentor):
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
+        transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
+        transforms.RandomCrop(224),
+        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),  # Normalize image data to [-1, 1]
     ])
+    return transform
 
-    dataset = WangEtAlDataset('/home/paperspace/Documents/chandler/ForenSynths/wang_et_al/training', transform=transform)
-    dataloader = DataLoader(dataset, batch_size=256, shuffle=False, num_workers=4)
+if __name__ == "__main__":
+    # Set options for augmentation
+    opt = {
+        'rz_interp': ['bilinear'],
+        'loadSize': 256,
+        'blur_prob': 0.1,  # Set your value
+        'blur_sig': [0.5],
+        'jpg_prob': 0.1,  # Set your value
+        'jpg_method': ['cv2'],
+        'jpg_qual': [75]
+    }
 
-    feature_extractor = CLIPFeatureExtractor()
-    # feature_extractor = ImageNetFeatureExtractor()
+    augmentor = ImageAugmentor(opt)
+    transform = create_transform(augmentor)
+    # _, transform = clip.load("ViT-L/14", device="cuda:0")
+
+    dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=transform)
+    dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=4)
+
+    # feature_extractor = CLIPFeatureExtractor()
+    feature_extractor = ImageNetFeatureExtractor()
     real_embeddings, fake_embeddings = feature_extractor.extract_features(dataloader)
 
-    with open('embeddings/r50_clip_embeddings.pkl', 'wb') as f:
+    with open('embeddings/rn50_imagenet_embeddings.pkl', 'wb') as f:
         pickle.dump((real_embeddings, fake_embeddings), f)

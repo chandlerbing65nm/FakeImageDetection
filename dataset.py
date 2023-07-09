@@ -12,7 +12,7 @@ class WangEtAlDataset(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.classes = ['real', 'fake']
+        self.classes = ['0_real', '1_fake']
         self.data = []
 
         # Iterate over the categories
@@ -46,7 +46,7 @@ class WangEtAlDataset(Dataset):
         return image, label
 
 
-class DiffusionDataset(Dataset):
+class CorviEtAlDataset(Dataset):
     def __init__(self, fake_dir, real_dir, transform=None):
         self.transform = transform
         self.data = []
@@ -100,17 +100,17 @@ class ForenSynths(Dataset):
 
         sub_folders = os.listdir(root_dir)
         
-        if 'fake' in sub_folders and 'real' in sub_folders:
+        if '1_fake' in sub_folders and '0_real' in sub_folders:
             # This is the 'biggan' case
-            fake_dir = os.path.join(root_dir, 'fake')
-            real_dir = os.path.join(root_dir, 'real')
+            fake_dir = os.path.join(root_dir, '1_fake')
+            real_dir = os.path.join(root_dir, '0_real')
             self._process_folder(fake_dir, self.fake_index)
             self._process_folder(real_dir, self.real_index)
         else:
             # This is the 'cyclegan' case
             for folder in sub_folders:
-                fake_dir = os.path.join(root_dir, folder, 'fake')
-                real_dir = os.path.join(root_dir, folder, 'real')
+                fake_dir = os.path.join(root_dir, folder, '1_fake')
+                real_dir = os.path.join(root_dir, folder, '0_real')
                 self._process_folder(fake_dir, self.fake_index)
                 self._process_folder(real_dir, self.real_index)
             
