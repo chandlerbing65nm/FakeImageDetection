@@ -372,7 +372,7 @@ def main(
 
     # Extracting features from validation set
     val_dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
-    val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=True, num_workers=4)
+    val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=4)
     
     feature_extractor = CLIPFeatureExtractor(model_name='ViT-B/16', device=device)
     # Extract the features
@@ -382,7 +382,7 @@ def main(
     val_embeddings = np.concatenate((val_real_embeddings, val_fake_embeddings), axis=0)
     val_labels = np.array([0] * len(val_real_embeddings) + [1] * len(val_fake_embeddings))
     val_data = TensorDataset(torch.tensor(val_embeddings, dtype=torch.float32), torch.tensor(val_labels, dtype=torch.float32))
-    val_loader = DataLoader(val_data, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_data, batch_size=64, shuffle=False)
 
     # Creating and training the binary classifier
 
