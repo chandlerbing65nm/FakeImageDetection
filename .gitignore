@@ -3,4 +3,6 @@ checkpoints/
 DiffusionImages/
 embeddings/
 data/
+samples/
+few-shot/
 *.pkl

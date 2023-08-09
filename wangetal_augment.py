@@ -8,6 +8,10 @@ from io import BytesIO
 import torch
 import torchvision.transforms as transforms
 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+
 class ImageAugmentor:
     def __init__(self, opt):
         self.opt = opt
