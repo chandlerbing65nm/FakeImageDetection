@@ -126,7 +126,7 @@ if __name__ == "__main__":
     dataset_path = args.dataset_path
     model_choice = args.model_choice
     classifier_params = {"nhead": args.nhead, "num_layers": args.num_layers}
-    checkpoint_path='/home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/checkpoints/mask_0/vitb16_clip_best_attention_epoch29.pth'
+    checkpoint_path='checkpoints/mask_50/vitb16_spectralmaskclip_best_attention_epoch11.pth'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")

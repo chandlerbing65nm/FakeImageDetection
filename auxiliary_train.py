@@ -155,9 +155,9 @@ def train_model(
 
     return model
 
-class ContinuousMaskingModel(nn.Module):
+class LearnableMaskingModel(nn.Module):
     def __init__(self, input_channels, output_channels):
-        super(ContinuousMaskingModel, self).__init__()
+        super(LearnableMaskingModel, self).__init__()
         self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=3, padding=1)
         self.conv2 = nn.Conv2d(64, output_channels, kernel_size=3, padding=1)
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
@@ -171,21 +171,20 @@ class ContinuousMaskingModel(nn.Module):
         x = torch.flatten(x, 1) # Flatten the tensor for the fully connected layer
         x = self.fc(x)
         x = self.sigmoid(x)
+        # x = (x > 0.5).float() # Apply thresholding to create a binary mask
         return x
 
 class DeepfakeDetectionModel(nn.Module):
     def __init__(self, mask=False, device='cuda:0'):
         super(DeepfakeDetectionModel, self).__init__()
-        self.clip_model, _ = clip.load('ViT-B/16')
+        self.clip_model, _ = clip.load('ViT-B/16', device=device, jit=False)
         self.mask = mask
         self.device = device
         for param in self.clip_model.parameters():
             param.requires_grad = False
 
-        self.masking_model = ContinuousMaskingModel(input_channels=3, output_channels=512).to(self.device)
-        self.mlp_encoder = nn.Sequential(
-            nn.Linear(512, 512),
-            nn.ReLU(),
+        self.masking_model = LearnableMaskingModel(input_channels=3, output_channels=512).to(self.device)
+        self.probe = nn.Sequential(
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Linear(256, 1)
@@ -194,29 +193,30 @@ class DeepfakeDetectionModel(nn.Module):
     def forward(self, x):
         with torch.no_grad():
             clip_features = self.clip_model.encode_image(x)
-        
-        if self.mask is True:
+        clip_features = clip_features.to(torch.float32)
+
+        if self.mask:
             mask = self.masking_model(x)
             masked_features = clip_features * mask
         else:
             masked_features = clip_features
 
-        output = self.mlp_encoder(masked_features)
+        output = self.probe(masked_features)
         return output
 
-def extract_clip_features(dataset, clip_model):
-    features = []
-    labels = []
-    with torch.no_grad():
-        for inputs, label in tqdm(dataset, desc="Extracting Features"):
-            inputs = inputs.unsqueeze(0).to(device)
-            feature = clip_model.encode_image(inputs)
-            features.append(feature.cpu())
-            labels.append(label)
+# def extract_clip_features(dataset, clip_model):
+#     features = []
+#     labels = []
+#     with torch.no_grad():
+#         for inputs, label in tqdm(dataset, desc="Extracting Features"):
+#             inputs = inputs.unsqueeze(0).to(device)
+#             feature = clip_model.encode_image(inputs)
+#             features.append(feature.cpu())
+#             labels.append(label)
 
-    features_tensor = torch.stack(features).squeeze()
-    labels_tensor = torch.tensor(labels, dtype=torch.float32)
-    return TensorDataset(features_tensor, labels_tensor)
+#     features_tensor = torch.stack(features).squeeze()
+#     labels_tensor = torch.tensor(labels, dtype=torch.float32)
+#     return TensorDataset(features_tensor, labels_tensor)
 
 def create_transform(augmentor, mask_ratio=0.10):
     # Create an instance of the mask generator
@@ -235,18 +235,22 @@ def create_transform(augmentor, mask_ratio=0.10):
     return transform
 
 def main(batch_size, mask, save_path, early_stop, epochs, subset_length):
-    opt = {
-        'rz_interp': ['bilinear'],
-        'loadSize': 256,
-        'blur_prob': 0.1,  # Set your value
-        'blur_sig': [0.5],
-        'jpg_prob': 0.1,  # Set your value
-        'jpg_method': ['cv2'],
-        'jpg_qual': [75]
-    }
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    augmentor = ImageAugmentor(opt)
-    transform = create_transform(augmentor)
+    # opt = {
+    #     'rz_interp': ['bilinear'],
+    #     'loadSize': 256,
+    #     'blur_prob': 0.1,  # Set your value
+    #     'blur_sig': [0.5],
+    #     'jpg_prob': 0.1,  # Set your value
+    #     'jpg_method': ['cv2'],
+    #     'jpg_qual': [75]
+    # }
+
+    # augmentor = ImageAugmentor(opt)
+    # transform = create_transform(augmentor)
+
+    _, transform = clip.load('ViT-B/16', device=device, jit=False)
 
     # Define the dataset
     train_dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=transform)
@@ -267,13 +271,9 @@ def main(batch_size, mask, save_path, early_stop, epochs, subset_length):
     val_dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = DeepfakeDetectionModel(mask=mask, device=device).to(device)
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-4)
-
-    if mask:
-        save_path = save_path + f'{int(subset_length)}_samples'
 
     trained_model = train_model(
         model, 
@@ -289,16 +289,37 @@ def main(batch_size, mask, save_path, early_stop, epochs, subset_length):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train a Deepfake Detection Model')
-    parser.add_argument('--early_stop', type=bool, default=False, help='For early stopping')
+    parser.add_argument('--early_stop', action='store_true', help='For early stopping')
     parser.add_argument('--batch_size', type=int, default=32, help='Batch size for training')
-    parser.add_argument('--subset', type=int, default=200, help='to multiply by batch size')
+    parser.add_argument('--subset', type=int, default=50, help='to multiply by batch size')
     parser.add_argument('--epochs', type=int, default=30, help='Epochs for training')
-    parser.add_argument('--mask', type=bool, default=True, help='Whether to use mask in the model')
+    parser.add_argument('--mask', action='store_true', help='Whether to use mask in the model')
     parser.add_argument('--save_path', type=str, default='checkpoints/auxiliary/auxiliary_', help='Path to save the trained model')
 
     args = parser.parse_args()
 
-    args.save_path = args.save_path if args.mask else 'checkpoints/mask_0/vitb16_clip_best_mlp'
+    args.save_path = args.save_path if args.mask else 'checkpoints/mask_0/vitb16_clip_best_mlp_'
     subset_length = args.batch_size * args.subset if args.subset != 0 else -1
+    args.epochs = 10000 if args.early_stop else args.epochs
 
-    main(args.batch_size, args.mask, args.save_path, args.early_stop, args.epochs, subset_length)
+    args.save_path = args.save_path + f'{int(subset_length)}_samples'
+
+    # Pretty print the arguments
+    print("\nSelected Configuration:")
+    print("-" * 30)
+    print(f"Early Stopping: {args.early_stop}")
+    print(f"Batch Size: {args.batch_size}")
+    print(f"Subset Length: {subset_length}")
+    print(f"Save path: {args.save_path}")
+    print(f"Mask: {args.mask}")
+    print(f"Epochs: {args.epochs}")
+    print("-" * 30, "\n")
+
+    main(
+        args.batch_size, 
+        args.mask, 
+        args.save_path, 
+        args.early_stop, 
+        args.epochs, 
+        subset_length,
+        )
