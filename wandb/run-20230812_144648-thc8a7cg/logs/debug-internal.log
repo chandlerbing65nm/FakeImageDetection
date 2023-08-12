@@ -1,0 +1,823 @@
+2023-08-12 14:46:48,823 INFO    StreamThr :132661 [internal.py:wandb_internal():86] W&B internal server running at pid: 132661, started at: 2023-08-12 14:46:48.822784
+2023-08-12 14:46:48,824 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status
+2023-08-12 14:46:48,826 INFO    WriterThread:132661 [datastore.py:open_for_write():85] open: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/run-thc8a7cg.wandb
+2023-08-12 14:46:48,827 DEBUG   SenderThread:132661 [sender.py:send():379] send: header
+2023-08-12 14:46:48,841 DEBUG   SenderThread:132661 [sender.py:send():379] send: run
+2023-08-12 14:46:49,199 INFO    SenderThread:132661 [dir_watcher.py:__init__():211] watching files in: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files
+2023-08-12 14:46:49,199 INFO    SenderThread:132661 [sender.py:_start_run_threads():1121] run started: thc8a7cg with start time 1691851608.822876
+2023-08-12 14:46:49,199 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:46:49,199 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:46:49,207 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: check_version
+2023-08-12 14:46:49,207 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: check_version
+2023-08-12 14:46:49,231 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: run_start
+2023-08-12 14:46:49,238 DEBUG   HandlerThread:132661 [system_info.py:__init__():31] System info init
+2023-08-12 14:46:49,238 DEBUG   HandlerThread:132661 [system_info.py:__init__():46] System info init done
+2023-08-12 14:46:49,238 INFO    HandlerThread:132661 [system_monitor.py:start():181] Starting system monitor
+2023-08-12 14:46:49,238 INFO    SystemMonitor:132661 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-08-12 14:46:49,238 INFO    HandlerThread:132661 [system_monitor.py:probe():201] Collecting system info
+2023-08-12 14:46:49,239 INFO    SystemMonitor:132661 [interfaces.py:start():190] Started cpu monitoring
+2023-08-12 14:46:49,240 INFO    SystemMonitor:132661 [interfaces.py:start():190] Started disk monitoring
+2023-08-12 14:46:49,241 INFO    SystemMonitor:132661 [interfaces.py:start():190] Started gpu monitoring
+2023-08-12 14:46:49,241 INFO    SystemMonitor:132661 [interfaces.py:start():190] Started memory monitoring
+2023-08-12 14:46:49,242 INFO    SystemMonitor:132661 [interfaces.py:start():190] Started network monitoring
+2023-08-12 14:46:49,255 DEBUG   HandlerThread:132661 [system_info.py:probe():195] Probing system
+2023-08-12 14:46:49,261 DEBUG   HandlerThread:132661 [system_info.py:_probe_git():180] Probing git
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_info.py:_probe_git():188] Probing git done
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_info.py:probe():240] Probing system done
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_monitor.py:probe():210] {'os': 'Linux-5.4.0-155-generic-x86_64-with-glibc2.17', 'python': '3.8.16', 'heartbeatAt': '2023-08-12T14:46:49.255427', 'startedAt': '2023-08-12T14:46:48.816546', 'docker': None, 'cuda': None, 'args': ('--mask_ratio', '70', '--mask_generator_type', 'zoom', '--early_stop', '--model_type', 'mlp', '--device', 'cuda:1'), 'state': 'running', 'program': 'classifier_train.py', 'codePath': 'classifier_train.py', 'git': {'remote': 'https://github.com/chandlerbing65nm/UniversalFakeDetection.git', 'commit': '780a7e1d582b07f299e28e673301fb8ecf9dbeb0'}, 'email': 'chandlertimmdoloriel@gmail.com', 'root': '/home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection', 'host': 'psduj8f1d', 'username': 'paperspace', 'executable': '/home/paperspace/miniconda3/envs/unidetector/bin/python', 'cpu_count': 16, 'cpu_count_logical': 16, 'cpu_freq': {'current': 3201.324, 'min': 0.0, 'max': 0.0}, 'cpu_freq_per_core': [{'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}], 'disk': {'total': 1968.4833221435547, 'used': 265.9193649291992}, 'gpu': 'NVIDIA RTX A4000', 'gpu_count': 2, 'gpu_devices': [{'name': 'NVIDIA RTX A4000', 'memory_total': 17171480576}, {'name': 'NVIDIA RTX A4000', 'memory_total': 17171480576}], 'memory': {'total': 88.373779296875}}
+2023-08-12 14:46:49,272 INFO    HandlerThread:132661 [system_monitor.py:probe():211] Finished collecting system info
+2023-08-12 14:46:49,272 INFO    HandlerThread:132661 [system_monitor.py:probe():214] Publishing system info
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_info.py:_save_pip():67] Saving pip packages done
+2023-08-12 14:46:49,272 DEBUG   HandlerThread:132661 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-08-12 14:46:49,275 ERROR   HandlerThread:132661 [system_info.py:_save_conda():85] Error saving conda packages: [Errno 2] No such file or directory: 'conda'
+Traceback (most recent call last):
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/site-packages/wandb/sdk/internal/system/system_info.py", line 81, in _save_conda
+    subprocess.call(
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 340, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 858, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 1704, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'conda'
+2023-08-12 14:46:49,275 DEBUG   HandlerThread:132661 [system_info.py:_save_conda():86] Saving conda packages done
+2023-08-12 14:46:49,276 INFO    HandlerThread:132661 [system_monitor.py:probe():216] Finished publishing system info
+2023-08-12 14:46:49,278 DEBUG   SenderThread:132661 [sender.py:send():379] send: files
+2023-08-12 14:46:49,278 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-metadata.json with policy now
+2023-08-12 14:46:49,282 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:46:49,282 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:46:49,578 DEBUG   SenderThread:132661 [sender.py:send():379] send: telemetry
+2023-08-12 14:46:49,578 DEBUG   SenderThread:132661 [sender.py:send():379] send: config
+2023-08-12 14:46:49,748 INFO    wandb-upload_0:132661 [upload_job.py:push():131] Uploaded file /tmp/tmpd2qrvsqqwandb/04opya7z-wandb-metadata.json
+2023-08-12 14:46:50,201 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-metadata.json
+2023-08-12 14:46:50,201 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/conda-environment.yaml
+2023-08-12 14:46:50,201 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:46:50,201 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/requirements.txt
+2023-08-12 14:46:54,580 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:46:59,581 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:01,204 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:03,205 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:04,283 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:47:04,284 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:47:04,836 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:05,206 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:07,206 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:09,207 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:10,023 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:11,207 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:13,208 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:15,209 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:15,222 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:17,210 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:19,210 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:19,282 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:47:19,283 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:47:20,470 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:21,211 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:21,211 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/config.yaml
+2023-08-12 14:47:23,212 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:25,212 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:25,711 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:27,213 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:29,213 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:30,996 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:31,214 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:33,215 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:34,282 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:47:34,283 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:47:35,215 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:36,310 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:37,216 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:39,216 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:41,217 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:41,653 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:43,218 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:45,218 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:47,019 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:47,219 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:49,219 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:49,242 DEBUG   SystemMonitor:132661 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-08-12 14:47:49,243 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:47:49,283 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:47:49,283 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:47:51,220 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:52,404 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:53,221 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:55,221 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:56,221 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:57,222 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:47:57,461 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:47:59,222 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:01,224 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:02,557 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:03,224 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:04,283 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:48:04,283 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:48:05,224 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:07,225 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:07,642 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:09,226 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:10,235 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:10,236 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:10,236 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:10,237 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:10,329 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:10,329 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:10,330 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:10,330 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:11,227 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:11,227 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:48:12,227 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:12,687 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:13,227 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:15,228 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:17,229 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:17,735 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:19,229 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:19,243 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:48:19,283 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:48:19,283 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:48:21,230 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:22,781 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:23,231 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:25,231 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:25,901 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:25,902 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:25,902 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:25,902 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:25,995 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:25,996 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:25,997 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:25,997 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:26,232 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:48:27,232 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:27,814 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:28,232 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:29,233 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:31,233 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:32,865 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:33,234 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:34,283 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:48:34,284 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:48:35,235 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:37,235 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:37,921 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:39,236 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:41,237 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:41,621 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:41,622 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:41,622 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:41,623 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:41,719 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:41,719 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:41,720 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:41,720 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:42,237 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:42,237 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:48:42,945 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:43,237 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:45,238 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:47,239 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:47,948 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:49,239 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:49,244 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:48:49,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:48:49,284 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:48:51,240 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:53,050 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:53,240 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:55,241 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:57,241 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:58,100 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:48:58,635 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:58,636 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:58,636 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:58,637 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:58,730 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:48:58,730 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:48:58,731 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:48:58,731 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:48:59,242 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:48:59,242 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:49:00,242 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:01,243 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:03,138 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:03,243 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:04,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:49:04,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:49:05,244 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:07,244 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:08,195 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:09,245 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:11,245 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:13,235 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:13,246 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:15,150 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:15,151 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:15,151 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:15,151 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:15,247 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:15,247 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:49:15,250 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:15,251 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:15,251 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:15,251 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:16,247 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:16,247 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:49:17,247 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:18,296 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:19,245 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:49:19,248 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:19,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:49:19,284 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:49:21,248 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:23,249 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:23,353 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:25,250 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:27,251 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:28,437 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:29,251 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:31,252 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:31,618 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:31,618 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:31,619 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:31,619 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:31,712 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:31,717 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:31,718 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:31,718 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:32,252 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:49:33,252 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:33,441 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:34,253 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:34,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:49:34,284 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:49:35,253 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:37,253 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:38,488 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:39,254 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:41,255 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:43,255 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:43,561 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:45,256 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:47,257 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:47,954 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:47,955 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:47,956 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:47,956 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:48,046 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:49:48,047 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:49:48,048 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:49:48,048 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:49:48,257 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:49:48,656 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:49,245 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:49:49,257 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:49,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:49:49,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:49:50,257 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:51,258 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:53,258 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:53,736 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:55,259 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:57,260 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:49:58,825 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:49:59,260 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:01,261 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:03,262 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:03,889 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:04,287 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:50:04,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:50:04,545 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:04,546 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:04,546 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:04,546 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:04,641 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:04,651 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:04,651 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:04,651 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:05,262 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:05,263 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:50:06,263 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:07,263 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:08,933 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:09,264 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:11,264 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:13,265 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:13,989 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:15,266 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:17,266 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:19,037 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:19,246 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:50:19,267 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:19,284 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:50:19,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:50:20,387 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:20,388 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:20,388 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:20,388 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:20,480 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:20,485 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:20,485 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:20,485 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:21,268 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:21,268 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:50:22,268 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:23,268 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:24,102 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:25,269 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:27,269 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:29,110 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:29,270 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:31,271 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:33,271 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:34,181 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:34,285 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:50:34,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:50:35,272 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:36,176 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:36,177 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:36,178 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:36,178 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:36,269 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:36,270 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:36,270 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:36,270 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:36,274 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:50:37,275 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:38,275 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:39,208 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:39,276 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:41,276 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:43,277 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:44,294 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:45,278 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:47,279 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:49,246 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:50:49,279 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:49,285 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:50:49,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:50:49,446 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:51,280 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:52,776 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:52,777 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:52,777 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:52,778 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:52,870 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:50:52,870 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:50:52,870 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:50:52,871 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:50:53,280 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:53,280 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:50:54,281 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:54,503 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:50:55,281 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:57,282 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:59,282 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:50:59,590 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:01,283 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:03,284 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:04,285 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:51:04,285 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:51:04,635 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:05,284 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:07,285 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:09,152 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:09,153 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:09,153 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:09,153 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:09,245 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:09,254 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:09,255 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:09,255 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:09,285 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:09,286 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:51:09,650 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:10,286 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:11,286 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:13,287 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:14,702 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:15,288 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:17,288 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:19,247 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:51:19,285 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:51:19,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:51:19,289 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:19,755 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:21,290 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:23,291 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:24,757 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:25,291 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:25,396 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:25,397 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:25,397 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:25,397 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:25,490 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:25,491 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:25,498 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:25,498 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:26,291 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:26,292 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:51:27,292 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:29,292 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:29,836 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:31,293 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:33,293 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:34,285 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:51:34,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:51:34,837 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:35,294 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:37,295 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:39,295 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:39,902 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:41,296 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:41,592 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:41,593 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:41,594 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:41,594 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:41,686 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:41,691 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:41,691 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:41,696 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:42,305 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:51:43,305 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:44,306 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:44,914 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:45,306 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:47,307 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:49,248 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:51:49,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:51:49,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:51:49,307 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:49,982 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:51,308 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:53,308 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:55,018 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:51:55,309 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:57,310 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:51:57,852 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:57,853 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:57,853 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:57,853 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:57,962 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:51:57,963 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:51:57,963 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:51:57,964 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:51:58,310 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:51:59,310 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:00,105 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:00,311 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:01,311 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:03,312 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:04,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:52:04,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:52:05,167 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:05,312 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:07,313 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:09,313 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:10,232 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:11,314 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:13,314 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:14,761 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:14,762 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:14,762 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:14,762 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:14,856 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:14,856 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:14,857 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:14,857 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:15,259 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:15,315 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:15,315 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:52:16,315 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:17,316 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:19,248 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:52:19,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:52:19,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:52:19,316 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:20,312 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:21,317 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:23,317 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:25,314 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:25,318 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:27,319 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:29,319 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:30,377 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:31,199 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:31,200 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:31,200 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:31,201 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:31,296 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:31,297 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:31,298 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:31,299 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:31,320 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:31,320 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:52:32,320 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:33,320 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:34,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:52:34,286 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:52:35,321 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:35,452 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:37,322 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:39,322 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:40,543 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:41,323 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:43,323 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:45,324 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:45,633 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:47,325 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:48,183 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:48,184 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:48,184 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:48,184 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:48,276 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:52:48,279 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:52:48,279 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:52:48,280 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:52:48,325 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:52:49,249 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:52:49,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:52:49,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:52:49,325 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:50,326 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:50,731 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:51,326 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:53,326 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:55,327 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:55,793 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:52:57,328 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:52:59,328 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:00,846 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:01,329 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:03,329 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:04,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:53:04,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:53:04,650 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:04,650 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:04,651 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:04,651 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:04,742 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:04,747 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:04,747 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:04,748 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:05,330 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:05,330 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:53:05,864 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:06,330 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:07,330 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:09,331 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:10,926 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:11,331 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:13,332 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:15,333 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:15,972 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:17,333 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:19,250 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:53:19,286 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:53:19,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:53:19,334 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:20,759 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:20,760 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:20,760 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:20,760 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:20,851 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:20,859 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:20,859 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:20,860 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:21,054 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:21,334 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:21,335 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:53:22,335 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:23,335 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:25,336 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:26,103 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:27,336 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:29,337 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:31,189 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:31,337 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:33,338 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:34,287 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:53:34,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:53:35,339 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:36,230 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:36,731 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:36,731 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:36,732 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:36,732 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:36,823 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:36,825 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:36,825 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:36,825 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:37,339 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:37,340 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:53:38,340 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:39,340 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:41,303 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:41,341 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:43,341 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:45,342 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:46,334 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:47,342 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:49,250 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:53:49,287 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:53:49,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:53:49,343 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:51,344 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:51,365 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:52,437 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:52,437 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:52,437 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:52,438 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:52,530 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:53:52,530 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:53:52,530 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:53:52,540 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:53:53,344 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:53,345 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:53:54,345 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:55,345 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:56,369 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:53:57,346 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:53:59,347 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:01,347 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:01,438 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:03,348 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:04,287 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:54:04,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:54:05,349 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:06,507 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:07,349 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:09,014 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:54:09,015 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:54:09,015 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:54:09,015 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:09,110 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:54:09,111 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:54:09,111 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:54:09,112 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:09,350 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:09,350 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:54:10,350 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:11,350 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:11,536 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:13,351 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:15,352 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:16,561 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:17,352 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:19,251 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:54:19,287 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:54:19,287 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:54:19,353 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:21,354 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:21,640 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:23,354 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:25,355 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:25,388 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:54:25,389 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:54:25,389 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:54:25,389 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:25,482 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:54:25,483 DEBUG   SenderThread:132661 [sender.py:send():379] send: history
+2023-08-12 14:54:25,483 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:54:25,484 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:25,629 DEBUG   SenderThread:132661 [sender.py:send():379] send: exit
+2023-08-12 14:54:25,629 INFO    SenderThread:132661 [sender.py:send_exit():584] handling exit code: 0
+2023-08-12 14:54:25,629 INFO    SenderThread:132661 [sender.py:send_exit():586] handling runtime: 456
+2023-08-12 14:54:25,629 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:25,629 INFO    SenderThread:132661 [sender.py:send_exit():592] send defer
+2023-08-12 14:54:25,629 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,630 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 0
+2023-08-12 14:54:25,630 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,630 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 0
+2023-08-12 14:54:25,630 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 1
+2023-08-12 14:54:25,630 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,630 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 1
+2023-08-12 14:54:25,630 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,630 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 1
+2023-08-12 14:54:25,630 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 2
+2023-08-12 14:54:25,630 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,630 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 2
+2023-08-12 14:54:25,630 INFO    HandlerThread:132661 [system_monitor.py:finish():190] Stopping system monitor
+2023-08-12 14:54:25,631 DEBUG   SystemMonitor:132661 [system_monitor.py:_start():166] Finished system metrics aggregation loop
+2023-08-12 14:54:25,631 INFO    HandlerThread:132661 [interfaces.py:finish():202] Joined cpu monitor
+2023-08-12 14:54:25,631 DEBUG   SystemMonitor:132661 [system_monitor.py:_start():170] Publishing last batch of metrics
+2023-08-12 14:54:25,631 INFO    HandlerThread:132661 [interfaces.py:finish():202] Joined disk monitor
+2023-08-12 14:54:25,698 INFO    HandlerThread:132661 [interfaces.py:finish():202] Joined gpu monitor
+2023-08-12 14:54:25,698 INFO    HandlerThread:132661 [interfaces.py:finish():202] Joined memory monitor
+2023-08-12 14:54:25,698 INFO    HandlerThread:132661 [interfaces.py:finish():202] Joined network monitor
+2023-08-12 14:54:25,699 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,699 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 2
+2023-08-12 14:54:25,699 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 3
+2023-08-12 14:54:25,699 DEBUG   SenderThread:132661 [sender.py:send():379] send: stats
+2023-08-12 14:54:25,700 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,700 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 3
+2023-08-12 14:54:25,700 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,700 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 3
+2023-08-12 14:54:25,700 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 4
+2023-08-12 14:54:25,700 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,700 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 4
+2023-08-12 14:54:25,700 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,701 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 4
+2023-08-12 14:54:25,701 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 5
+2023-08-12 14:54:25,701 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,701 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 5
+2023-08-12 14:54:25,701 DEBUG   SenderThread:132661 [sender.py:send():379] send: summary
+2023-08-12 14:54:25,701 INFO    SenderThread:132661 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:54:25,702 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,702 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 5
+2023-08-12 14:54:25,702 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 6
+2023-08-12 14:54:25,702 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,702 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 6
+2023-08-12 14:54:25,702 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,702 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 6
+2023-08-12 14:54:25,702 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 7
+2023-08-12 14:54:25,703 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:54:25,703 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:25,703 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 7
+2023-08-12 14:54:25,703 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:25,703 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 7
+2023-08-12 14:54:26,355 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:26,355 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:54:26,629 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: poll_exit
+2023-08-12 14:54:27,355 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:28,154 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 8
+2023-08-12 14:54:28,155 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: poll_exit
+2023-08-12 14:54:28,155 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:28,155 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 8
+2023-08-12 14:54:28,155 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:28,155 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 8
+2023-08-12 14:54:28,155 INFO    SenderThread:132661 [job_builder.py:build():281] Attempting to build job artifact
+2023-08-12 14:54:28,156 INFO    SenderThread:132661 [job_builder.py:_get_source_type():400] is repo sourced job
+2023-08-12 14:54:28,166 INFO    SenderThread:132661 [job_builder.py:build():374] adding wandb-job metadata file
+2023-08-12 14:54:28,168 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 9
+2023-08-12 14:54:28,169 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:28,169 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 9
+2023-08-12 14:54:28,169 DEBUG   SenderThread:132661 [sender.py:send():379] send: artifact
+2023-08-12 14:54:28,356 INFO    Thread-12 :132661 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:29,143 INFO    wandb-upload_0:132661 [upload_job.py:push():89] Uploaded file /home/paperspace/.local/share/wandb/artifacts/staging/tmpcdql6vph
+2023-08-12 14:54:29,146 INFO    wandb-upload_1:132661 [upload_job.py:push():89] Uploaded file /home/paperspace/.local/share/wandb/artifacts/staging/tmp9j8p30vj
+2023-08-12 14:54:30,122 INFO    SenderThread:132661 [sender.py:send_artifact():1475] sent artifact job-https___github.com_chandlerbing65nm_UniversalFakeDetection.git_classifier_train.py - {'id': 'QXJ0aWZhY3Q6NTQwMjMwNjg2', 'digest': 'cc8ec4d3596d94c68a51b068d379c7bd', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjg5OTkwNDk0', 'latestArtifact': None}, 'version': 'latest'}
+2023-08-12 14:54:30,122 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:30,122 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 9
+2023-08-12 14:54:30,122 INFO    SenderThread:132661 [dir_watcher.py:finish():358] shutting down directory watcher
+2023-08-12 14:54:30,357 INFO    SenderThread:132661 [dir_watcher.py:finish():388] scan: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files
+2023-08-12 14:54:30,357 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/config.yaml config.yaml
+2023-08-12 14:54:30,357 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/conda-environment.yaml conda-environment.yaml
+2023-08-12 14:54:30,359 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/requirements.txt requirements.txt
+2023-08-12 14:54:30,359 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log output.log
+2023-08-12 14:54:30,361 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json wandb-summary.json
+2023-08-12 14:54:30,361 INFO    SenderThread:132661 [dir_watcher.py:finish():402] scan save: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-metadata.json wandb-metadata.json
+2023-08-12 14:54:30,362 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 10
+2023-08-12 14:54:30,362 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:30,363 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 10
+2023-08-12 14:54:30,364 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:30,364 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 10
+2023-08-12 14:54:30,364 INFO    SenderThread:132661 [file_pusher.py:finish():159] shutting down file pusher
+2023-08-12 14:54:30,695 INFO    wandb-upload_0:132661 [upload_job.py:push():131] Uploaded file /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/config.yaml
+2023-08-12 14:54:30,707 INFO    wandb-upload_1:132661 [upload_job.py:push():131] Uploaded file /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/requirements.txt
+2023-08-12 14:54:30,746 INFO    wandb-upload_3:132661 [upload_job.py:push():131] Uploaded file /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/wandb-summary.json
+2023-08-12 14:54:30,763 INFO    wandb-upload_2:132661 [upload_job.py:push():131] Uploaded file /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/files/output.log
+2023-08-12 14:54:30,963 INFO    Thread-11 :132661 [sender.py:transition_state():612] send defer: 11
+2023-08-12 14:54:30,963 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:30,964 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 11
+2023-08-12 14:54:30,964 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:30,964 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 11
+2023-08-12 14:54:30,964 INFO    SenderThread:132661 [file_pusher.py:join():164] waiting for file pusher
+2023-08-12 14:54:30,964 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 12
+2023-08-12 14:54:30,964 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:30,964 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 12
+2023-08-12 14:54:30,964 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:30,964 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 12
+2023-08-12 14:54:30,964 INFO    SenderThread:132661 [file_stream.py:finish():593] file stream finish called
+2023-08-12 14:54:31,618 INFO    SenderThread:132661 [file_stream.py:finish():597] file stream finish is done
+2023-08-12 14:54:31,618 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 13
+2023-08-12 14:54:31,618 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:31,618 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 13
+2023-08-12 14:54:31,619 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:31,619 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 13
+2023-08-12 14:54:31,619 INFO    SenderThread:132661 [sender.py:transition_state():612] send defer: 14
+2023-08-12 14:54:31,619 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: defer
+2023-08-12 14:54:31,619 INFO    HandlerThread:132661 [handler.py:handle_request_defer():170] handle defer: 14
+2023-08-12 14:54:31,619 DEBUG   SenderThread:132661 [sender.py:send():379] send: final
+2023-08-12 14:54:31,619 DEBUG   SenderThread:132661 [sender.py:send():379] send: footer
+2023-08-12 14:54:31,620 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: defer
+2023-08-12 14:54:31,620 INFO    SenderThread:132661 [sender.py:send_request_defer():608] handle sender defer: 14
+2023-08-12 14:54:31,620 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: poll_exit
+2023-08-12 14:54:31,620 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: poll_exit
+2023-08-12 14:54:31,621 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: server_info
+2023-08-12 14:54:31,621 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: server_info
+2023-08-12 14:54:31,622 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: get_summary
+2023-08-12 14:54:31,623 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: sampled_history
+2023-08-12 14:54:31,623 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: job_info
+2023-08-12 14:54:31,739 DEBUG   SenderThread:132661 [sender.py:send_request():406] send_request: job_info
+2023-08-12 14:54:31,739 INFO    MainThread:132661 [wandb_run.py:_footer_history_summary_info():3481] rendering history
+2023-08-12 14:54:31,740 INFO    MainThread:132661 [wandb_run.py:_footer_history_summary_info():3513] rendering summary
+2023-08-12 14:54:31,740 INFO    MainThread:132661 [wandb_run.py:_footer_sync_info():3440] logging synced files
+2023-08-12 14:54:31,740 DEBUG   HandlerThread:132661 [handler.py:handle_request():144] handle_request: shutdown
+2023-08-12 14:54:31,740 INFO    HandlerThread:132661 [handler.py:finish():857] shutting down handler
+2023-08-12 14:54:32,624 INFO    WriterThread:132661 [datastore.py:close():294] close: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_144648-thc8a7cg/run-thc8a7cg.wandb
+2023-08-12 14:54:32,739 INFO    SenderThread:132661 [sender.py:finish():1552] shutting down sender
+2023-08-12 14:54:32,739 INFO    SenderThread:132661 [file_pusher.py:finish():159] shutting down file pusher
+2023-08-12 14:54:32,739 INFO    SenderThread:132661 [file_pusher.py:join():164] waiting for file pusher

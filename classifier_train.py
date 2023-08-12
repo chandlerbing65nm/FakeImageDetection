@@ -12,6 +12,7 @@ from sklearn.metrics import average_precision_score, precision_score, recall_sco
 import clip
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import argparse
+import wandb
 
 from dataset import WangEtAlDataset, CorviEtAlDataset
 from extract_features import *
@@ -234,10 +235,13 @@ def train_model(
 
             # Early stopping
             if phase == 'Validation':
+                wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap})
                 early_stopping(epoch_loss, model, optimizer, epoch)
                 if early_stopping.early_stop:
                     print("Early stopping")
                     return model
+            else:
+                wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap})
         
         # Save the model after every epoch
         # torch.save(model.state_dict(), f'checkpoints/model_{epoch+1}.pth')
@@ -252,10 +256,15 @@ def main(
     embedding_path=None,
     model_type='attention',
     clip_model='ViT-L/14',
+    wandb_name=None,
+    project_name=None,
     save_path=None,
     early_stop=True,
     device="cpu",
     ):
+
+    wandb.init(project=project_name, name=wandb_name)
+    wandb.config.update(args)  # Log all hyperparameters
 
     # Load embeddings
     with open(embedding_path, 'rb') as f:
@@ -324,6 +333,8 @@ if __name__ == "__main__":
     parser.add_argument('--mask_generator_type', default='zoom', 
                         choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
                         help='Type of mask generator')
+    parser.add_argument('--project_name', type=str, default="Deepfake Detection",
+                        help='wandb project name')
     parser.add_argument('--clip_model', default='ViT-L/14', 
                         choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
                         help='Type of clip visual model')
@@ -350,6 +361,7 @@ if __name__ == "__main__":
         save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{args.model_type}'
 
     num_epochs = 10000 if args.early_stop else args.num_epochs
+    wandb_name = f"mask_{mask_ratio}_{clip_model}_{args.mask_generator_type}_{args.model_type}"
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -361,6 +373,8 @@ if __name__ == "__main__":
     print(f"Mask Generator Type: {args.mask_generator_type}")
     print(f"Mask Ratio: {mask_ratio}")
     print(f"Model Type: {args.model_type}")
+    print(f"WandB Project Name: {args.project_name}")
+    print(f"WandB Instance Name: {wandb_name}")
     print(f"CLIP model type: {args.clip_model}")
     print(f"Save path: {save_path}.pth")
     print(f"Embed path: {embedding_path}")
@@ -374,6 +388,8 @@ if __name__ == "__main__":
         embedding_path=embedding_path,
         model_type=args.model_type, 
         clip_model=args.clip_model,
+        wandb_name=wandb_name,
+        project_name=args.project_name,
         save_path=save_path, 
         early_stop=args.early_stop,
         device=args.device

@@ -1,0 +1,1039 @@
+2023-08-12 14:56:02,194 INFO    StreamThr :135894 [internal.py:wandb_internal():86] W&B internal server running at pid: 135894, started at: 2023-08-12 14:56:02.193527
+2023-08-12 14:56:02,195 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status
+2023-08-12 14:56:02,197 INFO    WriterThread:135894 [datastore.py:open_for_write():85] open: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/run-fetcs8zo.wandb
+2023-08-12 14:56:02,197 DEBUG   SenderThread:135894 [sender.py:send():379] send: header
+2023-08-12 14:56:02,210 DEBUG   SenderThread:135894 [sender.py:send():379] send: run
+2023-08-12 14:56:02,560 INFO    SenderThread:135894 [dir_watcher.py:__init__():211] watching files in: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files
+2023-08-12 14:56:02,560 INFO    SenderThread:135894 [sender.py:_start_run_threads():1121] run started: fetcs8zo with start time 1691852162.193663
+2023-08-12 14:56:02,560 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:56:02,560 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:56:02,568 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: check_version
+2023-08-12 14:56:02,568 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: check_version
+2023-08-12 14:56:02,594 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: run_start
+2023-08-12 14:56:02,602 DEBUG   HandlerThread:135894 [system_info.py:__init__():31] System info init
+2023-08-12 14:56:02,602 DEBUG   HandlerThread:135894 [system_info.py:__init__():46] System info init done
+2023-08-12 14:56:02,602 INFO    HandlerThread:135894 [system_monitor.py:start():181] Starting system monitor
+2023-08-12 14:56:02,602 INFO    SystemMonitor:135894 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-08-12 14:56:02,602 INFO    HandlerThread:135894 [system_monitor.py:probe():201] Collecting system info
+2023-08-12 14:56:02,602 INFO    SystemMonitor:135894 [interfaces.py:start():190] Started cpu monitoring
+2023-08-12 14:56:02,603 INFO    SystemMonitor:135894 [interfaces.py:start():190] Started disk monitoring
+2023-08-12 14:56:02,604 INFO    SystemMonitor:135894 [interfaces.py:start():190] Started gpu monitoring
+2023-08-12 14:56:02,605 INFO    SystemMonitor:135894 [interfaces.py:start():190] Started memory monitoring
+2023-08-12 14:56:02,606 INFO    SystemMonitor:135894 [interfaces.py:start():190] Started network monitoring
+2023-08-12 14:56:02,620 DEBUG   HandlerThread:135894 [system_info.py:probe():195] Probing system
+2023-08-12 14:56:02,625 DEBUG   HandlerThread:135894 [system_info.py:_probe_git():180] Probing git
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_info.py:_probe_git():188] Probing git done
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_info.py:probe():240] Probing system done
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_monitor.py:probe():210] {'os': 'Linux-5.4.0-155-generic-x86_64-with-glibc2.17', 'python': '3.8.16', 'heartbeatAt': '2023-08-12T14:56:02.620354', 'startedAt': '2023-08-12T14:56:02.187342', 'docker': None, 'cuda': None, 'args': ('--mask_ratio', '90', '--mask_generator_type', 'zoom', '--early_stop', '--model_type', 'linear', '--device', 'cuda:0'), 'state': 'running', 'program': 'classifier_train.py', 'codePath': 'classifier_train.py', 'git': {'remote': 'https://github.com/chandlerbing65nm/UniversalFakeDetection.git', 'commit': '780a7e1d582b07f299e28e673301fb8ecf9dbeb0'}, 'email': 'chandlertimmdoloriel@gmail.com', 'root': '/home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection', 'host': 'psduj8f1d', 'username': 'paperspace', 'executable': '/home/paperspace/miniconda3/envs/unidetector/bin/python', 'cpu_count': 16, 'cpu_count_logical': 16, 'cpu_freq': {'current': 3201.324, 'min': 0.0, 'max': 0.0}, 'cpu_freq_per_core': [{'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}, {'current': 3201.324, 'min': 0.0, 'max': 0.0}], 'disk': {'total': 1968.4833221435547, 'used': 265.92336654663086}, 'gpu': 'NVIDIA RTX A4000', 'gpu_count': 2, 'gpu_devices': [{'name': 'NVIDIA RTX A4000', 'memory_total': 17171480576}, {'name': 'NVIDIA RTX A4000', 'memory_total': 17171480576}], 'memory': {'total': 88.373779296875}}
+2023-08-12 14:56:02,635 INFO    HandlerThread:135894 [system_monitor.py:probe():211] Finished collecting system info
+2023-08-12 14:56:02,635 INFO    HandlerThread:135894 [system_monitor.py:probe():214] Publishing system info
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_info.py:_save_pip():67] Saving pip packages done
+2023-08-12 14:56:02,635 DEBUG   HandlerThread:135894 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-08-12 14:56:02,638 ERROR   HandlerThread:135894 [system_info.py:_save_conda():85] Error saving conda packages: [Errno 2] No such file or directory: 'conda'
+Traceback (most recent call last):
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/site-packages/wandb/sdk/internal/system/system_info.py", line 81, in _save_conda
+    subprocess.call(
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 340, in call
+    with Popen(*popenargs, **kwargs) as p:
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 858, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/home/paperspace/miniconda3/envs/unidetector/lib/python3.8/subprocess.py", line 1704, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+FileNotFoundError: [Errno 2] No such file or directory: 'conda'
+2023-08-12 14:56:02,639 DEBUG   HandlerThread:135894 [system_info.py:_save_conda():86] Saving conda packages done
+2023-08-12 14:56:02,639 INFO    HandlerThread:135894 [system_monitor.py:probe():216] Finished publishing system info
+2023-08-12 14:56:02,642 DEBUG   SenderThread:135894 [sender.py:send():379] send: files
+2023-08-12 14:56:02,642 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-metadata.json with policy now
+2023-08-12 14:56:02,645 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:56:02,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:56:02,882 DEBUG   SenderThread:135894 [sender.py:send():379] send: telemetry
+2023-08-12 14:56:02,883 DEBUG   SenderThread:135894 [sender.py:send():379] send: config
+2023-08-12 14:56:03,219 INFO    wandb-upload_0:135894 [upload_job.py:push():131] Uploaded file /tmp/tmpcm3sj0yuwandb/6ffvor7y-wandb-metadata.json
+2023-08-12 14:56:03,561 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:56:03,561 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-metadata.json
+2023-08-12 14:56:03,561 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/conda-environment.yaml
+2023-08-12 14:56:03,562 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/requirements.txt
+2023-08-12 14:56:07,884 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:12,884 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:14,563 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_created():271] file/dir created: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:16,564 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:17,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:56:17,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:56:18,276 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:18,565 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:20,566 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:22,566 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:23,505 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:24,567 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:26,568 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:28,569 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:28,753 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:30,570 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:32,570 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:32,645 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:56:32,645 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:56:34,047 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:34,571 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:34,571 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/config.yaml
+2023-08-12 14:56:36,572 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:38,573 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:39,362 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:40,573 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:42,574 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:44,575 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:44,700 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:46,576 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:47,645 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:56:47,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:56:48,576 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:50,056 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:50,577 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:52,578 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:54,578 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:55,423 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:56:56,579 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:56:58,580 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:00,580 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:00,799 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:02,581 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:02,606 DEBUG   SystemMonitor:135894 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-08-12 14:57:02,607 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:57:02,645 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:57:02,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:57:04,582 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:06,191 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:06,582 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:08,583 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:10,584 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:11,221 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:12,584 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:14,585 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:16,287 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:16,585 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:17,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:57:17,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:57:18,586 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:19,893 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:19,894 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:19,894 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:19,895 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:19,976 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:19,977 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:19,977 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:19,977 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:20,587 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:57:20,587 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:21,291 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:22,587 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:24,588 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:26,336 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:26,589 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:28,589 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:30,590 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:31,381 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:32,584 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:32,585 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:32,585 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:32,585 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:32,590 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:57:32,591 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:32,609 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:57:32,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:57:32,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:57:32,666 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:32,822 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:32,823 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:32,823 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:33,591 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:57:34,591 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:36,467 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:36,592 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:38,592 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:40,593 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:41,558 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:42,594 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:44,594 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:45,204 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:45,205 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:45,205 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:45,205 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:45,285 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:45,286 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:45,286 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:45,295 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:45,594 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:57:46,595 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:46,596 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:47,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:57:47,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:57:48,595 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:50,596 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:51,694 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:52,597 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:54,597 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:56,598 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:57:56,730 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:57:57,986 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:57,987 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:57,987 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:57,987 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:58,066 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:57:58,067 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:57:58,067 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:57:58,073 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:57:58,599 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:57:58,599 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:00,599 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:01,830 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:02,600 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:02,608 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:58:02,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:58:02,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:58:04,600 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:06,601 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:06,877 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:08,602 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:10,364 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:10,365 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:10,365 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:10,365 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:10,447 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:10,447 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:10,448 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:10,448 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:10,602 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:58:10,603 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:11,968 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:12,603 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:14,603 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:16,604 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:17,013 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:17,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:58:17,646 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:58:18,605 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:20,605 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:22,045 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:22,606 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:23,023 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:23,024 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:23,024 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:23,024 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:23,106 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:23,107 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:23,107 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:23,107 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:23,606 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:58:24,607 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:26,607 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:27,049 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:28,608 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:30,609 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:32,087 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:32,609 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:58:32,609 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:32,646 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:58:32,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:58:34,610 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:35,419 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:35,420 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:35,420 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:35,421 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:35,502 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:35,503 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:35,503 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:35,511 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:35,610 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:58:36,610 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:37,143 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:38,611 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:40,612 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:42,240 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:42,612 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:44,613 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:46,613 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:47,294 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:47,647 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:58:47,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:58:48,019 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:48,020 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:48,021 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:48,021 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:48,101 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:58:48,102 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:58:48,102 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:58:48,103 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:58:48,614 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:58:48,614 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:50,615 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:52,353 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:52,616 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:54,617 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:56,618 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:58:57,408 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:58:58,619 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:00,619 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:00,727 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:00,727 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:00,728 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:00,728 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:00,809 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:00,810 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:00,810 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:00,820 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:01,620 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:59:02,440 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:02,609 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:59:02,620 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:02,647 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:59:02,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:59:04,620 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:06,621 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:07,524 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:08,621 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:10,622 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:12,578 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:12,623 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:13,365 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:13,366 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:13,366 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:13,366 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:13,447 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:13,448 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:13,453 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:13,458 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:13,623 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:59:14,623 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:16,624 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:17,628 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:17,647 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:59:17,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:59:18,625 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:20,625 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:22,626 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:22,674 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:24,627 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:26,627 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:26,682 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:26,682 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:26,683 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:26,683 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:26,765 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:26,766 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:26,766 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:26,772 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:27,627 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:59:27,775 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:28,628 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:30,628 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:32,610 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 14:59:32,629 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:32,647 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:59:32,647 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:59:32,822 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:34,629 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:36,630 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:37,870 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:38,630 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:39,916 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:39,917 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:39,917 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:39,917 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:40,003 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:40,004 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:40,004 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:40,007 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:40,631 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:59:40,631 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:42,632 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:42,935 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:44,633 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:46,633 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:47,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 14:59:47,648 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 14:59:48,030 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:48,634 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:50,634 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:52,635 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:52,815 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:52,815 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:52,816 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:52,816 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:52,902 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 14:59:52,907 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 14:59:52,908 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 14:59:52,908 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 14:59:53,104 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:53,636 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 14:59:54,637 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:56,640 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 14:59:58,162 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 14:59:58,640 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:00,641 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:02,611 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:00:02,642 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:02,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:00:02,648 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:00:03,216 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:04,642 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:05,543 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:05,544 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:05,544 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:05,545 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:05,632 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:05,633 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:05,633 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:05,634 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:05,645 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:00:06,645 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:08,255 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:08,646 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:10,646 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:12,647 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:13,306 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:14,648 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:16,648 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:17,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:00:17,648 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:00:18,309 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:18,310 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:18,310 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:18,310 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:18,311 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:18,396 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:18,397 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:18,397 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:18,399 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:18,651 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:00:18,651 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:20,651 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:22,652 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:23,373 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:24,652 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:26,653 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:28,431 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:28,654 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:30,654 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:30,670 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:30,671 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:30,671 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:30,671 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:30,752 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:30,753 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:30,753 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:30,753 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:31,655 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:00:32,611 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:00:32,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:00:32,648 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:00:32,655 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:33,483 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:34,655 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:36,656 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:38,560 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:38,656 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:40,657 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:42,658 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:43,089 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:43,090 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:43,090 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:43,090 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:43,172 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:43,172 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:43,173 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:43,173 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:43,575 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:43,658 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:00:44,658 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:46,659 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:47,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:00:47,648 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:00:48,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:48,660 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:50,660 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:52,661 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:53,714 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:00:54,662 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:55,716 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:55,717 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:55,717 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:55,718 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:55,799 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:00:55,800 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:00:55,800 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:00:55,804 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:00:56,662 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:00:56,662 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:58,663 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:00:58,725 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:00,663 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:02,612 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:01:02,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:01:02,649 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:01:02,664 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:03,771 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:04,664 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:06,665 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:07,952 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:07,953 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:07,953 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:07,954 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:08,042 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:08,043 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:08,044 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:08,049 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:08,666 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:08,666 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:08,774 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:10,666 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:12,667 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:13,839 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:14,668 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:16,668 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:17,648 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:01:17,649 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:01:18,669 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:18,881 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:20,593 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:20,594 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:20,595 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:20,595 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:20,670 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:20,670 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:20,681 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:20,681 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:20,681 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:20,687 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:21,670 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:22,670 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:23,917 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:24,671 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:26,672 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:28,672 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:28,969 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:30,673 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:32,613 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:01:32,649 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:01:32,649 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:01:32,675 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:33,252 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:33,253 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:33,253 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:33,254 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:33,334 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:33,335 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:33,335 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:33,335 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:33,675 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:34,041 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:34,675 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:35,676 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:37,676 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:39,075 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:39,677 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:41,678 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:43,679 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:44,141 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:45,680 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:45,744 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:45,745 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:45,745 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:45,745 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:45,831 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:45,832 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:45,832 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:45,833 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:46,680 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:47,649 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:01:47,649 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:01:47,680 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:48,680 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:49,160 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:49,681 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:51,681 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:53,682 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:54,220 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:55,683 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:57,683 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:01:57,842 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:57,842 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:57,843 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:57,843 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:57,926 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:01:57,926 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:01:57,927 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:01:57,933 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:01:58,684 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:01:59,241 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:01:59,684 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:00,684 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:01,684 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:02,613 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:02:02,649 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:02:02,650 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:02:03,685 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:04,289 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:05,686 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:07,686 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:09,354 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:09,687 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:10,526 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:10,526 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:10,526 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:10,527 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:10,614 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:10,615 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:10,615 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:10,616 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:10,687 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:02:11,687 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:12,687 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:13,688 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:14,450 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:15,688 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:17,650 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:02:17,650 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:02:17,689 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:19,542 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:19,690 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:21,690 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:23,320 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:23,321 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:23,321 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:23,322 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:23,403 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:23,404 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:23,404 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:23,404 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:23,691 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:02:23,691 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:24,622 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:24,691 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:25,691 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:27,692 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:29,655 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:29,693 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:31,693 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:32,614 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:02:32,650 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:02:32,650 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:02:33,694 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:34,714 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:35,694 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:36,104 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:36,104 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:36,104 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:36,105 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:36,187 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:36,187 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:36,187 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:36,188 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:36,695 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:02:37,695 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:38,696 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:39,696 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:39,813 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:41,696 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:43,697 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:44,891 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:45,698 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:47,650 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:02:47,651 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:02:47,698 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:49,003 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:49,003 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:49,004 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:49,004 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:49,085 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:02:49,086 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:02:49,086 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:02:49,091 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:02:49,699 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:02:49,699 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:49,891 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:50,699 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:51,699 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:53,700 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:54,944 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:02:55,700 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:57,701 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:59,701 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:02:59,992 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:01,566 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:01,567 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:01,567 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:01,567 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:01,649 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:01,650 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:01,650 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:01,655 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:01,702 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:01,702 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:02,615 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:03:02,650 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:03:02,651 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:03:03,703 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:04,703 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:05,100 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:05,704 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:07,705 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:09,706 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:10,140 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:11,706 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:13,689 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:13,690 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:13,690 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:13,690 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:13,707 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:13,707 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:13,777 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:13,778 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:13,779 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:13,779 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:14,707 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:15,189 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:15,708 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:16,708 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:17,650 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:03:17,651 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:03:17,709 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:19,710 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:20,252 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:21,711 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:23,712 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:25,301 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:25,713 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:25,823 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:25,824 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:25,824 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:25,824 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:25,905 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:25,906 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:25,906 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:25,906 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:26,713 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:27,714 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:28,715 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:29,715 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:30,369 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:31,716 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:32,615 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:03:32,651 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:03:32,651 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:03:33,717 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:35,425 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:35,718 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:37,720 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:38,517 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:38,518 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:38,518 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:38,519 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:38,601 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:38,602 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:38,602 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:38,603 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:38,720 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:39,720 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:40,523 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:40,720 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:41,721 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:43,722 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:45,583 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:45,723 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:47,651 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:03:47,652 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:03:47,724 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:49,725 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:51,025 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:51,026 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:51,026 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:51,026 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:51,027 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:51,113 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:03:51,113 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:03:51,114 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:03:51,114 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:03:51,725 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:03:51,725 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:52,725 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:53,726 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:55,727 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:56,063 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:03:57,728 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:03:59,729 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:01,103 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:01,730 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:02,616 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:04:02,651 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:04:02,651 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:04:03,219 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:03,220 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:03,220 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:03,220 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:03,306 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:03,307 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:03,307 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:03,308 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:03,731 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:03,731 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:04,731 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:05,731 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:06,125 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:07,732 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:09,733 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:11,171 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:11,733 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:13,734 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:15,655 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:15,656 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:15,656 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:15,657 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:15,734 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:15,734 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:15,742 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:15,743 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:15,743 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:15,743 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:16,249 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:16,734 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:17,652 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:04:17,652 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:04:17,735 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:18,735 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:19,735 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:21,295 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:21,737 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:23,738 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:25,739 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:26,361 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:27,740 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:28,372 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:28,373 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:28,373 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:28,374 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:28,455 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:28,460 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:28,460 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:28,461 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:28,741 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:29,742 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:30,742 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:31,382 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:31,742 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:32,616 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:04:32,652 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:04:32,652 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:04:33,743 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:35,744 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:36,426 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:37,745 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:39,746 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:40,798 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:40,799 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:40,799 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:40,799 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:40,881 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:40,882 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:40,882 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:40,883 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:41,488 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:41,747 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:41,747 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:42,747 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:43,748 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:45,748 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:46,533 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:47,652 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:04:47,652 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:04:47,749 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:49,750 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:51,567 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:51,751 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:53,325 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:53,326 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:53,326 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:53,326 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:53,409 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:04:53,410 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:04:53,410 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:04:53,410 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:04:53,752 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:04:53,752 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:54,752 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:55,753 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:56,640 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:04:57,753 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:04:59,754 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:01,690 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:01,755 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:02,617 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:05:02,653 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:05:02,653 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:05:03,756 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:05,756 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:06,085 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:06,086 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:06,086 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:06,086 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:06,167 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:06,168 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:06,168 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:06,168 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:06,757 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:06,773 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:07,757 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:08,757 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:09,758 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:11,758 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:11,815 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:13,759 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:15,760 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:16,853 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:17,653 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:05:17,653 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:05:17,760 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:18,606 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:18,607 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:18,607 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:18,607 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:18,689 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:18,690 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:18,690 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:18,690 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:18,761 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:19,761 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:20,761 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:21,762 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:21,926 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:23,762 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:25,763 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:26,964 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:27,764 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:29,764 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:31,033 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:31,034 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:31,034 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:31,034 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:31,116 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:31,116 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:31,116 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:31,116 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:31,765 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:31,765 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:32,029 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:32,618 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:05:32,653 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:05:32,653 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:05:32,765 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:33,765 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:35,766 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:37,064 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:37,767 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:39,767 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:41,768 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:42,112 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:43,389 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:43,389 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:43,390 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:43,390 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:43,471 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:43,476 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:43,476 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:43,477 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:43,768 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:43,769 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:44,769 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:45,769 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:47,196 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:47,653 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:05:47,654 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:05:47,770 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:49,771 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:51,771 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:52,243 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:53,772 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:55,698 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:55,699 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:55,699 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:55,700 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:55,772 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:55,773 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:55,781 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:05:55,790 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:05:55,790 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:05:55,791 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:05:56,773 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:05:56,773 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:57,291 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:05:57,773 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:58,773 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:05:59,774 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:01,774 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:02,344 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:02,618 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:06:02,654 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:06:02,654 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:06:03,775 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:05,776 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:07,382 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:07,776 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:08,008 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:06:08,009 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:06:08,009 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:06:08,009 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:06:08,090 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:06:08,091 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:06:08,091 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:06:08,092 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:06:08,776 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:06:09,777 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:10,777 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:11,777 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:12,429 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:13,778 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:15,779 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:17,530 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:17,654 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:06:17,654 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:06:17,779 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:19,780 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:20,466 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:06:20,467 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:06:20,467 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:06:20,467 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:06:20,551 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: partial_history
+2023-08-12 15:06:20,551 DEBUG   SenderThread:135894 [sender.py:send():379] send: history
+2023-08-12 15:06:20,556 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: summary_record
+2023-08-12 15:06:20,557 INFO    SenderThread:135894 [sender.py:_save_file():1375] saving file wandb-summary.json with policy end
+2023-08-12 15:06:20,780 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/wandb-summary.json
+2023-08-12 15:06:21,780 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:22,575 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:22,781 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:23,781 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:25,782 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:27,782 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:27,822 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:29,783 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:31,783 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:32,619 DEBUG   SenderThread:135894 [sender.py:send():379] send: stats
+2023-08-12 15:06:32,654 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:06:32,654 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:06:32,869 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:33,784 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:35,784 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:37,785 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:37,932 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:39,785 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:41,786 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:43,026 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:43,786 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:45,787 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:47,654 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: stop_status
+2023-08-12 15:06:47,655 DEBUG   SenderThread:135894 [sender.py:send_request():406] send_request: stop_status
+2023-08-12 15:06:47,787 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:48,029 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:49,788 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:51,788 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:53,060 DEBUG   HandlerThread:135894 [handler.py:handle_request():144] handle_request: status_report
+2023-08-12 15:06:53,789 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
+2023-08-12 15:06:55,790 INFO    Thread-12 :135894 [dir_watcher.py:_on_file_modified():288] file/dir modified: /home/paperspace/Documents/chandler/Experiments/UniversalFakeDetection/wandb/run-20230812_145602-fetcs8zo/files/output.log
