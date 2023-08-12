@@ -7,3 +7,4 @@ samples/
 few-shot/
 *.pkl
 auxiliary_test.py
+auxiliary_train.py
