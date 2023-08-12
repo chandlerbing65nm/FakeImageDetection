@@ -6,6 +6,8 @@ data/
 samples/
 wandb/
 few-shot/
+evaluation/
+results/
 *.pkl
 auxiliary_test.py
 auxiliary_train.py

@@ -100,6 +100,7 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
     print(f'Average Precision: {avg_ap}, Std Dev: {std_ap}')
     print(f'Accuracy: {avg_acc}, Std Dev: {std_acc}')
 
+    return avg_ap, avg_acc
 
 
 if __name__ == "__main__":
@@ -162,6 +163,9 @@ if __name__ == "__main__":
         mask_ratio = 0
         checkpoint_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{model_choice}.pth'
 
+    # Define the path to the results file
+    results_file = f'results/mask_{mask_ratio}_{clip_model}_{args.mask_type}_{model_choice}.txt'
+
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
@@ -174,34 +178,35 @@ if __name__ == "__main__":
     print(f"Number of Heads: {args.nhead}")
     print(f"Number of Layers: {args.num_layers}")
     print(f"Checkpoint Type: {checkpoint_path}")
+    print(f"Results saved to: {results_file}")
     print("-" * 30, "\n")
 
     if args.data_type == 'ForenSynths':
-        dataset_paths = [
-            '../../Datasets/Wang_CVPR20/progan',
-            '../../Datasets/Wang_CVPR20/cyclegan',
-            '../../Datasets/Wang_CVPR20/biggan',
-            '../../Datasets/Wang_CVPR20/stylegan',
-            '../../Datasets/Wang_CVPR20/gaugan',
-             '../../Datasets/Wang_CVPR20/stargan',
-            '../../Datasets/Wang_CVPR20/deepfake',
-            '../../Datasets/Wang_CVPR20/seeingdark',
-            '../../Datasets/Wang_CVPR20/san',
-            '../../Datasets/Wang_CVPR20/crn',
-            '../../Datasets/Wang_CVPR20/imle',
-            ]
+        datasets = {
+            'ProGAN': '../../Datasets/Wang_CVPR20/progan',
+            'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
+            'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
+            'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
+            'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
+            'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
+            'DeepFake': '../../Datasets/Wang_CVPR20/deepfake',
+            'SITD': '../../Datasets/Wang_CVPR20/seeingdark',
+            'SAN': '../../Datasets/Wang_CVPR20/san',
+            'CRN': '../../Datasets/Wang_CVPR20/crn',
+            'IMLE': '../../Datasets/Wang_CVPR20/imle',
+        }
     elif args.data_type == 'GenImage':
-        dataset_paths = [
-            '../../Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
-            '../../Datasets/GenImage/imagenet_glide/imagenet_glide/val',
-            ]
+        datasets = {
+            'VQDM': '../../Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
+            'Glide': '../../Datasets/GenImage/imagenet_glide/imagenet_glide/val',
+        }
     else:
         raise ValueError("wrong dataset type")
 
-    for dataset_path in dataset_paths:
-        print(f"\nEvaluating dataset at path: {dataset_path}")
+    for dataset_name, dataset_path in datasets.items():
+        print(f"\nEvaluating {dataset_name}")
 
-        evaluate_model(
+        avg_ap, avg_acc = evaluate_model(
             data_type=data_type,
             clip_model=args.clip_model,
             dataset_path=dataset_path,
@@ -210,3 +215,11 @@ if __name__ == "__main__":
             checkpoint_path=checkpoint_path,
             device=device,
         )
+
+        # Write the results to the file
+        with open(results_file, 'a') as file:
+            if file.tell() == 0: # Check if the file is empty
+                file.write("Dataset, Precision, Accuracy\n\n")
+                file.write("-" * 28)
+                file.write("\n")
+            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}\n")
