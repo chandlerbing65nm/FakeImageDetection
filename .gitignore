@@ -5,6 +5,5 @@ embeddings/
 data/
 samples/
 few-shot/
-auxiliary_test.py
-auxiliary_train.py
 *.pkl
+auxiliary_test.py
