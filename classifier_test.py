@@ -57,7 +57,6 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
         test_embeddings = test_fake_embeddings
         test_labels = np.array([1] * len(test_fake_embeddings))
     
-    model.cuda()    
     model.eval()  # set model to evaluation mode
 
     # Lists to store metrics for each run
@@ -79,7 +78,7 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
         with torch.no_grad():
             y_true, y_pred = [], []
             for img, label in tqdm(test_loader, "accessing test dataloader"):
-                in_tens = img.cuda()
+                in_tens = img.to(device)
                 y_pred.extend(model(in_tens).sigmoid().flatten().tolist())
                 y_true.extend(label.flatten().tolist())
 

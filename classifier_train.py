@@ -176,10 +176,9 @@ def train_model(
     val_loader, 
     num_epochs=25, 
     save_path='./', 
-    early_stopping_enabled=True
+    early_stopping_enabled=True,
+    device='cpu'
     ):
-
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     early_stopping = EarlyStopping(
         path=save_path, 
@@ -312,6 +311,7 @@ def main(
         num_epochs=num_epochs, 
         save_path=save_path,
         early_stopping_enabled=early_stop,
+        device=device,
         )
 
 if __name__ == "__main__":
@@ -331,8 +331,11 @@ if __name__ == "__main__":
     parser.add_argument('--model_type', default='linear', 
                         choices=['attention', 'mlp', 'linear'], 
                         help='Type of model to be used')
-    parser.add_argument('--device', default='cuda:0' if torch.cuda.is_available() else 'cpu', 
-                        choices=['cuda:0', 'cpu'], help='Computing device to use')
+    parser.add_argument(
+        '--device', 
+        default='cuda:0' if torch.cuda.is_available() else 'cpu', 
+        help='Computing device to use'
+        )
 
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
