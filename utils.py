@@ -215,35 +215,30 @@ class BalancedSpectralMaskGenerator:
         # Move the image to the same device as the mask
         image = image.to(self.device)
 
-        # Get the number of channels, height, and width of the image
-        num_channels, height, width = image.shape
+        # Convert the image to grayscale using standard weights
+        grayscale_weights = torch.tensor([0.2989, 0.5870, 0.1140], device=self.device)
+        grayscale_image = torch.einsum("chw,c->hw", image, grayscale_weights).unsqueeze(0)
+
+        # Apply Fourier transformation to decompose the grayscale image into spectral bands
+        x_mul = torch.fft.fftn(grayscale_image, dim=(1, 2))
+
+        # Compute the image contents in each band and normalize
+        I_x = torch.sum(torch.sum(torch.abs(x_mul), dim=1), dim=1)
+        I_prime_x = I_x / torch.sum(I_x)
+
+        # Generate the balanced spectral mask
+        m_spectral = torch.bernoulli(1 - I_prime_x * self.mask_ratio).to(self.device)
 
         # Initialize an empty tensor to hold the masked image
+        num_channels, height, width = image.shape
         masked_image = torch.zeros_like(image)
 
-        # Loop over each channel and apply the masking process
+        # Loop over each channel and apply the computed spectral mask
         for c in range(num_channels):
             channel_image = image[c].unsqueeze(0)
-
-            # Apply Fourier transformation to decompose the image into spectral bands
-            x_mul = torch.fft.fftn(channel_image, dim=(1, 2))
-
-            # Compute the image contents in each band
-            I_x = torch.sum(torch.sum(torch.abs(x_mul), dim=1), dim=1)
-
-            # Normalize the image contents
-            I_prime_x = I_x / torch.sum(I_x)
-
-            # Generate the balanced spectral mask
-            m_spectral = torch.bernoulli(1 - I_prime_x * self.mask_ratio).to(self.device)
-
-            # Apply the balanced spectral mask to the image in spectral space
-            masked_spectral_image = x_mul * m_spectral.view(-1, 1, 1)
-
-            # Inverse Fourier transform to return to spatial domain
+            spectral_image = torch.fft.fftn(channel_image, dim=(1, 2))
+            masked_spectral_image = spectral_image * m_spectral.view(-1, 1, 1)
             masked_channel_image = torch.fft.ifftn(masked_spectral_image, dim=(1, 2)).real
-
-            # Store the masked channel in the output image
             masked_image[c] = masked_channel_image.squeeze()
 
         return masked_image
@@ -279,7 +274,7 @@ class ZoomBlockGenerator:
 # Let's create a simple test script that generates a masked image and saves it to a jpg file.
 def test_mask_generator():
     # Create a MaskGenerator
-    mask_generator = ShiftedPatchMaskGenerator(mask_ratio=0.5, device="cpu")
+    mask_generator = BalancedSpectralMaskGenerator(mask_ratio=0.15, device="cpu")
 
     # Load an image
     image = Image.open("/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png")  # replace "test.jpg" with your image file path
@@ -293,6 +288,6 @@ def test_mask_generator():
     pil_image = ToPILImage()(masked_image.cpu())
 
     # Save the PIL image to a jpg file
-    pil_image.save("samples/masked_shiftedpatch_50.jpg")
+    pil_image.save("samples/masked_epctral.jpg")
 
 test_mask_generator()

@@ -17,6 +17,7 @@ from torchvision.transforms import Resize, InterpolationMode
 
 import warnings
 import collections
+from torchvision import models
 warnings.filterwarnings("ignore", category=UserWarning)
 
 from dataset import WangEtAlDataset, CorviEtAlDataset
@@ -158,20 +159,28 @@ def train_model(
 class LearnableMaskingModel(nn.Module):
     def __init__(self, input_channels, output_channels):
         super(LearnableMaskingModel, self).__init__()
-        self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(64, output_channels, kernel_size=3, padding=1)
+        
+        # Load the VGG16 model without the classification head (all fully connected layers)
+        vgg16_model = models.vgg16(pretrained=True)
+        self.features = vgg16_model.features
+
+        # Add your custom layers
         self.global_avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(output_channels, output_channels) # You can adjust the size here if needed
+        
+        # Number of filters in the last convolutional layer of VGG16
+        vgg16_last_filters = 512
+        
+        # Linear layer to get the desired output_channels
+        self.fc = nn.Linear(vgg16_last_filters, output_channels)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        x = nn.ReLU()(self.conv1(x))
-        x = self.conv2(x)
+        x = self.features(x) # Use VGG16 features (convolutional layers)
         x = self.global_avg_pool(x)
         x = torch.flatten(x, 1) # Flatten the tensor for the fully connected layer
         x = self.fc(x)
         x = self.sigmoid(x)
-        # x = (x > 0.5).float() # Apply thresholding to create a binary mask
+        # x = torch.nn.functional.softmax(x, dim=1)
         return x
 
 class DeepfakeDetectionModel(nn.Module):
@@ -197,7 +206,7 @@ class DeepfakeDetectionModel(nn.Module):
 
         if self.mask:
             mask = self.masking_model(x)
-            masked_features = clip_features * mask
+            masked_features = clip_features + mask
         else:
             masked_features = clip_features
 
@@ -237,20 +246,20 @@ def create_transform(augmentor, mask_ratio=0.10):
 def main(batch_size, mask, save_path, early_stop, epochs, subset_length):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    # opt = {
-    #     'rz_interp': ['bilinear'],
-    #     'loadSize': 256,
-    #     'blur_prob': 0.1,  # Set your value
-    #     'blur_sig': [0.5],
-    #     'jpg_prob': 0.1,  # Set your value
-    #     'jpg_method': ['cv2'],
-    #     'jpg_qual': [75]
-    # }
+    opt = {
+        'rz_interp': ['bilinear'],
+        'loadSize': 256,
+        'blur_prob': 0.1,  # Set your value
+        'blur_sig': [0.5],
+        'jpg_prob': 0.1,  # Set your value
+        'jpg_method': ['cv2'],
+        'jpg_qual': [75]
+    }
 
-    # augmentor = ImageAugmentor(opt)
-    # transform = create_transform(augmentor)
+    augmentor = ImageAugmentor(opt)
+    transform = create_transform(augmentor)
 
-    _, transform = clip.load('ViT-B/16', device=device, jit=False)
+    # _, transform = clip.load('ViT-B/16', device=device, jit=False)
 
     # Define the dataset
     train_dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=transform)
@@ -310,7 +319,7 @@ if __name__ == "__main__":
     print(f"Early Stopping: {args.early_stop}")
     print(f"Batch Size: {args.batch_size}")
     print(f"Subset Length: {subset_length}")
-    print(f"Save path: {args.save_path}")
+    print(f"Save path: {args.save_path}.pth")
     print(f"Mask: {args.mask}")
     print(f"Epochs: {args.epochs}")
     print("-" * 30, "\n")

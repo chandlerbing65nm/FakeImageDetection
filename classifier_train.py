@@ -14,7 +14,7 @@ from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import argparse
 
 from dataset import WangEtAlDataset, CorviEtAlDataset
-from extract_features import FullCLIPFeatureExtractor, CLIPFeatureExtractor
+from extract_features import *
 from wangetal_augment import ImageAugmentor
 
 class LinearClassifier(nn.Module):
@@ -105,7 +105,16 @@ class SelfAttentionClassifier(nn.Module):
         return x
 
 class EarlyStopping:
-    def __init__(self, path, patience=7, verbose=False, delta=0, min_lr=1e-6, factor=0.1, early_stopping_enabled=True, num_epochs=25):
+    def __init__(
+        self, 
+        path, 
+        patience=7, 
+        verbose=False, 
+        delta=0, min_lr=1e-6, 
+        factor=0.1, 
+        early_stopping_enabled=True, 
+        num_epochs=25
+        ):
 
         self.patience = patience
         self.verbose = verbose
@@ -242,7 +251,8 @@ def main(
     num_layers=6,
     num_epochs=10000,
     embedding_path=None,
-    model_type='attention', 
+    model_type='attention',
+    clip_model='ViT-L/14',
     save_path=None,
     early_stop=True,
     device="cpu",
@@ -270,7 +280,7 @@ def main(
     val_dataset = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
     val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=4)
     
-    feature_extractor = CLIPFeatureExtractor(model_name='ViT-B/16', device=device)
+    feature_extractor = CLIPFeatureExtractor(model_name=clip_model, device=device)
     # Extract the features
     val_real_embeddings, val_fake_embeddings = feature_extractor.extract_features(val_dataloader)
 
@@ -304,69 +314,52 @@ def main(
         early_stopping_enabled=early_stop,
         )
 
-# if __name__ == "__main__":
-#     nhead=8
-#     num_layers=6
-#     mask_generator_type = 'spectral'
-#     # mask_generator_type = None
-#     mask_ratio=70
-#     embedding_path=f'embeddings/masking/vitb16_{mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
-#     model_type='attention'
-    
-#     if mask_generator_type in ['zoomblock', 'patch', 'spectral', 'shiftedpatch']:
-#         save_path=f'checkpoints/mask_{mask_ratio}/vitb16_{mask_generator_type}maskclip_best_{model_type}.pt'
-#     else:
-#         save_path=f'checkpoints/vitb16_clip_best_{model_type}.pt'
-
-#     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-#     main(
-#         nhead=nhead, 
-#         num_layers=num_layers, 
-#         model_type=model_type, 
-#         save_path=save_path, 
-#         device=device
-#         )
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Your model description here")
 
     parser.add_argument('--nhead', type=int, default=8, help='Number of heads for attention mechanism')
     parser.add_argument('--num_layers', type=int, default=6, help='Number of layers')
-    parser.add_argument('--early_stop', type=bool, default=False, help='For early stopping')
+    parser.add_argument('--early_stop', action='store_true', help='For early stopping')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
-    parser.add_argument('--mask_generator_type', default='spectral', 
-                        choices=['zoomblock', 'patch', 'spectral', 'shiftedpatch', 'None'], 
+    parser.add_argument('--mask_generator_type', default='zoom', 
+                        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
                         help='Type of mask generator')
+    parser.add_argument('--clip_model', default='ViT-L/14', 
+                        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
+                        help='Type of clip visual model')
     parser.add_argument('--mask_ratio', type=int, default=50, help='Masking ratio')
-    parser.add_argument('--model_type', default='attention', 
+    parser.add_argument('--model_type', default='linear', 
                         choices=['attention', 'mlp', 'linear'], 
                         help='Type of model to be used')
     parser.add_argument('--device', default='cuda:0' if torch.cuda.is_available() else 'cpu', 
                         choices=['cuda:0', 'cpu'], help='Computing device to use')
 
     args = parser.parse_args()
+    clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
     
-    if args.mask_generator_type in ['zoomblock', 'patch', 'spectral', 'shiftedpatch']:
+    if args.mask_generator_type in ['zoom', 'patch', 'spectral', 'shiftedpatch']:
         mask_ratio = args.mask_ratio
-        embedding_path = f'embeddings/masking/vitb16_{args.mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
-        save_path = f'checkpoints/mask_{mask_ratio}/vitb16_{args.mask_generator_type}maskclip_best_{args.model_type}'
+        embedding_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
+        save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_{args.mask_generator_type}maskclip_best_{args.model_type}'
     else:
         mask_ratio = 0
-        embedding_path = f'embeddings/vitb16_clip_embeddings.pkl'
-        save_path = f'checkpoints/mask_{mask_ratio}/vitb16_clip_best_{args.model_type}'
+        embedding_path = f'embeddings/{clip_model}_clip_embeddings.pkl'
+        save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{args.model_type}'
+
+    num_epochs = 10000 if args.early_stop else args.num_epochs
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
     print(f"Number of Heads: {args.nhead}")
     print(f"Number of Layers: {args.num_layers}")
-    print(f"Number of Epochs: {args.num_epochs}")
+    print(f"Number of Epochs: {num_epochs}")
     print(f"Early Stopping: {args.early_stop}")
     print(f"Mask Generator Type: {args.mask_generator_type}")
     print(f"Mask Ratio: {mask_ratio}")
     print(f"Model Type: {args.model_type}")
-    print(f"Save path: {save_path}.pth") if args.early_stop else print(f"Save path: {save_path}_epoch{args.num_epochs-1}.pth")
+    print(f"CLIP model type: {args.clip_model}")
+    print(f"Save path: {save_path}.pth")
     print(f"Embed path: {embedding_path}")
     print(f"Device: {args.device}")
     print("-" * 30, "\n")
@@ -374,9 +367,10 @@ if __name__ == "__main__":
     main(
         nhead=args.nhead, 
         num_layers=args.num_layers, 
-        num_epochs=args.num_epochs,
+        num_epochs=num_epochs,
         embedding_path=embedding_path,
         model_type=args.model_type, 
+        clip_model=args.clip_model,
         save_path=save_path, 
         early_stop=args.early_stop,
         device=args.device

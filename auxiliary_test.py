@@ -76,9 +76,9 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False, num_workers=4)
 
     if args.mask:
-        model_path='checkpoints/auxiliary/auxiliary_32_samples.pth'
+        model_path='checkpoints/auxiliary/auxiliary_1600_samples.pth'
     else:
-        model_path='checkpoints/mask_0/vitb16_clip_best_mlp_32_samples.pth'
+        model_path='checkpoints/mask_0/vitb16_clip_best_mlp_1600_samples.pth'
 
     model = DeepfakeDetectionModel(mask=args.mask, device=device)
     model.load_state_dict(torch.load(model_path))
