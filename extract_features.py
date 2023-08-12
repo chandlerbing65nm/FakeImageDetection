@@ -59,7 +59,7 @@ class CLIPFeatureExtractor:
             imgs[i] = masked_img.to(self.device)
         return imgs
 
-def create_transform(augmentor, mask_ratio=0.10):
+def create_transform(augmentor):
     # Define the transformation pipeline
     transform = transforms.Compose([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
@@ -76,7 +76,7 @@ def extract_save_features(
     clip_model,
     dataset_path, 
     save_path, 
-    mask_ratio, 
+    ratio, 
     use_masking, 
     device):
     # Set options for augmentation
@@ -95,13 +95,13 @@ def extract_save_features(
 
     # Depending on the mask_generator_type create the appropriate mask generator
     if mask_generator_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(mask_ratio=mask_ratio, device=device)
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device=device)
     elif mask_generator_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(mask_ratio=mask_ratio, device=device)
+        mask_generator = ZoomBlockGenerator(ratio=ratio, device=device)
     elif mask_generator_type == 'patch':
-        mask_generator = PatchMaskGenerator(mask_ratio=mask_ratio, device=device)
+        mask_generator = PatchMaskGenerator(ratio=ratio, device=device)
     elif mask_generator_type == 'shiftedpatch':
-        mask_generator = ShiftedPatchMaskGenerator(mask_ratio=mask_ratio, device=device)
+        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device=device)
     else:
         mask_generator = None
         # raise ValueError('Invalid mask_generator_type')
@@ -135,20 +135,20 @@ if __name__ == "__main__":
     parser.add_argument('--device', default='cuda:0' if torch.cuda.is_available() else 'cpu', 
                         choices=['cuda:0', 'cpu'],
                         help='Computing device to use')
-    parser.add_argument('--mask_ratio', type=int, default=50,
+    parser.add_argument('--ratio', type=int, default=50,
                         help='Ratio of mask to apply')
 
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
 
-    if args.mask_ratio != 0 and args.mask_ratio > 0 and args.mask_generator_type != 'nomask':
-        mask_ratio = args.mask_ratio
-        save_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
+    if args.ratio != 0 and args.ratio > 0 and args.mask_generator_type != 'nomask':
+        ratio = args.ratio
+        save_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{ratio}clip_embeddings.pkl'
         use_masking = True
     else:
         save_path = f'embeddings/{clip_model}_clip_embeddings.pkl'
         use_masking = False
-        mask_ratio = 0
+        ratio = 0
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     print(f"Path to the dataset: {args.dataset_path}")
     print(f"CLIP model type: {args.clip_model}")
     print(f"Flag to use masking: {use_masking}")
-    print(f"Ratio of mask to apply: {mask_ratio}")
+    print(f"Ratio to apply operation: {ratio}")
     print(f"Embedding Path: {save_path}")
     print(f"Device: {args.device}")
     print("-" * 30, "\n")
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         args.clip_model, 
         args.dataset_path, 
         save_path, 
-        mask_ratio/100, 
+        ratio/100, 
         use_masking, 
         args.device
         )

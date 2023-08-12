@@ -7,8 +7,8 @@ import torch.fft as fft
 import torch.nn.functional as F
 
 class RandomMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.6, device: str = "cpu") -> None:
-        self.mask_ratio = 1 - mask_ratio
+    def __init__(self, ratio: float = 0.6, device: str = "cpu") -> None:
+        self.ratio = ratio
         self.device = device
 
     def transform(self, image):
@@ -16,7 +16,7 @@ class RandomMaskGenerator:
         _, height, width = image.shape
         
         pixel_count = height * width
-        mask_count = int(torch.ceil(torch.tensor(pixel_count * self.mask_ratio).to(self.device)))
+        mask_count = int(torch.ceil(torch.tensor(pixel_count * self.ratio).to(self.device)))
 
         # Move the image to the same device as the mask
         image = image.to(self.device)
@@ -36,8 +36,8 @@ class RandomMaskGenerator:
 
 
 class InvBlockMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.3, device: str = "cpu") -> None:
-        self.mask_ratio = 1-mask_ratio
+    def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
+        self.ratio = 1-ratio
         self.device = device
 
     def transform(self, image):
@@ -48,7 +48,7 @@ class InvBlockMaskGenerator:
         _, height, width = image.shape
 
         # Compute the size of the unmasked block
-        unmask_area = int(height * width * self.mask_ratio)  # Total number of unmasked pixels
+        unmask_area = int(height * width * self.ratio)  # Total number of unmasked pixels
         side_length = int(np.sqrt(unmask_area))  # Side length of the square unmasked block
         unmask_height = side_length
         unmask_width = side_length
@@ -79,8 +79,8 @@ class InvBlockMaskGenerator:
         return masked_image
 
 class BlockMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.3, device: str = "cpu") -> None:
-        self.mask_ratio = mask_ratio
+    def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
+        self.ratio = ratio
         self.device = device
 
     def transform(self, image):
@@ -91,7 +91,7 @@ class BlockMaskGenerator:
         _, height, width = image.shape
 
         # Compute the size of the unmasked block
-        unmask_area = int(height * width * self.mask_ratio)  # Total number of unmasked pixels
+        unmask_area = int(height * width * self.ratio)  # Total number of unmasked pixels
         side_length = int(np.sqrt(unmask_area))  # Side length of the square unmasked block
         unmask_height = side_length
         unmask_width = side_length
@@ -119,8 +119,8 @@ class BlockMaskGenerator:
         return masked_image
 
 class PatchMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.3, device: str = "cpu") -> None:
-        self.mask_ratio = mask_ratio
+    def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
+        self.ratio = ratio
         self.device = device
 
     def transform(self, image):
@@ -139,7 +139,7 @@ class PatchMaskGenerator:
         num_patches = (height * width) // (patch_size * patch_size)
 
         # Compute the number of patches to mask
-        mask_patches = int(np.ceil(num_patches * self.mask_ratio))
+        mask_patches = int(np.ceil(num_patches * self.ratio))
 
         # Create a mask of ones
         mask = torch.ones((1, height, width), dtype=torch.float32, device=self.device)
@@ -163,8 +163,8 @@ class PatchMaskGenerator:
         return masked_image
 
 class ShiftedPatchMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.3, grid_size: int = 16, device: str = "cpu") -> None:
-        self.mask_ratio = mask_ratio
+    def __init__(self, ratio: float = 0.3, grid_size: int = 16, device: str = "cpu") -> None:
+        self.ratio = ratio
         self.grid_size = grid_size
         self.device = device
 
@@ -183,7 +183,7 @@ class ShiftedPatchMaskGenerator:
         num_patches = self.grid_size * self.grid_size
 
         # Compute the number of patches to mask
-        mask_patches = int(np.ceil(num_patches * self.mask_ratio))
+        mask_patches = int(np.ceil(num_patches * self.ratio))
 
         # Create a mask of ones
         mask = torch.ones((1, self.grid_size, self.grid_size), dtype=torch.float32, device=self.device)
@@ -207,8 +207,8 @@ class ShiftedPatchMaskGenerator:
 
 
 class BalancedSpectralMaskGenerator:
-    def __init__(self, mask_ratio: float = 0.1, device: str = "cpu") -> None:
-        self.mask_ratio = mask_ratio
+    def __init__(self, ratio: float = 0.1, device: str = "cpu") -> None:
+        self.ratio = ratio
         self.device = device
 
     def transform(self, image):
@@ -227,7 +227,7 @@ class BalancedSpectralMaskGenerator:
         I_prime_x = I_x / torch.sum(I_x)
 
         # Generate the balanced spectral mask
-        m_spectral = torch.bernoulli(1 - I_prime_x * self.mask_ratio).to(self.device)
+        m_spectral = torch.bernoulli(1 - I_prime_x * self.ratio).to(self.device)
 
         # Initialize an empty tensor to hold the masked image
         num_channels, height, width = image.shape
@@ -244,8 +244,8 @@ class BalancedSpectralMaskGenerator:
         return masked_image
 
 class ZoomBlockGenerator:
-    def __init__(self, mask_ratio: float = 0.1, device: str = "cpu") -> None:
-        self.zoom_ratio = 1 - mask_ratio
+    def __init__(self, ratio: float = 0.1, device: str = "cpu") -> None:
+        self.zoom_ratio = ratio
         self.device = device
 
     def transform(self, image):
@@ -274,7 +274,7 @@ class ZoomBlockGenerator:
 # Let's create a simple test script that generates a masked image and saves it to a jpg file.
 def test_mask_generator():
     # Create a MaskGenerator
-    mask_generator = BalancedSpectralMaskGenerator(mask_ratio=0.15, device="cpu")
+    mask_generator = ZoomBlockGenerator(ratio=0.5, device="cpu")
 
     # Load an image
     image = Image.open("/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png")  # replace "test.jpg" with your image file path
@@ -288,6 +288,6 @@ def test_mask_generator():
     pil_image = ToPILImage()(masked_image.cpu())
 
     # Save the PIL image to a jpg file
-    pil_image.save("samples/masked_epctral.jpg")
+    pil_image.save("samples/masked_zoom.jpg")
 
 test_mask_generator()

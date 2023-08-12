@@ -8,6 +8,7 @@ import os
 import clip
 from tqdm import tqdm
 import argparse
+import random
 
 from dataset import WangEtAlDataset, CorviEtAlDataset, ForenSynths, GenImage
 from extract_features import *
@@ -62,7 +63,15 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
     # Lists to store metrics for each run
     accuracies, average_precisions = [], []
 
-    for _ in range(3):
+    for i in range(3):
+
+        # Setting the seed
+        seed = i*100
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
 
         test_data = TensorDataset(torch.tensor(test_embeddings, dtype=torch.float32), torch.tensor(test_labels, dtype=torch.float32))
         test_loader = DataLoader(test_data, batch_size=8, shuffle=False, num_workers=4)
