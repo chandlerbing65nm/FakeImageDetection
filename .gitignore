@@ -4,6 +4,7 @@ DiffusionImages/
 embeddings/
 data/
 samples/
+wandb/
 few-shot/
 *.pkl
 auxiliary_test.py
