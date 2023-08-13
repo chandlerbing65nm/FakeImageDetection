@@ -124,19 +124,33 @@ def extract_save_features(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract features and save them")
 
-    parser.add_argument('--mask_generator_type', default='nomask', 
-                        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'],
-                        help='Type of mask generator')
-    parser.add_argument('--clip_model', default='ViT-L/14', 
-                        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
-                        help='Type of clip visual model')
-    parser.add_argument('--dataset_path', default='../../Datasets/Wang_CVPR20/wang_et_al/training',
-                        help='Path to the dataset')
-    parser.add_argument('--device', default='cuda:0' if torch.cuda.is_available() else 'cpu', 
-                        choices=['cuda:0', 'cpu'],
-                        help='Computing device to use')
-    parser.add_argument('--ratio', type=int, default=50,
-                        help='Ratio of mask to apply')
+    parser.add_argument(
+        '--mask_generator_type', 
+        default='nomask', 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'],
+        help='Type of mask generator'
+        )
+    parser.add_argument(
+        '--clip_model', 
+        default='ViT-L/14', 
+        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
+        help='Type of clip visual model'
+        )
+    parser.add_argument(
+        '--dataset_path', 
+        default='../../Datasets/Wang_CVPR20/wang_et_al/training',
+        help='Path to the dataset'
+        )
+    parser.add_argument(
+        '--device', 
+        default='cuda:0' if torch.cuda.is_available() else 'cpu', 
+        help='Computing device to use'
+        )
+    parser.add_argument(
+        '--ratio', 
+        type=int, 
+        default=50,help='Ratio of mask to apply'
+        )
 
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')

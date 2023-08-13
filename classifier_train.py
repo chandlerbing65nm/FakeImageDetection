@@ -333,6 +333,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_layers', type=int, default=6, help='Number of layers')
     parser.add_argument('--early_stop', action='store_true', help='For early stopping')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
+    parser.add_argument('--mask_ratio', type=int, default=50, help='Masking ratio')
     parser.add_argument(
         '--mask_generator_type', 
         default='zoom', 
@@ -351,7 +352,6 @@ if __name__ == "__main__":
         choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
         help='Type of clip visual model'
         )
-    parser.add_argument('--mask_ratio', type=int, default=50, help='Masking ratio')
     parser.add_argument(
         '--model_type', 
         default='linear', 
