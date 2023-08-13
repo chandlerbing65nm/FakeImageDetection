@@ -333,18 +333,31 @@ if __name__ == "__main__":
     parser.add_argument('--num_layers', type=int, default=6, help='Number of layers')
     parser.add_argument('--early_stop', action='store_true', help='For early stopping')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
-    parser.add_argument('--mask_generator_type', default='zoom', 
-                        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
-                        help='Type of mask generator')
-    parser.add_argument('--project_name', type=str, default="Deepfake Detection",
-                        help='wandb project name')
-    parser.add_argument('--clip_model', default='ViT-L/14', 
-                        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
-                        help='Type of clip visual model')
+    parser.add_argument(
+        '--mask_generator_type', 
+        default='zoom', 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
+        help='Type of mask generator'
+        )
+    parser.add_argument(
+        '--project_name', 
+        type=str, 
+        default="Deepfake Detection",
+        help='wandb project name'
+        )
+    parser.add_argument(
+        '--clip_model', 
+        default='ViT-L/14', 
+        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
+        help='Type of clip visual model'
+        )
     parser.add_argument('--mask_ratio', type=int, default=50, help='Masking ratio')
-    parser.add_argument('--model_type', default='linear', 
-                        choices=['attention', 'mlp', 'linear'], 
-                        help='Type of model to be used')
+    parser.add_argument(
+        '--model_type', 
+        default='linear', 
+        choices=['attention', 'mlp', 'linear'], 
+        help='Type of model to be used'
+        )
     parser.add_argument(
         '--device', 
         default='cuda:0' if torch.cuda.is_available() else 'cpu', 
