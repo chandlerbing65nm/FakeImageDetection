@@ -260,10 +260,12 @@ def main(
     project_name=None,
     save_path=None,
     early_stop=True,
+    wandb_offline=False,
     device="cpu",
     ):
 
-    wandb.init(project=project_name, name=wandb_name)
+    status = "offline" if wandb_offline else "online"
+    wandb.init(project=project_name, name=wandb_name, mode=status)
     wandb.config.update(args)  # Log all hyperparameters
 
     # Load embeddings
@@ -326,6 +328,7 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Your model description here")
 
+    parser.add_argument('--wandb_offline', action='store_true', help='Run wandb in offline mode')
     parser.add_argument('--nhead', type=int, default=8, help='Number of heads for attention mechanism')
     parser.add_argument('--num_layers', type=int, default=6, help='Number of layers')
     parser.add_argument('--early_stop', action='store_true', help='For early stopping')
@@ -375,6 +378,7 @@ if __name__ == "__main__":
     print(f"Model Type: {args.model_type}")
     print(f"WandB Project Name: {args.project_name}")
     print(f"WandB Instance Name: {wandb_name}")
+    print(f"WandB Offline: {args.wandb_offline}")
     print(f"CLIP model type: {args.clip_model}")
     print(f"Save path: {save_path}.pth")
     print(f"Embed path: {embedding_path}")
@@ -392,5 +396,6 @@ if __name__ == "__main__":
         project_name=args.project_name,
         save_path=save_path, 
         early_stop=args.early_stop,
+        wandb_offline=args.wandb_offline,
         device=args.device
     )
