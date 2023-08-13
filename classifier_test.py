@@ -164,7 +164,7 @@ if __name__ == "__main__":
         checkpoint_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{model_choice}.pth'
 
     # Define the path to the results file
-    results_file = f'results/mask_{mask_ratio}_{clip_model}_{args.mask_type}_{model_choice}.txt'
+    results_file = f'results/{args.data_type.lower()}/mask_{mask_ratio}_{clip_model}_{args.mask_type}_{model_choice}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -219,7 +219,17 @@ if __name__ == "__main__":
         # Write the results to the file
         with open(results_file, 'a') as file:
             if file.tell() == 0: # Check if the file is empty
-                file.write("Dataset, Precision, Accuracy\n\n")
+                file.write("Selected Configuration:\n")
+                file.write("-" * 28 + "\n")
+                file.write(f"Device: {args.device}\n")
+                file.write(f"Dataset Type: {args.data_type}\n")
+                file.write(f"CLIP model type: {args.clip_model}\n")
+                file.write(f"Ratio of mask: {mask_ratio}\n")
+                file.write(f"Mask Type: {args.mask_type}\n")
+                file.write(f"Checkpoint Type: {checkpoint_path}\n")
+                file.write(f"Results saved to: {results_file}\n")
+                file.write("-" * 28 + "\n\n")
+                file.write("Dataset, Precision, Accuracy\n")
                 file.write("-" * 28)
                 file.write("\n")
             file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}\n")
