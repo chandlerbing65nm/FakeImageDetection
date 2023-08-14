@@ -337,7 +337,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--mask_generator_type', 
         default='zoom', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'], 
         help='Type of mask generator'
         )
     parser.add_argument(
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
     
-    if args.mask_generator_type in ['zoom', 'patch', 'spectral', 'shiftedpatch']:
+    if args.mask_generator_type in ['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock']:
         mask_ratio = args.mask_ratio
         embedding_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
         save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_{args.mask_generator_type}maskclip_best_{args.model_type}'
