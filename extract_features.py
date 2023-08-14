@@ -102,6 +102,8 @@ def extract_save_features(
         mask_generator = PatchMaskGenerator(ratio=ratio, device=device)
     elif mask_generator_type == 'shiftedpatch':
         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device=device)
+    elif mask_generator_type == 'invblock':
+        mask_generator = InvBlockMaskGenerator(ratio=ratio, device=device)
     else:
         mask_generator = None
         # raise ValueError('Invalid mask_generator_type')
@@ -127,7 +129,7 @@ if __name__ == "__main__":
     parser.add_argument(
         '--mask_generator_type', 
         default='nomask', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'],
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'],
         help='Type of mask generator'
         )
     parser.add_argument(

@@ -274,7 +274,7 @@ class ZoomBlockGenerator:
 # Let's create a simple test script that generates a masked image and saves it to a jpg file.
 def test_mask_generator():
     # Create a MaskGenerator
-    mask_generator = ZoomBlockGenerator(ratio=0.5, device="cpu")
+    mask_generator = InvBlockMaskGenerator(ratio=0.5, device="cpu")
 
     # Load an image
     image = Image.open("/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png")  # replace "test.jpg" with your image file path
@@ -288,6 +288,6 @@ def test_mask_generator():
     pil_image = ToPILImage()(masked_image.cpu())
 
     # Save the PIL image to a jpg file
-    pil_image.save("samples/masked_zoom.jpg")
+    pil_image.save("samples/masked_invblock.jpg")
 
 test_mask_generator()
