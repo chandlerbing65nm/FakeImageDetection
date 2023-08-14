@@ -14,7 +14,7 @@ from dataset import WangEtAlDataset, CorviEtAlDataset, ForenSynths, GenImage
 from extract_features import *
 from classifier_train import MLPClassifier, SelfAttentionClassifier, LinearClassifier
 
-def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier_params, checkpoint_path, device):
+def evaluate_model(data_type, clip_model, dataset_path, probe_model, classifier_params, checkpoint_path, device):
 
     transform = transforms.Compose([
         transforms.Resize(256),
@@ -38,11 +38,11 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
 
     feature_size = test_fake_embeddings.shape[1]
 
-    if model_choice == "linear":
+    if probe_model == "linear":
         model = LinearClassifier(input_size=feature_size).to(device)
-    elif model_choice == "mlp":
+    elif probe_model == "mlp":
         model = MLPClassifier(input_size=feature_size).to(device)
-    elif model_choice == "attention":
+    elif probe_model == "attention":
         model = SelfAttentionClassifier(input_size=feature_size, **classifier_params).to(device)
 
     model.load_state_dict(torch.load(checkpoint_path))
@@ -106,11 +106,33 @@ def evaluate_model(data_type, clip_model, dataset_path, model_choice, classifier
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Settings for your script")
 
+    parser.add_argument('--nhead', default=8, type=int, help="Number of heads for attention model")
+    parser.add_argument('--num_layers', default=6, type=int, help="Number of layers for attention model")
     parser.add_argument(
-        '--device', 
-        default="cuda:0" if torch.cuda.is_available() else "cpu", 
+        '--clip_model', 
+        default='ViT-L/14', 
         type=str, 
-        help="Device to use (default: auto-detect)"
+        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
+        help='Type of clip visual model'
+        )
+    parser.add_argument(
+        '--mask_type', 
+        default='zoom', 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
+        help='Type of mask generator'
+        )
+    parser.add_argument(
+        '--ratio', 
+        type=int, 
+        default=50,
+        help='Ratio of mask to apply'
+        )
+    parser.add_argument(
+        '--probe_model', 
+        default="linear", 
+        type=str, 
+        choices=['attention', 'mlp', 'linear'], 
+        help="Model choice"
         )
     parser.add_argument(
         '--data_type', 
@@ -120,32 +142,10 @@ if __name__ == "__main__":
         help="Dataset Type"
         )
     parser.add_argument(
-        '--clip_model', 
-        default='ViT-L/14', 
+        '--device', 
+        default="cuda:0" if torch.cuda.is_available() else "cpu", 
         type=str, 
-        choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
-        help='Type of clip visual model'
-        )
-    parser.add_argument(
-        '--model_choice', 
-        default="linear", 
-        type=str, 
-        choices=['attention', 'mlp', 'linear'], 
-        help="Model choice"
-        )
-    parser.add_argument('--nhead', default=8, type=int, help="Number of heads for attention model")
-    parser.add_argument('--num_layers', default=6, type=int, help="Number of layers for attention model")
-    parser.add_argument(
-        '--mask_ratio', 
-        type=int, 
-        default=50,
-        help='Ratio of mask to apply'
-        )
-    parser.add_argument(
-        '--mask_type', 
-        default='zoom', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'nomask'], 
-        help='Type of mask generator'
+        help="Device to use (default: auto-detect)"
         )
 
     args = parser.parse_args()
@@ -153,18 +153,18 @@ if __name__ == "__main__":
 
     device = torch.device(args.device)
     data_type = args.data_type
-    model_choice = args.model_choice
+    probe_model = args.probe_model
     classifier_params = {"nhead": args.nhead, "num_layers": args.num_layers}
 
-    if args.mask_type in ['zoom', 'patch', 'spectral', 'shiftedpatch'] and args.mask_ratio > 0:
-        mask_ratio = args.mask_ratio
-        checkpoint_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_{args.mask_type}maskclip_best_{model_choice}.pth'
+    if args.mask_type in ['zoom', 'patch', 'spectral', 'shiftedpatch'] and args.ratio > 0:
+        ratio = args.ratio
+        checkpoint_path = f'checkpoints/mask_{ratio}/{clip_model}_{args.mask_type}maskclip_best_{probe_model}.pth'
     else:
-        mask_ratio = 0
-        checkpoint_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{model_choice}.pth'
+        ratio = 0
+        checkpoint_path = f'checkpoints/mask_{ratio}/{clip_model}_clip_best_{probe_model}.pth'
 
     # Define the path to the results file
-    results_file = f'results/{args.data_type.lower()}/mask_{mask_ratio}_{clip_model}_{args.mask_type}_{model_choice}.txt'
+    results_file = f'results/{args.data_type.lower()}/mask_{ratio}_{clip_model}_{args.mask_type}_{probe_model}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -172,8 +172,8 @@ if __name__ == "__main__":
     print(f"Device: {args.device}")
     print(f"Dataset Type: {args.data_type}")
     print(f"CLIP model type: {args.clip_model}")
-    print(f"Model Choice: {args.model_choice}")
-    print(f"Ratio of mask: {mask_ratio}")
+    print(f"Model Choice: {args.probe_model}")
+    print(f"Ratio of mask: {ratio}")
     print(f"Mask Type: {args.mask_type}")
     print(f"Number of Heads: {args.nhead}")
     print(f"Number of Layers: {args.num_layers}")
@@ -210,7 +210,7 @@ if __name__ == "__main__":
             data_type=data_type,
             clip_model=args.clip_model,
             dataset_path=dataset_path,
-            model_choice=model_choice,
+            probe_model=probe_model,
             classifier_params=classifier_params,
             checkpoint_path=checkpoint_path,
             device=device,
@@ -224,7 +224,7 @@ if __name__ == "__main__":
                 file.write(f"Device: {args.device}\n")
                 file.write(f"Dataset Type: {args.data_type}\n")
                 file.write(f"CLIP model type: {args.clip_model}\n")
-                file.write(f"Ratio of mask: {mask_ratio}\n")
+                file.write(f"Ratio of mask: {ratio}\n")
                 file.write(f"Mask Type: {args.mask_type}\n")
                 file.write(f"Checkpoint Type: {checkpoint_path}\n")
                 file.write(f"Results saved to: {results_file}\n")

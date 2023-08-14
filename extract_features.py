@@ -72,7 +72,7 @@ def create_transform(augmentor):
     return transform
 
 def extract_save_features(
-    mask_generator_type, 
+    mask_type, 
     clip_model,
     dataset_path, 
     save_path, 
@@ -93,20 +93,20 @@ def extract_save_features(
     augmentor = ImageAugmentor(opt)
     transform = create_transform(augmentor)
 
-    # Depending on the mask_generator_type create the appropriate mask generator
-    if mask_generator_type == 'spectral':
+    # Depending on the mask_type create the appropriate mask generator
+    if mask_type == 'spectral':
         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device=device)
-    elif mask_generator_type == 'zoom':
+    elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio, device=device)
-    elif mask_generator_type == 'patch':
+    elif mask_type == 'patch':
         mask_generator = PatchMaskGenerator(ratio=ratio, device=device)
-    elif mask_generator_type == 'shiftedpatch':
+    elif mask_type == 'shiftedpatch':
         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device=device)
-    elif mask_generator_type == 'invblock':
+    elif mask_type == 'invblock':
         mask_generator = InvBlockMaskGenerator(ratio=ratio, device=device)
     else:
         mask_generator = None
-        # raise ValueError('Invalid mask_generator_type')
+        # raise ValueError('Invalid mask_type')
 
     # Define the dataset and dataloader
     dataset = WangEtAlDataset(dataset_path, transform=transform)
@@ -127,12 +127,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Extract features and save them")
 
     parser.add_argument(
-        '--mask_generator_type', 
-        default='nomask', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'],
-        help='Type of mask generator'
-        )
-    parser.add_argument(
         '--clip_model', 
         default='ViT-L/14', 
         choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
@@ -144,22 +138,28 @@ if __name__ == "__main__":
         help='Path to the dataset'
         )
     parser.add_argument(
-        '--device', 
-        default='cuda:0' if torch.cuda.is_available() else 'cpu', 
-        help='Computing device to use'
+        '--mask_type', 
+        default='nomask', 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'],
+        help='Type of mask generator'
         )
     parser.add_argument(
         '--ratio', 
         type=int, 
         default=50,help='Ratio of mask to apply'
         )
+    parser.add_argument(
+        '--device', 
+        default='cuda:0' if torch.cuda.is_available() else 'cpu', 
+        help='Computing device to use'
+        )
 
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
 
-    if args.ratio != 0 and args.ratio > 0 and args.mask_generator_type != 'nomask':
+    if args.ratio != 0 and args.ratio > 0 and args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{ratio}clip_embeddings.pkl'
+        save_path = f'embeddings/masking/{clip_model}_{args.mask_type}mask{ratio}clip_embeddings.pkl'
         use_masking = True
     else:
         save_path = f'embeddings/{clip_model}_clip_embeddings.pkl'
@@ -169,7 +169,7 @@ if __name__ == "__main__":
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
-    print(f"Type of mask generator: {args.mask_generator_type}")
+    print(f"Type of mask generator: {args.mask_type}")
     print(f"Path to the dataset: {args.dataset_path}")
     print(f"CLIP model type: {args.clip_model}")
     print(f"Flag to use masking: {use_masking}")
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     print("-" * 30, "\n")
 
     extract_save_features(
-        args.mask_generator_type,
+        args.mask_type,
         args.clip_model, 
         args.dataset_path, 
         save_path, 

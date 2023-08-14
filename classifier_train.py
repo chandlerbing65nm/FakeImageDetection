@@ -254,7 +254,7 @@ def main(
     num_layers=6,
     num_epochs=10000,
     embedding_path=None,
-    model_type='attention',
+    probe_model='attention',
     clip_model='ViT-L/14',
     wandb_name=None,
     project_name=None,
@@ -303,11 +303,11 @@ def main(
     # Creating and training the binary classifier
 
     feature_size = real_embeddings.shape[1] # Inspect the size of the embeddings
-    if model_type == 'linear':
+    if probe_model == 'linear':
         model = LinearClassifier(input_size=feature_size).to(device)
-    elif model_type == 'mlp':
+    elif probe_model == 'mlp':
         model = MLPClassifier(input_size=feature_size).to(device)
-    elif model_type == 'attention':
+    elif probe_model == 'attention':
         model = SelfAttentionClassifier(input_size=feature_size, nhead=nhead, num_layers=num_layers).to(device)
 
     criterion = nn.BCEWithLogitsLoss()
@@ -328,22 +328,18 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Your model description here")
 
-    parser.add_argument('--wandb_offline', action='store_true', help='Run wandb in offline mode')
     parser.add_argument('--nhead', type=int, default=8, help='Number of heads for attention mechanism')
     parser.add_argument('--num_layers', type=int, default=6, help='Number of layers')
-    parser.add_argument('--early_stop', action='store_true', help='For early stopping')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
-    parser.add_argument('--mask_ratio', type=int, default=50, help='Masking ratio')
     parser.add_argument(
-        '--mask_generator_type', 
-        default='zoom', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'], 
-        help='Type of mask generator'
+        '--wandb_offline', 
+        action='store_true', 
+        help='Run wandb in offline mode'
         )
     parser.add_argument(
         '--project_name', 
         type=str, 
-        default="Deepfake Detection",
+        default="DeepFake-Detection",
         help='wandb project name'
         )
     parser.add_argument(
@@ -353,7 +349,24 @@ if __name__ == "__main__":
         help='Type of clip visual model'
         )
     parser.add_argument(
-        '--model_type', 
+        '--early_stop', 
+        action='store_true', 
+        help='For early stopping'
+        )
+    parser.add_argument(
+        '--mask_type', 
+        default='zoom', 
+        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'], 
+        help='Type of mask generator'
+        )
+    parser.add_argument(
+        '--ratio', 
+        type=int, 
+        default=50, 
+        help='Masking ratio'
+        )
+    parser.add_argument(
+        '--probe_model', 
         default='linear', 
         choices=['attention', 'mlp', 'linear'], 
         help='Type of model to be used'
@@ -367,17 +380,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
     
-    if args.mask_generator_type in ['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock']:
-        mask_ratio = args.mask_ratio
-        embedding_path = f'embeddings/masking/{clip_model}_{args.mask_generator_type}mask{mask_ratio}clip_embeddings.pkl'
-        save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_{args.mask_generator_type}maskclip_best_{args.model_type}'
+    if args.mask_type in ['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock']:
+        ratio = args.ratio
+        embedding_path = f'embeddings/masking/{clip_model}_{args.mask_type}mask{ratio}clip_embeddings.pkl'
+        save_path = f'checkpoints/mask_{ratio}/{clip_model}_{args.mask_type}maskclip_best_{args.probe_model}'
     else:
-        mask_ratio = 0
+        ratio = 0
         embedding_path = f'embeddings/{clip_model}_clip_embeddings.pkl'
-        save_path = f'checkpoints/mask_{mask_ratio}/{clip_model}_clip_best_{args.model_type}'
+        save_path = f'checkpoints/mask_{ratio}/{clip_model}_clip_best_{args.probe_model}'
 
     num_epochs = 10000 if args.early_stop else args.num_epochs
-    wandb_name = f"mask_{mask_ratio}_{clip_model}_{args.mask_generator_type}_{args.model_type}"
+    wandb_name = f"mask_{ratio}_{clip_model}_{args.mask_type}_{args.probe_model}"
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -386,9 +399,9 @@ if __name__ == "__main__":
     print(f"Number of Layers: {args.num_layers}")
     print(f"Number of Epochs: {num_epochs}")
     print(f"Early Stopping: {args.early_stop}")
-    print(f"Mask Generator Type: {args.mask_generator_type}")
-    print(f"Mask Ratio: {mask_ratio}")
-    print(f"Model Type: {args.model_type}")
+    print(f"Mask Generator Type: {args.mask_type}")
+    print(f"Mask Ratio: {ratio}")
+    print(f"Model Type: {args.probe_model}")
     print(f"WandB Project Name: {args.project_name}")
     print(f"WandB Instance Name: {wandb_name}")
     print(f"WandB Offline: {args.wandb_offline}")
@@ -403,7 +416,7 @@ if __name__ == "__main__":
         num_layers=args.num_layers, 
         num_epochs=num_epochs,
         embedding_path=embedding_path,
-        model_type=args.model_type, 
+        probe_model=args.probe_model, 
         clip_model=args.clip_model,
         wandb_name=wandb_name,
         project_name=args.project_name,
