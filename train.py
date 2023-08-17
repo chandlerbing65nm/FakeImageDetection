@@ -197,6 +197,7 @@ def create_transform(augmentor, mask_generator):
 
 
 def main(
+    local_rank=0,
     nhead=8,
     num_layers=6,
     num_epochs=10000,
@@ -209,7 +210,6 @@ def main(
     mask_type=None,
     early_stop=True,
     wandb_online=False,
-    local_rank=0
     ):
 
     device = torch.device(f'cuda:{local_rank}')
@@ -228,7 +228,7 @@ def main(
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device=device)
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio, device=device)
     elif mask_type == 'patch':
@@ -238,9 +238,9 @@ def main(
     elif mask_type == 'invblock':
         mask_generator = InvBlockMaskGenerator(ratio=ratio, device=device)
     elif mask_type == 'edge':
-        mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device=device)
+        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
     elif mask_type == 'highfreq':
-        mask_generator = HighFrequencyMaskGenerator(device=device)
+        mask_generator = HighFrequencyMaskGenerator()
     else:
         mask_generator = None
 
@@ -346,16 +346,16 @@ if __name__ == "__main__":
         help='Type of mask generator'
         )
     parser.add_argument(
-        '--ratio', 
-        type=int, 
-        default=50, 
-        help='Masking ratio'
-        )
-    parser.add_argument(
         '--batch_size', 
         type=int, 
         default=64, 
         help='Batch Size'
+        )
+    parser.add_argument(
+        '--ratio', 
+        type=int, 
+        default=50, 
+        help='Masking ratio'
         )
 
     args = parser.parse_args()
@@ -388,6 +388,7 @@ if __name__ == "__main__":
     print("-" * 30, "\n")
 
     main(
+        local_rank=args.local_rank,
         num_epochs=num_epochs,
         ratio=ratio/100,
         batch_size=args.batch_size,
@@ -398,7 +399,6 @@ if __name__ == "__main__":
         mask_type=args.mask_type,
         early_stop=args.early_stop,
         wandb_online=args.wandb_online,
-        local_rank=args.local_rank
     )
 
 
