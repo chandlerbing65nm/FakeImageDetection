@@ -21,12 +21,24 @@ from utils import *
 
 
 class CLIPFeatureExtractor:
-    def __init__(self, model_name='ViT-B/16', mask_generator=None, use_masking=False, device="cpu"):  # ViT-L/14
+    def __init__(
+        self, 
+        model_name='ViT-L/14', 
+        mask_generator=None, 
+        use_masking=False, 
+        full_clip=False, 
+        device="cpu"
+        ):
+
         self.device = device
         self.model, _ = clip.load(model_name, device=self.device, jit=False)
         self.model.eval()
         self.use_masking = use_masking
+        self.full_clip = full_clip
         self.mask_generator = mask_generator
+        self.text_inputs = [
+            "A visual depiction that may either represent an authentic capture of reality or a digitally manipulated construct, reflecting varying degrees of truthfulness or artificiality."
+            ]
 
     def extract_features(self, dataloader):
         real_embeddings = []
@@ -35,11 +47,25 @@ class CLIPFeatureExtractor:
         with torch.no_grad():
             for imgs, labels in tqdm(dataloader):
                 if self.use_masking:
-                    imgs = self.mask_image(imgs)  # Apply mask if enabled
+                    imgs = self.mask_image(imgs)
                 imgs = imgs.to(self.device)
                 labels = labels.to(self.device)
-                
-                features = self.model.encode_image(imgs)
+
+                if self.full_clip:
+                    # text_inputs = [self.text_inputs[label] for label in labels]
+                    text_inputs = clip.tokenize(self.text_inputs).to(self.device)
+                    image_features = self.model.encode_image(imgs)
+                    text_features = self.model.encode_text(text_inputs)
+
+                    # Normalize the features
+                    image_features = image_features / image_features.norm(dim=-1, keepdim=True)
+                    text_features = text_features / text_features.norm(dim=-1, keepdim=True)
+
+                    # Compute the similarity as the dot product of normalized features
+                    features = (image_features * text_features)
+                else:
+                    features = self.model.encode_image(imgs)
+
                 features = features.cpu().numpy()
 
                 for feature, label in zip(features, labels):
@@ -51,11 +77,8 @@ class CLIPFeatureExtractor:
         return np.array(real_embeddings), np.array(fake_embeddings)
 
     def mask_image(self, imgs):
-        # Apply mask to each image in the batch
         for i in range(len(imgs)):
-            # Generate the mask on the device
             masked_img = self.mask_generator.transform(imgs[i].cpu())
-            # Move the masked image back to the device
             imgs[i] = masked_img.to(self.device)
         return imgs
 
@@ -76,6 +99,7 @@ def extract_save_features(
     clip_model,
     dataset_path, 
     save_path, 
+    full_clip,
     ratio, 
     use_masking, 
     device):
@@ -104,6 +128,10 @@ def extract_save_features(
         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device=device)
     elif mask_type == 'invblock':
         mask_generator = InvBlockMaskGenerator(ratio=ratio, device=device)
+    elif mask_type == 'edge':
+        mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device=device)
+    elif mask_type == 'highfreq':
+        mask_generator = HighFrequencyMaskGenerator(device=device)
     else:
         mask_generator = None
         # raise ValueError('Invalid mask_type')
@@ -113,7 +141,12 @@ def extract_save_features(
     dataloader = DataLoader(dataset, batch_size=64, shuffle=True, num_workers=4)
 
     # Define the feature extractor with the given mask generator and use_masking flag
-    feature_extractor = CLIPFeatureExtractor(model_name=clip_model, mask_generator=mask_generator, use_masking=use_masking, device=device)
+    feature_extractor = CLIPFeatureExtractor(
+        model_name=clip_model, 
+        mask_generator=mask_generator, 
+        use_masking=use_masking,
+        full_clip=full_clip, 
+        device=device)
 
     # Extract the features
     real_embeddings, fake_embeddings = feature_extractor.extract_features(dataloader)
@@ -128,7 +161,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--clip_model', 
-        default='ViT-L/14', 
+        default='ViT-B/16', 
         choices=['ViT-B/16', 'ViT-L/14', 'RN50', 'RN101'],
         help='Type of clip visual model'
         )
@@ -138,9 +171,23 @@ if __name__ == "__main__":
         help='Path to the dataset'
         )
     parser.add_argument(
+        '--full_clip', 
+        action='store_true', 
+        help='Use CLIP text encoder'
+        )
+    parser.add_argument(
         '--mask_type', 
         default='nomask', 
-        choices=['zoom', 'patch', 'spectral', 'shiftedpatch', 'invblock', 'nomask'],
+        choices=[
+            'zoom', 
+            'patch', 
+            'spectral', 
+            'shiftedpatch', 
+            'invblock', 
+            'edge',
+            'highfreq',
+            'nomask'
+            ],
         help='Type of mask generator'
         )
     parser.add_argument(
@@ -156,13 +203,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     clip_model = args.clip_model.lower().replace('/', '').replace('-', '')
+    full_clip = '' if args.full_clip is False else 'full'
 
-    if args.ratio != 0 and args.ratio > 0 and args.mask_type != 'nomask':
+    if args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'embeddings/masking/{clip_model}_{args.mask_type}mask{ratio}clip_embeddings.pkl'
+        save_path = f'embeddings/masking/{clip_model}_{args.mask_type}mask{ratio}{full_clip}clip_embeddings.pkl'
         use_masking = True
     else:
-        save_path = f'embeddings/{clip_model}_clip_embeddings.pkl'
+        save_path = f'embeddings/{clip_model}_{full_clip}clip_embeddings.pkl'
         use_masking = False
         ratio = 0
 
@@ -172,6 +220,7 @@ if __name__ == "__main__":
     print(f"Type of mask generator: {args.mask_type}")
     print(f"Path to the dataset: {args.dataset_path}")
     print(f"CLIP model type: {args.clip_model}")
+    print(f"Use text encoder: {args.full_clip}")
     print(f"Flag to use masking: {use_masking}")
     print(f"Ratio to apply operation: {ratio}")
     print(f"Embedding Path: {save_path}")
@@ -183,6 +232,7 @@ if __name__ == "__main__":
         args.clip_model, 
         args.dataset_path, 
         save_path, 
+        full_clip,
         ratio/100, 
         use_masking, 
         args.device

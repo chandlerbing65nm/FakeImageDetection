@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import torch.fft as fft
 import torch.nn.functional as F
+from scipy.stats import skew, kurtosis
 
 class RandomMaskGenerator:
     def __init__(self, ratio: float = 0.6, device: str = "cpu") -> None:
@@ -33,7 +34,6 @@ class RandomMaskGenerator:
         masked_image = image * mask
 
         return masked_image
-
 
 class InvBlockMaskGenerator:
     def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
@@ -271,23 +271,127 @@ class ZoomBlockGenerator:
 
         return zoomed_image
 
+class EdgeAwareMaskGenerator:
+    def __init__(self, ratio: float = 0.3, threshold: float = 0.5, device: str = "cpu") -> None:
+        self.ratio = ratio
+        self.threshold = threshold
+        self.device = device
+        self.sobel_x = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+        self.sobel_y = torch.tensor([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+
+    def transform(self, image):
+        channels, height, width = image.shape
+        image = image
+
+        # Apply Sobel filters
+        grad_x = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_x.repeat(channels, 1, 1, 1), padding=1, groups=channels)
+        grad_y = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_y.repeat(channels, 1, 1, 1), padding=1, groups=channels)
+        grad_magnitude = torch.sqrt(torch.sum(grad_x**2 + grad_y**2, dim=1)).squeeze(0)
+
+        edge_map = (grad_magnitude > self.threshold).float()
+
+        # Compute patch size
+        patch_size = 8
+        while height % patch_size != 0 or width % patch_size != 0:
+            patch_size -= 1
+
+        # Compute edge content using convolution with a patch-sized kernel
+        patch_kernel = torch.ones((1, 1, patch_size, patch_size))
+        edge_content = torch.nn.functional.conv2d(edge_map.unsqueeze(0).unsqueeze(0), patch_kernel, stride=patch_size)
+
+        # Select patches to mask
+        num_patches_to_mask = int(np.ceil(edge_content.numel() * self.ratio))
+        mask_patch_indices = torch.topk(edge_content.view(-1), num_patches_to_mask).indices
+
+        # Create the mask
+        mask = torch.ones((1, height, width))
+        for index in mask_patch_indices:
+            start_y = (index // (width // patch_size)) * patch_size
+            start_x = (index % (width // patch_size)) * patch_size
+            mask[:, start_y:start_y + patch_size, start_x:start_x + patch_size] = 0
+
+        # Repeat the mask for all channels
+        mask = mask.repeat((channels, 1, 1))
+
+        masked_image = image * mask
+        return masked_image
+
+class HighFrequencyMaskGenerator:
+    def __init__(self, emphasis_factor: float = 2.0, device: str = "cpu") -> None:
+        self.emphasis_factor = emphasis_factor
+        self.device = device
+
+    def transform(self, image):
+        image = image.to(self.device)
+
+        # Compute the Fourier Transform
+        spectral_image = torch.fft.fftn(image, dim=(1, 2))
+        
+        # Compute the magnitude
+        magnitude = torch.abs(spectral_image)
+
+        # Create a high-frequency emphasis mask using a radial gradient
+        _, height, width = image.shape
+        cy, cx = height // 2, width // 2
+        y = torch.linspace(-cy, cy, height, device=self.device)
+        x = torch.linspace(-cx, cx, width, device=self.device)
+        y, x = torch.meshgrid(y, x, indexing='xy')  # Include the indexing argument
+        radial_distance = torch.sqrt(x**2 + y**2)
+        hf_mask = 1 + self.emphasis_factor * (radial_distance / radial_distance.max())
+
+        # Apply the mask
+        masked_magnitude = magnitude * hf_mask
+
+        # Compute the phase
+        phase = torch.angle(spectral_image)
+
+        # Convert back to the complex form
+        masked_spectral_image = masked_magnitude * torch.exp(1j * phase)
+
+        # Inverse Fourier Transform
+        masked_image = torch.fft.ifftn(masked_spectral_image, dim=(1, 2)).real
+
+        return masked_image
+
 # Let's create a simple test script that generates a masked image and saves it to a jpg file.
-def test_mask_generator():
+def test_mask_generator(image_path, mask_type, ratio):
     # Create a MaskGenerator
-    mask_generator = InvBlockMaskGenerator(ratio=0.5, device="cpu")
+    if mask_type == 'spectral':
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'zoom':
+        mask_generator = ZoomBlockGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'patch':
+        mask_generator = PatchMaskGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'shiftedpatch':
+        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'invblock':
+        mask_generator = InvBlockMaskGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'edge':
+        mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device="cpu")
+    elif mask_type == 'highfreq':
+        mask_generator = HighFrequencyMaskGenerator(device="cpu")
+    else:
+        raise ValueError('Invalid mask_type')
 
     # Load an image
-    image = Image.open("/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png")  # replace "test.jpg" with your image file path
+    image = Image.open(image_path)  # replace with your image file path
     image = image.resize((224, 224))  # resize the image to match the mask size
-    image = torch.tensor(np.array(image)).permute(2, 0, 1) / 255.0  # convert the image to a PyTorch tensor
+    original_image_tensor = torch.tensor(np.array(image)).permute(2, 0, 1) / 255.0  # convert the image to a PyTorch tensor
+
+    # Save the original image as a PIL image
+    original_pil_image = ToPILImage()(original_image_tensor.cpu())
+    original_pil_image.save(f"samples/original_image.jpg")
 
     # Generate a masked image
-    masked_image = mask_generator.transform(image)
+    masked_image = mask_generator.transform(original_image_tensor)
 
     # Convert the masked image back to a PIL image
     pil_image = ToPILImage()(masked_image.cpu())
+    pil_image.save(f"samples/masked_{mask_type}.jpg")
 
-    # Save the PIL image to a jpg file
-    pil_image.save("samples/masked_invblock.jpg")
 
-test_mask_generator()
+test_mask_generator(
+    image_path="/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png",
+    mask_type='edge', 
+    ratio=0.2
+    )
