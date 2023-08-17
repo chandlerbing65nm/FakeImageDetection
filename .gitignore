@@ -12,5 +12,5 @@ results/
 *.pth
 auxiliary_test.py
 auxiliary_train.py
-extract_*
+extract_features*
 classifier_*

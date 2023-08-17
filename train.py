@@ -394,4 +394,4 @@ if __name__ == "__main__":
 
 
 # How to run?
-# python -m torch.distributed.launch --nproc_per_node=2 wangetal_train.py -- --args.parse
+# python -m torch.distributed.launch --nproc_per_node=2 train.py -- --args.parse
