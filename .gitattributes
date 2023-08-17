@@ -1,0 +1,2 @@
+mfm_pretrain_resnet50.pth filter=lfs diff=lfs merge=lfs -text
+mfm_pretrain_vit_base.pth filter=lfs diff=lfs merge=lfs -text
