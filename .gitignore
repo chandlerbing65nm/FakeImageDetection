@@ -10,6 +10,7 @@ evaluation/
 results/
 *.pkl
 *.pth
+wangetal_*
 auxiliary_test.py
 auxiliary_train.py
 extract_features*
