@@ -201,6 +201,7 @@ def main(
     num_layers=6,
     num_epochs=10000,
     ratio=50,
+    batch_size=64,
     resnet_model='ViT-L/14',
     wandb_name=None,
     project_name=None,
@@ -272,10 +273,10 @@ def main(
     # val_loader = DataLoader(val_data, batch_size=128, shuffle=False, num_workers=4)
 
     train_sampler = DistributedSampler(train_data)
-    train_loader = DataLoader(train_data, batch_size=128, sampler=train_sampler, num_workers=4)
+    train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     val_sampler = DistributedSampler(val_data, shuffle=False)
-    val_loader = DataLoader(val_data, batch_size=128, sampler=val_sampler, num_workers=4)
+    val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
     # Creating and training the binary classifier
     if resnet_model == 'RN50':
@@ -350,6 +351,12 @@ if __name__ == "__main__":
         default=50, 
         help='Masking ratio'
         )
+    parser.add_argument(
+        '--batch_size', 
+        type=int, 
+        default=64, 
+        help='Batch Size'
+        )
 
     args = parser.parse_args()
     resnet_model = args.resnet_model.lower().replace('/', '').replace('-', '')
@@ -371,6 +378,7 @@ if __name__ == "__main__":
     print(f"Early Stopping: {args.early_stop}")
     print(f"Mask Generator Type: {args.mask_type}")
     print(f"Mask Ratio: {ratio}")
+    print(f"Batch Size: {args.batch_size}")
     print(f"WandB Project Name: {args.project_name}")
     print(f"WandB Instance Name: {wandb_name}")
     print(f"WandB Online: {args.wandb_online}")
@@ -382,6 +390,7 @@ if __name__ == "__main__":
     main(
         num_epochs=num_epochs,
         ratio=ratio/100,
+        batch_size=args.batch_size,
         resnet_model=args.resnet_model,
         wandb_name=wandb_name,
         project_name=args.project_name,

@@ -213,10 +213,10 @@ class BalancedSpectralMaskGenerator:
 
     def transform(self, image):
         # Move the image to the same device as the mask
-        image = image.to(self.device)
+        image = image
 
         # Convert the image to grayscale using standard weights
-        grayscale_weights = torch.tensor([0.2989, 0.5870, 0.1140], device=self.device)
+        grayscale_weights = torch.tensor([0.2989, 0.5870, 0.1140])
         grayscale_image = torch.einsum("chw,c->hw", image, grayscale_weights).unsqueeze(0)
 
         # Apply Fourier transformation to decompose the grayscale image into spectral bands
@@ -227,7 +227,7 @@ class BalancedSpectralMaskGenerator:
         I_prime_x = I_x / torch.sum(I_x)
 
         # Generate the balanced spectral mask
-        m_spectral = torch.bernoulli(1 - I_prime_x * self.ratio).to(self.device)
+        m_spectral = torch.bernoulli(1 - I_prime_x * self.ratio)
 
         # Initialize an empty tensor to hold the masked image
         num_channels, height, width = image.shape
@@ -392,6 +392,6 @@ def test_mask_generator(image_path, mask_type, ratio):
 
 test_mask_generator(
     image_path="/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png",
-    mask_type='edge', 
+    mask_type='spectral', 
     ratio=0.2
     )
