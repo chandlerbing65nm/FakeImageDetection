@@ -9,6 +9,7 @@ few-shot/
 evaluation/
 results/
 *.pkl
+*.pth
 auxiliary_test.py
 auxiliary_train.py
 classifier_*
