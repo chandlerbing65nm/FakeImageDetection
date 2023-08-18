@@ -7,6 +7,7 @@ from PIL import Image
 import os
 import clip
 from tqdm import tqdm
+import timm
 import argparse
 import random
 
@@ -30,7 +31,7 @@ def test_augment(mask_generator):
     return transform
 
 def evaluate_model(
-    resnet_model,
+    model_name,
     data_type,
     mask_type, 
     ratio,
@@ -61,10 +62,21 @@ def evaluate_model(
 
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    if resnet_model == 'RN50':
+    if model_name == 'RN18':
+        model = resnet18(pretrained=False)
+    elif model_name == 'RN34':
+        model = resnet34(pretrained=False)
+    elif model_name == 'RN50':
         model = resnet50(pretrained=False)
-    elif resnet_model == 'RN101':
+    elif model_name == 'RN101':
         model = resnet101(pretrained=False)
+    elif model_name == 'RN152':
+        model = resnet152(pretrained=False)
+    elif model_name.startswith('ViT'):
+        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
+        model = timm.create_model(model_variant, pretrained=False)
+    else:
+        raise ValueError(f"Model {model} not recognized!")
     
     model.fc = torch.nn.Linear(model.fc.in_features, 1)
 
@@ -99,12 +111,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Settings for your script")
 
     parser.add_argument(
-        '--resnet_model',
+        '--model_name',
         default='RN50',
         type=str,
-        choices=['RN50', 'RN101'],
-        help='Type of ResNet model'
-    )
+        choices=[
+            'RN18', 'RN34', 'RN50', 'RN101', 'RN152',
+            'ViT_base_patch16_224', 'ViT_base_patch32_224',
+            'ViT_large_patch16_224', 'ViT_large_patch32_224'
+        ],
+        help='Type of model to use; includes ResNet and ViT variants'
+        )
     parser.add_argument(
         '--mask_type', 
         default='zoom', 
@@ -147,26 +163,26 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     device = torch.device(args.device)
-    model = args.resnet_model.lower()
+    model_name = args.model_name.lower()
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model}_{args.mask_type}mask_best.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}_{args.mask_type}mask_best.pth'
     else:
         ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model}_best.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}_best.pth'
 
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model}_{args.mask_type}mask{ratio}.txt'
+    filename = f'{model_name}_{args.mask_type}mask{ratio}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
     print(f"Device: {args.device}")
     print(f"Dataset Type: {args.data_type}")
-    print(f"ResNet model type: {args.resnet_model}")
+    print(f"Model type: {args.model_name}")
     print(f"Ratio of mask: {ratio}")
     print(f"Batch Size: {args.batch_size}")
     print(f"Mask Type: {args.mask_type}")
@@ -176,12 +192,12 @@ if __name__ == "__main__":
 
     if args.data_type == 'ForenSynths':
         datasets = {
-            'ProGAN': '../../Datasets/Wang_CVPR20/progan',
-            'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
-            'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
-            'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
-            'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
-            'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
+            # 'ProGAN': '../../Datasets/Wang_CVPR20/progan',
+            # 'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
+            # 'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
+            # 'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
+            # 'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
+            # 'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
             'DeepFake': '../../Datasets/Wang_CVPR20/deepfake',
             'SITD': '../../Datasets/Wang_CVPR20/seeingdark',
             'SAN': '../../Datasets/Wang_CVPR20/san',
@@ -200,7 +216,7 @@ if __name__ == "__main__":
         print(f"\nEvaluating {dataset_name}")
 
         avg_ap, avg_acc = evaluate_model(
-            args.resnet_model,
+            args.model_name,
             args.data_type,
             args.mask_type,
             ratio/100,
@@ -217,7 +233,7 @@ if __name__ == "__main__":
                 file.write("-" * 28 + "\n")
                 file.write(f"Device: {args.device}\n")
                 file.write(f"Dataset Type: {args.data_type}\n")
-                file.write(f"ResNet model type: {args.resnet_model}\n")
+                file.write(f"Model type: {args.model_name}\n")
                 file.write(f"Ratio of mask: {ratio}\n")
                 file.write(f"Batch Size: {args.batch_size}\n")
                 file.write(f"Mask Type: {args.mask_type}\n")

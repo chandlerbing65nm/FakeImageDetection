@@ -218,7 +218,7 @@ def main(
     num_epochs=10000,
     ratio=50,
     batch_size=64,
-    resnet_model='ViT-L/14',
+    model_name='RN50',
     wandb_name=None,
     project_name=None,
     save_path=None,
@@ -285,10 +285,21 @@ def main(
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
     # Creating and training the binary classifier
-    if resnet_model == 'RN50':
+    if model_name == 'RN18':
+        model = resnet18(pretrained=False)
+    elif model_name == 'RN34':
+        model = resnet34(pretrained=False)
+    elif model_name == 'RN50':
         model = resnet50(pretrained=False)
-    elif resnet_model == 'RN101':
+    elif model_name == 'RN101':
         model = resnet101(pretrained=False)
+    elif model_name == 'RN152':
+        model = resnet152(pretrained=False)
+    elif model_name.startswith('ViT'):
+        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
+        model = timm.create_model(model_variant, pretrained=False)
+    else:
+        raise ValueError(f"Model {model_name} not recognized!")
 
     model.fc = nn.Linear(model.fc.in_features, 1)
     model = model.to(device)
@@ -317,6 +328,17 @@ if __name__ == "__main__":
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
     parser.add_argument(
+        '--model_name',
+        default='RN50',
+        type=str,
+        choices=[
+            'RN18', 'RN34', 'RN50', 'RN101', 'RN152',
+            'ViT_base_patch16_224', 'ViT_base_patch32_224',
+            'ViT_large_patch16_224', 'ViT_large_patch32_224'
+        ],
+        help='Type of model to use; includes ResNet and ViT variants'
+        )
+    parser.add_argument(
         '--wandb_online', 
         action='store_true', 
         help='Run wandb in offline mode'
@@ -328,10 +350,10 @@ if __name__ == "__main__":
         help='wandb project name'
         )
     parser.add_argument(
-        '--resnet_model', 
+        '--model', 
         default='RN50', 
         choices=['RN50', 'RN101'],
-        help='Type of resnet_model visual model'
+        help='Type of model visual model'
         )
     parser.add_argument(
         '--early_stop', 
@@ -365,17 +387,17 @@ if __name__ == "__main__":
         )
 
     args = parser.parse_args()
-    resnet_model = args.resnet_model.lower().replace('/', '').replace('-', '')
+    model_name = args.model_name.lower().replace('/', '').replace('-', '')
     
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'checkpoints/mask_{ratio}/{resnet_model}_{args.mask_type}mask_best'
+        save_path = f'checkpoints/mask_{ratio}/{model_name}_{args.mask_type}mask_best'
     else:
         ratio = 0
-        save_path = f'checkpoints/mask_{ratio}/{resnet_model}_best'
+        save_path = f'checkpoints/mask_{ratio}/{model_name}_best'
 
     num_epochs = 300 if args.early_stop else args.num_epochs
-    wandb_name = f"mask_{ratio}_{resnet_model}_{args.mask_type}"
+    wandb_name = f"mask_{ratio}_{model_name}_{args.mask_type}"
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -388,7 +410,7 @@ if __name__ == "__main__":
     print(f"WandB Project Name: {args.project_name}")
     print(f"WandB Instance Name: {wandb_name}")
     print(f"WandB Online: {args.wandb_online}")
-    print(f"CLIP model type: {args.resnet_model}")
+    print(f"model type: {args.model_name}")
     print(f"Save path: {save_path}.pth")
     print(f"Device: cuda:{args.local_rank}")
     print("-" * 30, "\n")
@@ -398,7 +420,7 @@ if __name__ == "__main__":
         num_epochs=num_epochs,
         ratio=ratio/100,
         batch_size=args.batch_size,
-        resnet_model=args.resnet_model,
+        model_name=args.model_name,
         wandb_name=wandb_name,
         project_name=args.project_name,
         save_path=save_path, 
