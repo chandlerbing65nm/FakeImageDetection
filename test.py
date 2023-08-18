@@ -16,26 +16,46 @@ from dataset import *
 from wangetal_augment import ImageAugmentor
 from utils import *
 
-def evaluate_model(
-    resnet_model,
-    data_type, 
-    dataset_path, 
-    batch_size,
-    checkpoint_path, 
-    device
-    ):
+def test_augment(mask_generator):
+    # Define the custom transform
+    masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        masking_transform, # Add the custom masking transform here
     ])
+    return transform
+
+def evaluate_model(
+    resnet_model,
+    data_type,
+    mask_type, 
+    ratio,
+    dataset_path, 
+    batch_size,
+    checkpoint_path, 
+    device
+    ):
+
+    # Depending on the mask_type, create the appropriate mask generator
+    if mask_type == 'spectral':
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+    elif mask_type == 'zoom':
+        mask_generator = ZoomBlockGenerator(ratio=ratio)
+    elif mask_type == 'edge':
+        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
+    else:
+        mask_generator = None
+
+    test_transform = test_augment(mask_generator)
 
     if data_type == 'GenImage':
-        test_dataset = GenImage(dataset_path, transform=transform)
+        test_dataset = GenImage(dataset_path, transform=test_transform)
     elif data_type == 'ForenSynths' :
-        test_dataset = ForenSynths(dataset_path, transform=transform)
+        test_dataset = ForenSynths(dataset_path, transform=test_transform)
     else:
         raise ValueError("wrong dataset input")
 
@@ -137,7 +157,7 @@ if __name__ == "__main__":
         checkpoint_path = f'checkpoints/mask_{ratio}/{model}_best.pth'
 
     # Define the path to the results file
-    results_path = f'results/{args.data_type.lower()}/'
+    results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
     filename = f'{model}_{args.mask_type}mask{ratio}.txt'
 
@@ -182,6 +202,8 @@ if __name__ == "__main__":
         avg_ap, avg_acc = evaluate_model(
             args.resnet_model,
             args.data_type,
+            args.mask_type,
+            ratio/100,
             dataset_path,
             args.batch_size,
             checkpoint_path,

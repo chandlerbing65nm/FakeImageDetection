@@ -6,7 +6,7 @@ NUM_EPOCHS=100
 PROJECT_NAME="Masked-ResNet"
 RESNET_MODEL="RN50"
 MASK_TYPE="spectral"
-RATIO=20
+RATIO=15
 BATCH_SIZE=64
 
 # Run the distributed training command

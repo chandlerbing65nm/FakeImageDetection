@@ -17,6 +17,7 @@ from torchvision.models import resnet50, resnet101
 import multiprocessing
 
 import torch.distributed as dist
+from tqdm.auto import tqdm as tqdm_auto
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
@@ -182,19 +183,33 @@ def train_model(
 
     return model
 
-def create_transform(augmentor, mask_generator):
-    # Define the transformation pipeline
+def train_augment(augmentor, mask_generator):
+    # Define the custom transform
+    masking_transform = MaskingTransform(mask_generator)
+
     transform = transforms.Compose([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(), 
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        masking_transform,
     ])
     return transform
 
+def val_augment(mask_generator):
+    # Define the custom transform
+    masking_transform = MaskingTransform(mask_generator)
+
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        masking_transform, # Add the custom masking transform here
+    ])
+    return transform
 
 def main(
     local_rank=0,
@@ -215,6 +230,12 @@ def main(
     device = torch.device(f'cuda:{local_rank}')
     torch.cuda.set_device(device)
     dist.init_process_group(backend='nccl')
+
+    if dist.get_rank() == 0:
+        status = "online" if wandb_online else "offline"
+        wandb.init(project=project_name, name=wandb_name, mode=status)
+        wandb.config.update(args)  # Log all hyperparameters
+
     # Set options for augmentation
     opt = {
         'rz_interp': ['bilinear'],
@@ -228,7 +249,7 @@ def main(
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device=device)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio, device=device)
     elif mask_type == 'patch':
@@ -245,36 +266,21 @@ def main(
         mask_generator = None
 
     augmentor = ImageAugmentor(opt)
-    transform = create_transform(augmentor, mask_generator)
-
-    if dist.get_rank() == 0:
-        status = "online" if wandb_online else "offline"
-        wandb.init(project=project_name, name=wandb_name, mode=status)
-        wandb.config.update(args)  # Log all hyperparameters
-
-    val_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
+    train_transform = train_augment(augmentor, mask_generator)
+    val_transform = val_augment(mask_generator)
 
     # # Defining a subset of the training dataset (e.g., using only the first 100 samples for debugging)
     # debug_size = 128*10
-    # train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=transform)
+    # train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
     # train_data = Subset(train_data, range(debug_size))
 
     # Creating training dataset from images
-    train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=transform)
-    # train_loader = DataLoader(train_data_subset, batch_size=128, shuffle=True, num_workers=4)
-
-    # Creating validation dataset from images
-    val_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
-    # val_loader = DataLoader(val_data, batch_size=128, shuffle=False, num_workers=4)
-
+    train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
     train_sampler = DistributedSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
+    # Creating validation dataset from images
+    val_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
     val_sampler = DistributedSampler(val_data, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 

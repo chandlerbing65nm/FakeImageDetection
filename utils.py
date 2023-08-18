@@ -7,6 +7,14 @@ import torch.fft as fft
 import torch.nn.functional as F
 from scipy.stats import skew, kurtosis
 
+from dataset import *
+
+from torchvision import transforms
+from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
+import numpy as np
+from tqdm import tqdm
+
 class RandomMaskGenerator:
     def __init__(self, ratio: float = 0.6, device: str = "cpu") -> None:
         self.ratio = ratio
@@ -207,41 +215,37 @@ class ShiftedPatchMaskGenerator:
 
 
 class BalancedSpectralMaskGenerator:
-    def __init__(self, ratio: float = 0.1, device: str = "cpu") -> None:
+    def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
         self.ratio = ratio
         self.device = device
 
     def transform(self, image):
-        # Move the image to the same device as the mask
-        image = image
 
-        # Convert the image to grayscale using standard weights
-        grayscale_weights = torch.tensor([0.2989, 0.5870, 0.1140])
-        grayscale_image = torch.einsum("chw,c->hw", image, grayscale_weights).unsqueeze(0)
+        # Perform Fourier Transform
+        freq_image = torch.fft.fftn(image, dim=(1, 2))
 
-        # Apply Fourier transformation to decompose the grayscale image into spectral bands
-        x_mul = torch.fft.fftn(grayscale_image, dim=(1, 2))
+        # Get the height and width of the image
+        channels, height, width = image.shape
 
-        # Compute the image contents in each band and normalize
-        I_x = torch.sum(torch.sum(torch.abs(x_mul), dim=1), dim=1)
-        I_prime_x = I_x / torch.sum(I_x)
+        # Compute the balanced mask
+        mask = self._create_balanced_mask(height, width)
 
-        # Generate the balanced spectral mask
-        m_spectral = torch.bernoulli(1 - I_prime_x * self.ratio)
+        # Apply the mask to the frequency image
+        masked_freq_image = freq_image * mask.repeat((channels, 1, 1))
 
-        # Initialize an empty tensor to hold the masked image
-        num_channels, height, width = image.shape
-        masked_image = torch.zeros_like(image)
-
-        # Loop over each channel and apply the computed spectral mask
-        for c in range(num_channels):
-            channel_image = image[c].unsqueeze(0)
-            spectral_image = torch.fft.fftn(channel_image, dim=(1, 2))
-            masked_spectral_image = spectral_image * m_spectral.view(-1, 1, 1)
-            masked_channel_image = torch.fft.ifftn(masked_spectral_image, dim=(1, 2)).real
-            masked_image[c] = masked_channel_image.squeeze()
+        # Perform Inverse Fourier Transform
+        masked_image = torch.fft.ifftn(masked_freq_image, dim=(1, 2)).real
 
         return masked_image
+
+    def _create_balanced_mask(self, height, width):
+        mask = torch.ones((1, height, width), dtype=torch.complex64)
+        num_frequencies = int(np.ceil(height * width * self.ratio))
+        mask_frequencies_indices = torch.randperm(height * width)[:num_frequencies]
+        y_indices = mask_frequencies_indices // width
+        x_indices = mask_frequencies_indices % width
+        mask[:, y_indices, x_indices] = 0
+        return mask
 
 class ZoomBlockGenerator:
     def __init__(self, ratio: float = 0.1, device: str = "cpu") -> None:
@@ -249,8 +253,6 @@ class ZoomBlockGenerator:
         self.device = device
 
     def transform(self, image):
-        # Move the image to the same device as the mask
-        image = image.to(self.device)
 
         # Get the height and width of the image
         _, height, width = image.shape
@@ -353,8 +355,64 @@ class HighFrequencyMaskGenerator:
 
         return masked_image
 
-# Let's create a simple test script that generates a masked image and saves it to a jpg file.
-def test_mask_generator(image_path, mask_type, ratio):
+# # Let's create a simple test script that generates a masked image and saves it to a jpg file.
+# def test_mask_generator(image_path, mask_type, ratio):
+#     # Create a MaskGenerator
+#     if mask_type == 'spectral':
+#         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'zoom':
+#         mask_generator = ZoomBlockGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'patch':
+#         mask_generator = PatchMaskGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'shiftedpatch':
+#         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'invblock':
+#         mask_generator = InvBlockMaskGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'edge':
+#         mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device="cpu")
+#     elif mask_type == 'highfreq':
+#         mask_generator = HighFrequencyMaskGenerator(device="cpu")
+#     else:
+#         raise ValueError('Invalid mask_type')
+
+#     # Load an image
+#     image = Image.open(image_path)  # replace with your image file path
+#     image = image.resize((224, 224))  # resize the image to match the mask size
+#     original_image_tensor = torch.tensor(np.array(image)).permute(2, 0, 1) / 255.0  # convert the image to a PyTorch tensor
+
+#     # Save the original image as a PIL image
+#     original_pil_image = ToPILImage()(original_image_tensor.cpu())
+#     original_pil_image.save(f"samples/original_image.jpg")
+
+#     # Generate a masked image
+#     masked_image = mask_generator.transform(original_image_tensor)
+
+#     # Convert the masked image back to a PIL image
+#     pil_image = ToPILImage()(masked_image.cpu())
+#     pil_image.save(f"samples/masked_{mask_type}.jpg")
+
+
+# test_mask_generator(
+#     image_path="/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png",
+#     mask_type='spectral', 
+#     ratio=0.13
+#     )
+
+class MaskingTransform(torch.nn.Module):
+    def __init__(self, mask_generator):
+        super().__init__()
+        self.mask_generator = mask_generator
+
+    def forward(self, image):
+        return self.mask_generator.transform(image)
+
+def test_mask_generator(
+    image_path, 
+    mask_type,
+    ratio=0.13, 
+    sample_size=20
+    ):
+
     # Create a MaskGenerator
     if mask_type == 'spectral':
         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device="cpu")
@@ -371,27 +429,41 @@ def test_mask_generator(image_path, mask_type, ratio):
     elif mask_type == 'highfreq':
         mask_generator = HighFrequencyMaskGenerator(device="cpu")
     else:
-        raise ValueError('Invalid mask_type')
+        mask_generator = None
 
-    # Load an image
-    image = Image.open(image_path)  # replace with your image file path
-    image = image.resize((224, 224))  # resize the image to match the mask size
-    original_image_tensor = torch.tensor(np.array(image)).permute(2, 0, 1) / 255.0  # convert the image to a PyTorch tensor
+    # Define the custom transform
+    masking_transform = MaskingTransform(mask_generator)
 
-    # Save the original image as a PIL image
-    original_pil_image = ToPILImage()(original_image_tensor.cpu())
-    original_pil_image.save(f"samples/original_image.jpg")
+    transform = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        masking_transform, # Add the custom masking transform here
+    ])
 
-    # Generate a masked image
-    masked_image = mask_generator.transform(original_image_tensor)
+    data = WangEtAlDataset(image_path, transform=transform)
+    dataloader = DataLoader(data, batch_size=32, shuffle=True)
 
-    # Convert the masked image back to a PIL image
-    pil_image = ToPILImage()(masked_image.cpu())
-    pil_image.save(f"samples/masked_{mask_type}.jpg")
+    # Get one batch of images and labels
+    images, labels = next(iter(dataloader))
+    image_to_save = images[0]
 
+    # Convert the tensor image to NumPy and transpose if necessary
+    image_to_save = image_to_save.numpy().transpose(1, 2, 0)
 
+    # Clip the values to the range [0, 1] if the image is in float format
+    if image_to_save.dtype == np.float32 or image_to_save.dtype == np.float64:
+        image_to_save = np.clip(image_to_save, 0, 1)
+
+    # Display and save the image
+    plt.imshow(image_to_save)
+    plt.axis('off')  # Optional, to turn off axes
+    plt.savefig(f"samples/masked_{mask_type}.jpg")
+
+# Usage:
 test_mask_generator(
-    image_path="/home/paperspace/Documents/chandler/Datasets/Wang_CVPR20/crn/0_real/00100001.png",
-    mask_type='spectral', 
+    '../../Datasets/Wang_CVPR20/wang_et_al/training', 
+    mask_type='spectral',
     ratio=0.2
     )

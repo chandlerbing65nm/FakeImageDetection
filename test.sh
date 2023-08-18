@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Define the arguments for your test script
-DATA_TYPE="ForenSynths"  # GenImage or ForenSynths
+DATA_TYPE="GenImage"  # GenImage or ForenSynths
 RESNET_MODEL="RN50"
-MASK_TYPE="edge"
-RATIO=30
+MASK_TYPE="zoom"
+RATIO=50
 BATCH_SIZE=64
 DEVICE="cuda:0"
 
