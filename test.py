@@ -11,7 +11,7 @@ import timm
 import argparse
 import random
 
-from torchvision.models import resnet50, resnet101
+import torchvision.models as vis_models
 
 from dataset import *
 from wangetal_augment import ImageAugmentor
@@ -63,15 +63,15 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     if model_name == 'RN18':
-        model = resnet18(pretrained=False)
+        model = vis_models.resnet18(pretrained=False)
     elif model_name == 'RN34':
-        model = resnet34(pretrained=False)
+        model = vis_models.resnet34(pretrained=False)
     elif model_name == 'RN50':
-        model = resnet50(pretrained=False)
+        model = vis_models.resnet50(pretrained=False)
     elif model_name == 'RN101':
-        model = resnet101(pretrained=False)
+        model = vis_models.resnet101(pretrained=False)
     elif model_name == 'RN152':
-        model = resnet152(pretrained=False)
+        model = vis_models.resnet152(pretrained=False)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
         model = timm.create_model(model_variant, pretrained=False)
@@ -244,3 +244,4 @@ if __name__ == "__main__":
                 file.write("-" * 28)
                 file.write("\n")
             file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}\n")
+            file.write("\n")  # Additional newline character after the last line

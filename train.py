@@ -13,7 +13,7 @@ import clip
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import argparse
 import wandb
-from torchvision.models import resnet50, resnet101
+import torchvision.models as vis_models
 import multiprocessing
 
 import torch.distributed as dist
@@ -32,7 +32,8 @@ class EarlyStopping:
         path, 
         patience=7, 
         verbose=False, 
-        delta=0, min_lr=1e-6, 
+        delta=0, 
+        min_lr=1e-6, 
         factor=0.1, 
         early_stopping_enabled=True, 
         num_epochs=25
@@ -59,7 +60,7 @@ class EarlyStopping:
         if self.early_stopping_enabled:
             if self.best_score is None:
                 self.best_score = score
-                self.save_checkpoint(val_loss, model, epoch)
+                self.save_checkpoint(val_loss, model, optimizer, epoch)
             elif score < self.best_score + self.delta:
                 self.counter += 1
                 if dist.get_rank() == 0:
@@ -75,26 +76,47 @@ class EarlyStopping:
                             self.early_stop = True
             else:
                 self.best_score = score
-                self.save_checkpoint(val_loss, model, epoch)
+                self.save_checkpoint(val_loss, model, optimizer, epoch)
                 self.counter = 0
         else:
-            self.last_epochs.append((val_loss, model.state_dict()))
-            if len(self.last_epochs) > 1:
-                self.last_epochs.pop(0)  # remove the oldest model if we have more than 3
-            if epoch == self.num_epochs-1:  # if it's the last epoch
-                for i, (val_loss, state_dict) in enumerate(self.last_epochs):
-                    if dist.get_rank() == 0:
-                        torch.save(state_dict, f"{self.path}_epoch{epoch-i}" + '.pth')
+            self.save_last_epochs(val_loss, model, optimizer, epoch)
         
-    def save_checkpoint(self, val_loss, model, epoch):
+    def save_checkpoint(self, val_loss, model, optimizer, epoch):
         if self.verbose and epoch % 1 == 0:
             if dist.get_rank() == 0:
                 print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         
         if dist.get_rank() == 0:
-            torch.save(model.state_dict(), self.path + '.pth')  # change here to use self.path
+            state = {
+                'epoch': epoch,
+                'val_loss': val_loss,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                }
+            torch.save(state, self.path + '.pth')  # change here to use self.path
+
+        # self.save_last_epochs(val_loss, model, optimizer, epoch)
         self.val_loss_min = val_loss
 
+    def save_last_epochs(self, val_loss, model, optimizer, epoch):
+        self.last_epochs.append((epoch, val_loss, model.state_dict(), optimizer.state_dict())) # Save optimizer state_dict too
+
+        # Keep only the latest 3 models
+        while len(self.last_epochs) > 3:
+            oldest_epoch, _, _, _ = self.last_epochs.pop(0)
+            if dist.get_rank() == 0:
+                os.remove(f"{self.path}_epoch{oldest_epoch}.pth")
+
+        # Save the latest 3 models
+        for saved_epoch, saved_val_loss, model_state_dict, optimizer_state_dict in self.last_epochs[-3:]:
+            if dist.get_rank() == 0:
+                state = {
+                    'epoch': saved_epoch,
+                    'val_loss': saved_val_loss,
+                    'model_state_dict': model_state_dict,
+                    'optimizer_state_dict': optimizer_state_dict,
+                    }
+                torch.save(state, f"{self.path}_epoch{saved_epoch}.pth")
 
 def train_model(
     model, 
@@ -103,24 +125,17 @@ def train_model(
     train_loader, 
     val_loader, 
     num_epochs=25, 
+    resume_epoch=0,
     save_path='./', 
-    early_stopping_enabled=True,
+    early_stopping=None,
     device='cpu'
     ):
 
-    early_stopping = EarlyStopping(
-        path=save_path, 
-        patience=5, 
-        verbose=True, 
-        early_stopping_enabled=early_stopping_enabled,
-        num_epochs=num_epochs,
-        )
-
-    for epoch in range(num_epochs):
+    for epoch in range(resume_epoch, num_epochs):
         if epoch % 1 == 0:  # Only print every 20 epochs
             if dist.get_rank() == 0:
                 print('\n')
-                print(f'Epoch {epoch+1}/{num_epochs}')
+                print(f'Epoch {epoch}/{num_epochs}')
                 print('-' * 10)
 
         for phase in ['Training', 'Validation']:
@@ -223,9 +238,18 @@ def main(
     project_name=None,
     save_path=None,
     mask_type=None,
+    resume_train=False,
     early_stop=True,
     wandb_online=False,
     ):
+
+    seed = 42
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     device = torch.device(f'cuda:{local_rank}')
     torch.cuda.set_device(device)
@@ -269,11 +293,6 @@ def main(
     train_transform = train_augment(augmentor, mask_generator)
     val_transform = val_augment(mask_generator)
 
-    # # Defining a subset of the training dataset (e.g., using only the first 100 samples for debugging)
-    # debug_size = 128*10
-    # train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
-    # train_data = Subset(train_data, range(debug_size))
-
     # Creating training dataset from images
     train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
     train_sampler = DistributedSampler(train_data)
@@ -286,15 +305,15 @@ def main(
 
     # Creating and training the binary classifier
     if model_name == 'RN18':
-        model = resnet18(pretrained=False)
+        model = vis_models.resnet18(pretrained=False)
     elif model_name == 'RN34':
-        model = resnet34(pretrained=False)
+        model = vis_models.resnet34(pretrained=False)
     elif model_name == 'RN50':
-        model = resnet50(pretrained=False)
+        model = vis_models.resnet50(pretrained=False)
     elif model_name == 'RN101':
-        model = resnet101(pretrained=False)
+        model = vis_models.resnet101(pretrained=False)
     elif model_name == 'RN152':
-        model = resnet152(pretrained=False)
+        model = vis_models.resnet152(pretrained=False)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
         model = timm.create_model(model_variant, pretrained=False)
@@ -308,6 +327,29 @@ def main(
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-4) 
 
+    early_stopping = EarlyStopping(
+        path=save_path, 
+        patience=5, 
+        verbose=True, 
+        early_stopping_enabled=early_stop,
+        num_epochs=num_epochs,
+        )
+
+    # Load checkpoint if resuming
+    if resume_train:
+        checkpoint = torch.load(f'{save_path}.pth')
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        # Extract val_loss and epoch from the checkpoint
+        val_loss = checkpoint['val_loss']
+        last_epoch = checkpoint['epoch']
+
+        if dist.get_rank() == 0:
+            print(f"\nResuming training from epoch {last_epoch} using {save_path}")
+            print(f"Validation loss at resumed epoch: {val_loss}")
+
+    resume_epoch = last_epoch + 1 if resume_train else 0
 
     trained_model = train_model(
         model, 
@@ -316,8 +358,9 @@ def main(
         train_loader, 
         val_loader, 
         num_epochs=num_epochs, 
+        resume_epoch=resume_epoch,
         save_path=save_path,
-        early_stopping_enabled=early_stop,
+        early_stopping=early_stopping,
         device=device,
         )
 
@@ -354,6 +397,11 @@ if __name__ == "__main__":
         default='RN50', 
         choices=['RN50', 'RN101'],
         help='Type of model visual model'
+        )
+    parser.add_argument(
+        '--resume_train', 
+        action='store_true', 
+        help='Run wandb in offline mode'
         )
     parser.add_argument(
         '--early_stop', 
@@ -399,6 +447,9 @@ if __name__ == "__main__":
     num_epochs = 300 if args.early_stop else args.num_epochs
     wandb_name = f"mask_{ratio}_{model_name}_{args.mask_type}"
 
+    # # Retrieve resume path and epoch
+    # resume_train = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
+
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
@@ -412,6 +463,7 @@ if __name__ == "__main__":
     print(f"WandB Online: {args.wandb_online}")
     print(f"model type: {args.model_name}")
     print(f"Save path: {save_path}.pth")
+    print(f"Resume training: {args.resume_train}")
     print(f"Device: cuda:{args.local_rank}")
     print("-" * 30, "\n")
 
@@ -425,6 +477,7 @@ if __name__ == "__main__":
         project_name=args.project_name,
         save_path=save_path, 
         mask_type=args.mask_type,
+        resume_train=args.resume_train,
         early_stop=args.early_stop,
         wandb_online=args.wandb_online,
     )

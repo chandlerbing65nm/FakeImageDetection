@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the arguments for your test script
-DATA_TYPE="ForenSynths"  # GenImage or ForenSynths
+DATA_TYPE="GenImage"  # GenImage or ForenSynths
 MODEL_NAME="RN50"
 MASK_TYPE="spectral"
 RATIO=15
