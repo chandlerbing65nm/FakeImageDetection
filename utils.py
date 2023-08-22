@@ -6,6 +6,7 @@ import numpy as np
 import torch.fft as fft
 import torch.nn.functional as F
 from scipy.stats import skew, kurtosis
+from scipy.signal import convolve2d
 
 from dataset import *
 
@@ -214,38 +215,38 @@ class ShiftedPatchMaskGenerator:
         return masked_image
 
 
-class BalancedSpectralMaskGenerator:
-    def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
-        self.ratio = ratio
-        self.device = device
+# class BalancedSpectralMaskGenerator:
+#     def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
+#         self.ratio = ratio
+#         self.device = device
 
-    def transform(self, image):
+#     def transform(self, image):
 
-        # Perform Fourier Transform
-        freq_image = torch.fft.fftn(image, dim=(1, 2))
+#         # Perform Fourier Transform
+#         freq_image = torch.fft.fftn(image, dim=(1, 2))
 
-        # Get the height and width of the image
-        channels, height, width = image.shape
+#         # Get the height and width of the image
+#         channels, height, width = image.shape
 
-        # Compute the balanced mask
-        mask = self._create_balanced_mask(height, width)
+#         # Compute the balanced mask
+#         mask = self._create_balanced_mask(height, width)
 
-        # Apply the mask to the frequency image
-        masked_freq_image = freq_image * mask.repeat((channels, 1, 1))
+#         # Apply the mask to the frequency image
+#         masked_freq_image = freq_image * mask.repeat((channels, 1, 1))
 
-        # Perform Inverse Fourier Transform
-        masked_image = torch.fft.ifftn(masked_freq_image, dim=(1, 2)).real
+#         # Perform Inverse Fourier Transform
+#         masked_image = torch.fft.ifftn(masked_freq_image, dim=(1, 2)).real
 
-        return masked_image
+#         return masked_image
 
-    def _create_balanced_mask(self, height, width):
-        mask = torch.ones((1, height, width), dtype=torch.complex64)
-        num_frequencies = int(np.ceil(height * width * self.ratio))
-        mask_frequencies_indices = torch.randperm(height * width)[:num_frequencies]
-        y_indices = mask_frequencies_indices // width
-        x_indices = mask_frequencies_indices % width
-        mask[:, y_indices, x_indices] = 0
-        return mask
+#     def _create_balanced_mask(self, height, width):
+#         mask = torch.ones((1, height, width), dtype=torch.complex64)
+#         num_frequencies = int(np.ceil(height * width * self.ratio))
+#         mask_frequencies_indices = torch.randperm(height * width)[:num_frequencies]
+#         y_indices = mask_frequencies_indices // width
+#         x_indices = mask_frequencies_indices % width
+#         mask[:, y_indices, x_indices] = 0
+#         return mask
 
 class ZoomBlockGenerator:
     def __init__(self, ratio: float = 0.1, device: str = "cpu") -> None:
@@ -273,50 +274,50 @@ class ZoomBlockGenerator:
 
         return zoomed_image
 
-class EdgeAwareMaskGenerator:
-    def __init__(self, ratio: float = 0.3, threshold: float = 0.5, device: str = "cpu") -> None:
-        self.ratio = ratio
-        self.threshold = threshold
-        self.device = device
-        self.sobel_x = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
-        self.sobel_y = torch.tensor([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+# class EdgeAwareMaskGenerator:
+#     def __init__(self, ratio: float = 0.3, threshold: float = 0.5, device: str = "cpu") -> None:
+#         self.ratio = ratio
+#         self.threshold = threshold
+#         self.device = device
+#         self.sobel_x = torch.tensor([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+#         self.sobel_y = torch.tensor([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]], dtype=torch.float32).unsqueeze(0).unsqueeze(0)
 
-    def transform(self, image):
-        channels, height, width = image.shape
-        image = image
+#     def transform(self, image):
+#         channels, height, width = image.shape
+#         image = image
 
-        # Apply Sobel filters
-        grad_x = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_x.repeat(channels, 1, 1, 1), padding=1, groups=channels)
-        grad_y = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_y.repeat(channels, 1, 1, 1), padding=1, groups=channels)
-        grad_magnitude = torch.sqrt(torch.sum(grad_x**2 + grad_y**2, dim=1)).squeeze(0)
+#         # Apply Sobel filters
+#         grad_x = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_x.repeat(channels, 1, 1, 1), padding=1, groups=channels)
+#         grad_y = torch.nn.functional.conv2d(image.unsqueeze(0), self.sobel_y.repeat(channels, 1, 1, 1), padding=1, groups=channels)
+#         grad_magnitude = torch.sqrt(torch.sum(grad_x**2 + grad_y**2, dim=1)).squeeze(0)
 
-        edge_map = (grad_magnitude > self.threshold).float()
+#         edge_map = (grad_magnitude > self.threshold).float()
 
-        # Compute patch size
-        patch_size = 8
-        while height % patch_size != 0 or width % patch_size != 0:
-            patch_size -= 1
+#         # Compute patch size
+#         patch_size = 8
+#         while height % patch_size != 0 or width % patch_size != 0:
+#             patch_size -= 1
 
-        # Compute edge content using convolution with a patch-sized kernel
-        patch_kernel = torch.ones((1, 1, patch_size, patch_size))
-        edge_content = torch.nn.functional.conv2d(edge_map.unsqueeze(0).unsqueeze(0), patch_kernel, stride=patch_size)
+#         # Compute edge content using convolution with a patch-sized kernel
+#         patch_kernel = torch.ones((1, 1, patch_size, patch_size))
+#         edge_content = torch.nn.functional.conv2d(edge_map.unsqueeze(0).unsqueeze(0), patch_kernel, stride=patch_size)
 
-        # Select patches to mask
-        num_patches_to_mask = int(np.ceil(edge_content.numel() * self.ratio))
-        mask_patch_indices = torch.topk(edge_content.view(-1), num_patches_to_mask).indices
+#         # Select patches to mask
+#         num_patches_to_mask = int(np.ceil(edge_content.numel() * self.ratio))
+#         mask_patch_indices = torch.topk(edge_content.view(-1), num_patches_to_mask).indices
 
-        # Create the mask
-        mask = torch.ones((1, height, width))
-        for index in mask_patch_indices:
-            start_y = (index // (width // patch_size)) * patch_size
-            start_x = (index % (width // patch_size)) * patch_size
-            mask[:, start_y:start_y + patch_size, start_x:start_x + patch_size] = 0
+#         # Create the mask
+#         mask = torch.ones((1, height, width))
+#         for index in mask_patch_indices:
+#             start_y = (index // (width // patch_size)) * patch_size
+#             start_x = (index % (width // patch_size)) * patch_size
+#             mask[:, start_y:start_y + patch_size, start_x:start_x + patch_size] = 0
 
-        # Repeat the mask for all channels
-        mask = mask.repeat((channels, 1, 1))
+#         # Repeat the mask for all channels
+#         mask = mask.repeat((channels, 1, 1))
 
-        masked_image = image * mask
-        return masked_image
+#         masked_image = image * mask
+#         return masked_image
 
 class HighFrequencyMaskGenerator:
     def __init__(self, emphasis_factor: float = 2.0, device: str = "cpu") -> None:
@@ -359,17 +360,17 @@ class HighFrequencyMaskGenerator:
 # def test_mask_generator(image_path, mask_type, ratio):
 #     # Create a MaskGenerator
 #     if mask_type == 'spectral':
-#         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device="cpu")
+#         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
 #     elif mask_type == 'zoom':
-#         mask_generator = ZoomBlockGenerator(ratio=ratio, device="cpu")
+#         mask_generator = ZoomBlockGenerator(ratio=ratio)
 #     elif mask_type == 'patch':
-#         mask_generator = PatchMaskGenerator(ratio=ratio, device="cpu")
+#         mask_generator = PatchMaskGenerator(ratio=ratio)
 #     elif mask_type == 'shiftedpatch':
-#         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device="cpu")
+#         mask_generator = ShiftedPatchMaskGenerator(ratio=ratio)
 #     elif mask_type == 'invblock':
-#         mask_generator = InvBlockMaskGenerator(ratio=ratio, device="cpu")
+#         mask_generator = InvBlockMaskGenerator(ratio=ratio)
 #     elif mask_type == 'edge':
-#         mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device="cpu")
+#         mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
 #     elif mask_type == 'highfreq':
 #         mask_generator = HighFrequencyMaskGenerator(device="cpu")
 #     else:
@@ -398,6 +399,86 @@ class HighFrequencyMaskGenerator:
 #     ratio=0.13
 #     )
 
+class EdgeAwareMaskGenerator:
+    def __init__(self, ratio: float = 0.3, threshold: float = 0.5) -> None:
+        self.ratio = ratio
+        self.threshold = threshold
+        self.sobel_x = np.array([[-1., 0., 1.], [-2., 0., 2.], [-1., 0., 1.]])
+        self.sobel_y = np.array([[-1., -2., -1.], [0., 0., 0.], [1., 2., 1.]])
+
+    def transform(self, pil_image: Image.Image) -> Image.Image:
+        image = np.array(pil_image) / 255.0
+        channels, height, width = image.shape
+        grad_magnitude = np.zeros((height, width))
+
+        # Apply Sobel filters to each channel
+        for ch in range(channels):
+            grad_x = convolve2d(image[ch], self.sobel_x, mode="same")
+            grad_y = convolve2d(image[ch], self.sobel_y, mode="same")
+            grad_magnitude += np.sqrt(grad_x**2 + grad_y**2)
+
+        edge_map = (grad_magnitude > self.threshold).astype(float)
+
+        # Compute patch size
+        patch_size = 16
+        while height % patch_size != 0 or width % patch_size != 0:
+            patch_size -= 1
+
+        # Compute edge content using convolution with a patch-sized kernel
+        patch_kernel = np.ones((patch_size, patch_size))
+        edge_content = convolve2d(edge_map, patch_kernel, mode="valid", stride=patch_size)
+
+        # Select patches to mask
+        num_patches_to_mask = int(np.ceil(edge_content.size * self.ratio))
+        mask_patch_indices = np.argpartition(edge_content.flatten(), -num_patches_to_mask)[-num_patches_to_mask:]
+
+        # Create the mask
+        mask = np.ones((height, width))
+        for index in mask_patch_indices:
+            start_y = (index // (width // patch_size)) * patch_size
+            start_x = (index % (width // patch_size)) * patch_size
+            mask[start_y:start_y + patch_size, start_x:start_x + patch_size] = 0
+
+        # Repeat the mask for all channels
+        mask = mask[np.newaxis, :, :].repeat(channels, axis=0)
+
+        masked_image = (image * mask).clip(0, 1)
+        return Image.fromarray((masked_image * 255).astype(np.uint8))
+
+class BalancedSpectralMaskGenerator:
+    def __init__(self, ratio: float = 0.3) -> None:
+        self.ratio = ratio
+
+    def transform(self, image: Image.Image) -> Image.Image:
+        # Convert the PIL Image to a complex-valued NumPy array
+        image_array = np.array(image).astype(np.complex64)
+        freq_image = np.fft.fftn(image_array, axes=(0, 1))
+
+        # Get the height and width of the image
+        height, width, _ = image_array.shape
+
+        # Compute the balanced mask
+        mask = self._create_balanced_mask(height, width)
+        self.masked_freq_image = freq_image * mask
+        masked_image_array = np.fft.ifftn(self.masked_freq_image, axes=(0, 1)).real
+        masked_image = Image.fromarray(masked_image_array.astype(np.uint8))
+        return masked_image
+
+    def _create_balanced_mask(self, height, width):
+        mask = np.ones((height, width, 3), dtype=np.complex64)
+        num_frequencies = int(np.ceil(height * width * self.ratio))
+        mask_frequencies_indices = np.random.permutation(height * width)[:num_frequencies]
+        y_indices = mask_frequencies_indices // width
+        x_indices = mask_frequencies_indices % width
+        mask[y_indices, x_indices, :] = 0
+        return mask
+
+    def get_magnitude_and_phase(self):
+        magnitude = np.abs(self.masked_freq_image)
+        phase = np.angle(self.masked_freq_image)
+        return magnitude, phase
+
+
 class MaskingTransform(torch.nn.Module):
     def __init__(self, mask_generator):
         super().__init__()
@@ -415,39 +496,39 @@ def test_mask_generator(
 
     # Create a MaskGenerator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device="cpu")
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(ratio=ratio, device="cpu")
+        mask_generator = ZoomBlockGenerator(ratio=ratio)
     elif mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(ratio=ratio, device="cpu")
+        mask_generator = PatchMaskGenerator(ratio=ratio)
     elif mask_type == 'shiftedpatch':
-        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device="cpu")
+        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio)
     elif mask_type == 'invblock':
-        mask_generator = InvBlockMaskGenerator(ratio=ratio, device="cpu")
+        mask_generator = InvBlockMaskGenerator(ratio=ratio)
     elif mask_type == 'edge':
-        mask_generator = EdgeAwareMaskGenerator(ratio=ratio, device="cpu")
+        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
     elif mask_type == 'highfreq':
-        mask_generator = HighFrequencyMaskGenerator(device="cpu")
+        mask_generator = HighFrequencyMaskGenerator()
     else:
         mask_generator = None
 
-    # Define the custom transform
-    masking_transform = MaskingTransform(mask_generator)
+    # # Define the custom transform
+    # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
+        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        masking_transform, # Add the custom masking transform here
     ])
 
     data = WangEtAlDataset(image_path, transform=transform)
     dataloader = DataLoader(data, batch_size=32, shuffle=True)
 
-    # Get one batch of images and labels
-    images, labels = next(iter(dataloader))
-    image_to_save = images[0]
+    # Access the first image and label directly
+    image, label = data[123]
+    image_to_save = image
 
     # Convert the tensor image to NumPy and transpose if necessary
     image_to_save = image_to_save.numpy().transpose(1, 2, 0)
@@ -463,7 +544,7 @@ def test_mask_generator(
 
 # Usage:
 test_mask_generator(
-    '../../Datasets/Wang_CVPR20/wang_et_al/training', 
+    '../../Datasets/Wang_CVPR20/wang_et_al/validation', 
     mask_type='spectral',
-    ratio=0.2
+    ratio=0.7
     )

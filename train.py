@@ -21,7 +21,7 @@ from tqdm.auto import tqdm as tqdm_auto
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
-from dataset import WangEtAlDataset, CorviEtAlDataset
+from dataset import WangEtAlDataset
 # from extract_features import *
 from wangetal_augment import ImageAugmentor
 from utils import *
@@ -200,29 +200,31 @@ def train_model(
 
 def train_augment(augmentor, mask_generator):
     # Define the custom transform
-    masking_transform = MaskingTransform(mask_generator)
+    # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
+        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(), 
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        masking_transform,
+        # masking_transform,
     ])
     return transform
 
 def val_augment(mask_generator):
     # Define the custom transform
-    masking_transform = MaskingTransform(mask_generator)
+    # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
+        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        masking_transform, # Add the custom masking transform here
+        # masking_transform, # Add the custom masking transform here
     ])
     return transform
 
@@ -233,11 +235,13 @@ def main(
     num_epochs=10000,
     ratio=50,
     batch_size=64,
+    wandb_run_id=None,
     model_name='RN50',
     wandb_name=None,
     project_name=None,
     save_path=None,
     mask_type=None,
+    pretrained=False,
     resume_train=False,
     early_stop=True,
     wandb_online=False,
@@ -255,10 +259,12 @@ def main(
     torch.cuda.set_device(device)
     dist.init_process_group(backend='nccl')
 
+    wandb_resume = "allow" if resume_train else None
+
     if dist.get_rank() == 0:
         status = "online" if wandb_online else "offline"
-        wandb.init(project=project_name, name=wandb_name, mode=status)
-        wandb.config.update(args)  # Log all hyperparameters
+        wandb.init(id=wandb_run_id, resume=wandb_resume, project=project_name, name=wandb_name, mode=status)
+        wandb.config.update(args, allow_val_change=True)
 
     # Set options for augmentation
     opt = {
@@ -273,15 +279,15 @@ def main(
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio, device=device)
+        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(ratio=ratio, device=device)
+        mask_generator = ZoomBlockGenerator(ratio=ratio)
     elif mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(ratio=ratio, device=device)
+        mask_generator = PatchMaskGenerator(ratio=ratio)
     elif mask_type == 'shiftedpatch':
-        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio, device=device)
+        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio)
     elif mask_type == 'invblock':
-        mask_generator = InvBlockMaskGenerator(ratio=ratio, device=device)
+        mask_generator = InvBlockMaskGenerator(ratio=ratio)
     elif mask_type == 'edge':
         mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
     elif mask_type == 'highfreq':
@@ -304,23 +310,15 @@ def main(
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
     # Creating and training the binary classifier
-    if model_name == 'RN18':
-        model = vis_models.resnet18(pretrained=False)
-    elif model_name == 'RN34':
-        model = vis_models.resnet34(pretrained=False)
-    elif model_name == 'RN50':
-        model = vis_models.resnet50(pretrained=False)
-    elif model_name == 'RN101':
-        model = vis_models.resnet101(pretrained=False)
-    elif model_name == 'RN152':
-        model = vis_models.resnet152(pretrained=False)
+    if model_name == 'RN50':
+        model = vis_models.resnet50(pretrained=pretrained)
+        model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=False)
+        model = timm.create_model(model_variant, pretrained=pretrained)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
-    model.fc = nn.Linear(model.fc.in_features, 1)
     model = model.to(device)
     model = DistributedDataParallel(model)
 
@@ -393,6 +391,12 @@ if __name__ == "__main__":
         help='wandb project name'
         )
     parser.add_argument(
+        '--wandb_run_id', 
+        type=str, 
+        default=None,
+        help='wandb run id'
+        )
+    parser.add_argument(
         '--model', 
         default='RN50', 
         choices=['RN50', 'RN101'],
@@ -402,6 +406,11 @@ if __name__ == "__main__":
         '--resume_train', 
         action='store_true', 
         help='Run wandb in offline mode'
+        )
+    parser.add_argument(
+        '--pretrained', 
+        action='store_true', 
+        help='For pretraining'
         )
     parser.add_argument(
         '--early_stop', 
@@ -436,16 +445,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
+    finetune = 'ft' if args.pretrained else ''
     
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'checkpoints/mask_{ratio}/{model_name}_{args.mask_type}mask_best'
+        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask_best'
     else:
         ratio = 0
         save_path = f'checkpoints/mask_{ratio}/{model_name}_best'
 
-    num_epochs = 300 if args.early_stop else args.num_epochs
-    wandb_name = f"mask_{ratio}_{model_name}_{args.mask_type}"
+    num_epochs = 100 if args.early_stop else args.num_epochs
+    wandb_name = f"mask_{ratio}_{model_name}{finetune}_{args.mask_type}"
 
     # # Retrieve resume path and epoch
     # resume_train = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
@@ -458,6 +468,7 @@ if __name__ == "__main__":
     print(f"Mask Generator Type: {args.mask_type}")
     print(f"Mask Ratio: {ratio}")
     print(f"Batch Size: {args.batch_size}")
+    print(f"WandB run ID: {args.wandb_run_id}")
     print(f"WandB Project Name: {args.project_name}")
     print(f"WandB Instance Name: {wandb_name}")
     print(f"WandB Online: {args.wandb_online}")
@@ -472,11 +483,13 @@ if __name__ == "__main__":
         num_epochs=num_epochs,
         ratio=ratio/100,
         batch_size=args.batch_size,
+        wandb_run_id=args.wandb_run_id,
         model_name=args.model_name,
         wandb_name=wandb_name,
         project_name=args.project_name,
         save_path=save_path, 
         mask_type=args.mask_type,
+        pretrained=args.pretrained,
         resume_train=args.resume_train,
         early_stop=args.early_stop,
         wandb_online=args.wandb_online,

@@ -19,14 +19,13 @@ from utils import *
 
 def test_augment(mask_generator):
     # Define the custom transform
-    masking_transform = MaskingTransform(mask_generator)
+    # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
-        transforms.Resize(256),
+        # transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        masking_transform, # Add the custom masking transform here
     ])
     return transform
 
@@ -55,8 +54,10 @@ def evaluate_model(
 
     if data_type == 'GenImage':
         test_dataset = GenImage(dataset_path, transform=test_transform)
-    elif data_type == 'ForenSynths' :
-        test_dataset = ForenSynths(dataset_path, transform=test_transform)
+    elif data_type == 'Wang_CVPR20' :
+        test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
+    elif data_type == 'Ojha_CVPR23' :
+        test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
     else:
         raise ValueError("wrong dataset input")
 
@@ -81,7 +82,9 @@ def evaluate_model(
     model.fc = torch.nn.Linear(model.fc.in_features, 1)
 
     model = torch.nn.DataParallel(model)
-    model.load_state_dict(torch.load(checkpoint_path))
+    # model.load_state_dict(torch.load(checkpoint_path))
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['model_state_dict'])
     model = model.to(device)
 
     model.eval() 
@@ -135,6 +138,11 @@ if __name__ == "__main__":
         help='Type of mask generator'
         )
     parser.add_argument(
+        '--pretrained', 
+        action='store_true', 
+        help='For pretraining'
+        )
+    parser.add_argument(
         '--ratio', 
         type=int, 
         default=50,
@@ -150,7 +158,7 @@ if __name__ == "__main__":
         '--data_type', 
         default="ForenSynths", 
         type=str, 
-        choices=['GenImage', 'ForenSynths'], 
+        choices=['GenImage', 'Wang_CVPR20', 'Ojha_CVPR23'], 
         help="Dataset Type"
         )
     parser.add_argument(
@@ -164,10 +172,11 @@ if __name__ == "__main__":
 
     device = torch.device(args.device)
     model_name = args.model_name.lower()
+    finetune = 'ft' if args.pretrained else ''
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}_{args.mask_type}mask_best.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask_best.pth'
     else:
         ratio = 0
         checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}_best.pth'
@@ -175,7 +184,7 @@ if __name__ == "__main__":
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}_{args.mask_type}mask{ratio}.txt'
+    filename = f'{model_name}{finetune}_{args.mask_type}mask{ratio}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -190,27 +199,41 @@ if __name__ == "__main__":
     print(f"Results saved to: {results_path}/{filename}")
     print("-" * 30, "\n")
 
-    if args.data_type == 'ForenSynths':
+    if args.data_type == 'Wang_CVPR20':
         datasets = {
-            # 'ProGAN': '../../Datasets/Wang_CVPR20/progan',
-            # 'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
-            # 'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
-            # 'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
-            # 'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
-            # 'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
+            'ProGAN': '../../Datasets/Wang_CVPR20/progan',
+            'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
+            'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
+            'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
+            'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
+            'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
             'DeepFake': '../../Datasets/Wang_CVPR20/deepfake',
             'SITD': '../../Datasets/Wang_CVPR20/seeingdark',
             'SAN': '../../Datasets/Wang_CVPR20/san',
             'CRN': '../../Datasets/Wang_CVPR20/crn',
             'IMLE': '../../Datasets/Wang_CVPR20/imle',
         }
-    elif args.data_type == 'GenImage':
+    # elif args.data_type == 'GenImage':
+    #     datasets = {
+    #         'VQDM': '../../Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
+    #         'Glide': '../../Datasets/GenImage/imagenet_glide/imagenet_glide/val',
+    #     }
+    elif args.data_type == 'Ojha_CVPR23':
         datasets = {
-            'VQDM': '../../Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
-            'Glide': '../../Datasets/GenImage/imagenet_glide/imagenet_glide/val',
+            'Guided': '../../Datasets/Ojha_CVPR23/guided',
+            'LDM_200': '../../Datasets/Ojha_CVPR23/ldm_200',
+            'LDM_200_cfg': '../../Datasets/Ojha_CVPR23/ldm_200_cfg',
+            'LDM_100': '../../Datasets/Ojha_CVPR23/ldm_100',
+            'Glide_100_27': '../../Datasets/Ojha_CVPR23/glide_100_27',
+            'Glide_50_27': '../../Datasets/Ojha_CVPR23/glide_50_27',
+            'Glide_100_10': '../../Datasets/Ojha_CVPR23/glide_100_10',
+            'DALL-E': '../../Datasets/Ojha_CVPR23/dalle',       
         }
     else:
         raise ValueError("wrong dataset type")
+
+    # Initialize a counter
+    dataset_count = len(datasets)
 
     for dataset_name, dataset_path in datasets.items():
         print(f"\nEvaluating {dataset_name}")
@@ -244,4 +267,9 @@ if __name__ == "__main__":
                 file.write("-" * 28)
                 file.write("\n")
             file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}\n")
-            file.write("\n")  # Additional newline character after the last line
+
+        # Decrement the counter
+        dataset_count -= 1
+        if dataset_count == 0:
+            with open(f'{results_path}/{filename}', 'a') as file:
+                file.write("\n")
