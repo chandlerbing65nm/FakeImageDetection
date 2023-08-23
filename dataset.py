@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 import random
 
-class WangEtAlDataset(Dataset):
+class ForenSynths(Dataset):
     def __init__(self, root_dir, transform=None):
         self.root_dir = root_dir
         self.transform = transform

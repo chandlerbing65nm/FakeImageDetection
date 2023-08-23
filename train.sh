@@ -14,7 +14,7 @@ MODEL_NAME="RN50"
 MASK_TYPE="spectral"
 RATIO=15
 BATCH_SIZE=64
-WANDB_ID="u336igyq"
+WANDB_ID="maskedresnet-1"
 
 # Run the distributed training command
 python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
@@ -28,5 +28,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --early_stop \
   --wandb_online \
   --pretrained \
-  --resume_train \
   --wandb_run_id $WANDB_ID \

@@ -14,7 +14,7 @@ import random
 import torchvision.models as vis_models
 
 from dataset import *
-from wangetal_augment import ImageAugmentor
+from augment import ImageAugmentor
 from utils import *
 
 def test_augment(mask_generator):
@@ -42,7 +42,7 @@ def evaluate_model(
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+        mask_generator = FrequencyMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio)
     elif mask_type == 'edge':

@@ -215,7 +215,7 @@ class ShiftedPatchMaskGenerator:
         return masked_image
 
 
-# class BalancedSpectralMaskGenerator:
+# class FrequencyMaskGenerator:
 #     def __init__(self, ratio: float = 0.3, device: str = "cpu") -> None:
 #         self.ratio = ratio
 #         self.device = device
@@ -360,7 +360,7 @@ class HighFrequencyMaskGenerator:
 # def test_mask_generator(image_path, mask_type, ratio):
 #     # Create a MaskGenerator
 #     if mask_type == 'spectral':
-#         mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+#         mask_generator = FrequencyMaskGenerator(ratio=ratio)
 #     elif mask_type == 'zoom':
 #         mask_generator = ZoomBlockGenerator(ratio=ratio)
 #     elif mask_type == 'patch':
@@ -445,7 +445,7 @@ class EdgeAwareMaskGenerator:
         masked_image = (image * mask).clip(0, 1)
         return Image.fromarray((masked_image * 255).astype(np.uint8))
 
-class BalancedSpectralMaskGenerator:
+class FrequencyMaskGenerator:
     def __init__(self, ratio: float = 0.3) -> None:
         self.ratio = ratio
 
@@ -496,7 +496,7 @@ def test_mask_generator(
 
     # Create a MaskGenerator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+        mask_generator = FrequencyMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio)
     elif mask_type == 'patch':
@@ -523,7 +523,7 @@ def test_mask_generator(
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 
-    data = WangEtAlDataset(image_path, transform=transform)
+    data = ForenSynths(image_path, transform=transform)
     dataloader = DataLoader(data, batch_size=32, shuffle=True)
 
     # Access the first image and label directly

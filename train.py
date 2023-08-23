@@ -21,10 +21,14 @@ from tqdm.auto import tqdm as tqdm_auto
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
-from dataset import WangEtAlDataset
+from dataset import ForenSynths
 # from extract_features import *
-from wangetal_augment import ImageAugmentor
+from augment import ImageAugmentor
 from utils import *
+
+import os
+os.environ['NCCL_BLOCKING_WAIT'] = '1'
+os.environ['NCCL_DEBUG'] = 'WARN'
 
 class EarlyStopping:
     def __init__(
@@ -203,8 +207,8 @@ def train_augment(augmentor, mask_generator):
     # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
+        transforms.Lambda(lambda img: mask_generator.transform(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
@@ -214,13 +218,14 @@ def train_augment(augmentor, mask_generator):
     ])
     return transform
 
-def val_augment(mask_generator):
+def val_augment(augmentor, mask_generator):
     # Define the custom transform
     # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: mask_generator.transform(img)),
-        transforms.Resize(256),
+        transforms.Lambda(lambda img: augmentor.data_augment(img)), 
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
@@ -267,19 +272,29 @@ def main(
         wandb.config.update(args, allow_val_change=True)
 
     # Set options for augmentation
-    opt = {
+    train_opt = {
         'rz_interp': ['bilinear'],
         'loadSize': 256,
         'blur_prob': 0.1,  # Set your value
-        'blur_sig': [0.5],
+        'blur_sig': [0.0, 3.0],
         'jpg_prob': 0.1,  # Set your value
-        'jpg_method': ['cv2'],
-        'jpg_qual': [75]
+        'jpg_method': ['cv2', 'pil'],
+        'jpg_qual': [30, 100]
+    }
+
+    val_opt = {
+        'rz_interp': ['bilinear'],
+        'loadSize': 256,
+        'blur_prob': 0.1,  # Set your value
+        'blur_sig': [(0.0 + 3.0) / 2],
+        'jpg_prob': 0.1,  # Set your value
+        'jpg_method': ['pil'],
+        'jpg_qual': [int((30 + 100) / 2)]
     }
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = BalancedSpectralMaskGenerator(ratio=ratio)
+        mask_generator = FrequencyMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio)
     elif mask_type == 'patch':
@@ -295,17 +310,16 @@ def main(
     else:
         mask_generator = None
 
-    augmentor = ImageAugmentor(opt)
-    train_transform = train_augment(augmentor, mask_generator)
-    val_transform = val_augment(mask_generator)
+    train_transform = train_augment(ImageAugmentor(train_opt), mask_generator)
+    val_transform = val_augment(ImageAugmentor(val_opt), mask_generator)
 
     # Creating training dataset from images
-    train_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
+    train_data = ForenSynths('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
     train_sampler = DistributedSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = WangEtAlDataset('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
+    val_data = ForenSynths('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
     val_sampler = DistributedSampler(val_data, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
