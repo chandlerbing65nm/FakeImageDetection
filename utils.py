@@ -23,8 +23,8 @@ def train_augment(augmentor, mask_generator):
     # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: mask_generator.transform(img)),
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
@@ -39,8 +39,8 @@ def val_augment(augmentor, mask_generator):
     # masking_transform = MaskingTransform(mask_generator)
 
     transform = transforms.Compose([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: mask_generator.transform(img)),
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)), 
         transforms.CenterCrop(224),
         transforms.ToTensor(),
@@ -126,7 +126,7 @@ def train_model(
             # Early stopping
             if phase == 'Validation':
                 if dist.get_rank() == 0:
-                    wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap}, step=epoch)
+                    wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap})
                 early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
                 if early_stopping.early_stop:
                     if dist.get_rank() == 0:
@@ -134,7 +134,7 @@ def train_model(
                     return model
             else:
                 if dist.get_rank() == 0:
-                    wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
+                    wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap})
 
         
         # Save the model after every epoch

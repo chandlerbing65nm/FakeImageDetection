@@ -28,5 +28,5 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --early_stop \
   --pretrained \
   --wandb_online \
-  --wandb_run_id $WANDB_ID \
-  --resume_train \
+  # --wandb_run_id $WANDB_ID \
+  # --resume_train \
