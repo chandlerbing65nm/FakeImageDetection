@@ -15,101 +15,9 @@ import torchvision.models as vis_models
 
 from dataset import *
 from augment import ImageAugmentor
+from mask import *
 from utils import *
-
-def test_augment(mask_generator):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
-
-    transform = transforms.Compose([
-        # transforms.Lambda(lambda img: mask_generator.transform(img)),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
-    return transform
-
-def evaluate_model(
-    model_name,
-    data_type,
-    mask_type, 
-    ratio,
-    dataset_path, 
-    batch_size,
-    checkpoint_path, 
-    device
-    ):
-
-    # Depending on the mask_type, create the appropriate mask generator
-    if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio)
-    elif mask_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(ratio=ratio)
-    elif mask_type == 'edge':
-        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
-    else:
-        mask_generator = None
-
-    test_transform = test_augment(mask_generator)
-
-    if data_type == 'GenImage':
-        test_dataset = GenImage(dataset_path, transform=test_transform)
-    elif data_type == 'Wang_CVPR20' :
-        test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
-    elif data_type == 'Ojha_CVPR23' :
-        test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
-    else:
-        raise ValueError("wrong dataset input")
-
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
-
-    if model_name == 'RN18':
-        model = vis_models.resnet18(pretrained=False)
-    elif model_name == 'RN34':
-        model = vis_models.resnet34(pretrained=False)
-    elif model_name == 'RN50':
-        model = vis_models.resnet50(pretrained=False)
-    elif model_name == 'RN101':
-        model = vis_models.resnet101(pretrained=False)
-    elif model_name == 'RN152':
-        model = vis_models.resnet152(pretrained=False)
-    elif model_name.startswith('ViT'):
-        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=False)
-    else:
-        raise ValueError(f"Model {model} not recognized!")
     
-    model.fc = torch.nn.Linear(model.fc.in_features, 1)
-
-    model = torch.nn.DataParallel(model)
-    # model.load_state_dict(torch.load(checkpoint_path))
-    checkpoint = torch.load(checkpoint_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model = model.to(device)
-
-    model.eval() 
-
-    y_true, y_pred = [], []
-
-    with torch.no_grad():
-        for inputs, labels in tqdm(test_dataloader, "Accessing test dataloader"):
-            inputs = inputs.to(device)
-            labels = labels.float().to(device)
-            outputs = model(inputs).view(-1).unsqueeze(1)
-            y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
-            y_true.extend(labels.cpu().numpy())
-
-    y_true, y_pred = np.array(y_true), np.array(y_pred)
-
-    acc = accuracy_score(y_true, y_pred > 0.5)
-    ap = average_precision_score(y_true, y_pred)
-
-    print(f'Average Precision: {ap}')
-    print(f'Accuracy: {acc}')
-
-    return ap, acc
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Settings for your script")
 
@@ -176,10 +84,10 @@ if __name__ == "__main__":
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask_best.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask.pth'
     else:
         ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}_best.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}.pth'
 
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'

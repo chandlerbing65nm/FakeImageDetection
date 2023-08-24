@@ -24,214 +24,13 @@ from torch.utils.data.distributed import DistributedSampler
 from dataset import ForenSynths
 # from extract_features import *
 from augment import ImageAugmentor
+from mask import *
+from earlystop import EarlyStopping
 from utils import *
 
 import os
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
-
-class EarlyStopping:
-    def __init__(
-        self, 
-        path, 
-        patience=7, 
-        verbose=False, 
-        delta=0, 
-        min_lr=1e-6, 
-        factor=0.1, 
-        early_stopping_enabled=True, 
-        num_epochs=25
-        ):
-
-        self.patience = patience
-        self.verbose = verbose
-        self.counter = 0
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.delta = delta
-        self.min_lr = min_lr
-        self.factor = factor
-        self.path = path
-        self.early_stopping_enabled = early_stopping_enabled
-        self.last_epochs = []
-        self.num_epochs = num_epochs
-
-    def __call__(self, val_loss, model, optimizer, epoch):
-
-        score = -val_loss
-
-        if self.early_stopping_enabled:
-            if self.best_score is None:
-                self.best_score = score
-                self.save_checkpoint(val_loss, model, optimizer, epoch)
-            elif score < self.best_score + self.delta:
-                self.counter += 1
-                if dist.get_rank() == 0:
-                    print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
-                if self.counter >= self.patience:
-                    for param_group in optimizer.param_groups:
-                        if param_group['lr'] > self.min_lr:
-                            if dist.get_rank() == 0:
-                                print(f'Reducing learning rate from {param_group["lr"]} to {param_group["lr"] * self.factor}')
-                            param_group['lr'] *= self.factor
-                            self.counter = 0  # reset the counter
-                        else:
-                            self.early_stop = True
-            else:
-                self.best_score = score
-                self.save_checkpoint(val_loss, model, optimizer, epoch)
-                self.counter = 0
-        else:
-            self.save_last_epochs(val_loss, model, optimizer, epoch)
-        
-    def save_checkpoint(self, val_loss, model, optimizer, epoch):
-        if self.verbose and epoch % 1 == 0:
-            if dist.get_rank() == 0:
-                print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        
-        if dist.get_rank() == 0:
-            state = {
-                'epoch': epoch,
-                'val_loss': val_loss,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                }
-            torch.save(state, self.path + '.pth')  # change here to use self.path
-
-        # self.save_last_epochs(val_loss, model, optimizer, epoch)
-        self.val_loss_min = val_loss
-
-    def save_last_epochs(self, val_loss, model, optimizer, epoch):
-        self.last_epochs.append((epoch, val_loss, model.state_dict(), optimizer.state_dict())) # Save optimizer state_dict too
-
-        # Keep only the latest 3 models
-        while len(self.last_epochs) > 3:
-            oldest_epoch, _, _, _ = self.last_epochs.pop(0)
-            if dist.get_rank() == 0:
-                os.remove(f"{self.path}_epoch{oldest_epoch}.pth")
-
-        # Save the latest 3 models
-        for saved_epoch, saved_val_loss, model_state_dict, optimizer_state_dict in self.last_epochs[-3:]:
-            if dist.get_rank() == 0:
-                state = {
-                    'epoch': saved_epoch,
-                    'val_loss': saved_val_loss,
-                    'model_state_dict': model_state_dict,
-                    'optimizer_state_dict': optimizer_state_dict,
-                    }
-                torch.save(state, f"{self.path}_epoch{saved_epoch}.pth")
-
-def train_model(
-    model, 
-    criterion, 
-    optimizer, 
-    train_loader, 
-    val_loader, 
-    num_epochs=25, 
-    resume_epoch=0,
-    save_path='./', 
-    early_stopping=None,
-    device='cpu'
-    ):
-
-    for epoch in range(resume_epoch, num_epochs):
-        if epoch % 1 == 0:  # Only print every 20 epochs
-            if dist.get_rank() == 0:
-                print('\n')
-                print(f'Epoch {epoch}/{num_epochs}')
-                print('-' * 10)
-
-        for phase in ['Training', 'Validation']:
-            if phase == 'Training':
-                model.train()
-                data_loader = train_loader
-            else:
-                model.eval()
-                data_loader = val_loader
-
-            running_loss = 0.0
-            y_true, y_pred = [], []
-
-            disable_tqdm = dist.get_rank() != 0
-            data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
-
-            for inputs, labels in data_loader_with_tqdm: #tqdm(data_loader, f"{phase}"):
-                inputs = inputs.to(device)
-                labels = labels.float().to(device)
-
-                optimizer.zero_grad()
-
-                with torch.set_grad_enabled(phase == 'Training'):
-                    outputs = model(inputs).view(-1).unsqueeze(1)
-                    loss = criterion(outputs.squeeze(1), labels)
-
-                    if phase == 'Training':
-                        loss.backward()
-                        optimizer.step()
-
-                running_loss += loss.item() * inputs.size(0)
-                y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
-                y_true.extend(labels.cpu().numpy())
-
-            epoch_loss = running_loss / len(data_loader.dataset)
-            
-            y_true, y_pred = np.array(y_true), np.array(y_pred)
-            acc = accuracy_score(y_true, y_pred > 0.5)
-            ap = average_precision_score(y_true, y_pred)
-            
-            if epoch % 1 == 0:  # Only print every 20 epochs
-                if dist.get_rank() == 0:
-                    print(f'{phase} Loss: {epoch_loss:.4f} Acc: {acc:.4f} AP: {ap:.4f}')
-
-            # Early stopping
-            if phase == 'Validation':
-                if dist.get_rank() == 0:
-                    wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap})
-                early_stopping(epoch_loss, model, optimizer, epoch)
-                if early_stopping.early_stop:
-                    if dist.get_rank() == 0:
-                        print("Early stopping")
-                    return model
-            else:
-                if dist.get_rank() == 0:
-                    wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap})
-        
-        # Save the model after every epoch
-        # torch.save(model.state_dict(), f'checkpoints/model_{epoch+1}.pth')
-
-    return model
-
-def train_augment(augmentor, mask_generator):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
-
-    transform = transforms.Compose([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
-        transforms.RandomCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(), 
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        # masking_transform,
-    ])
-    return transform
-
-def val_augment(augmentor, mask_generator):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
-
-    transform = transforms.Compose([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)), 
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        # masking_transform, # Add the custom masking transform here
-    ])
-    return transform
 
 def main(
     local_rank=0,
@@ -344,7 +143,6 @@ def main(
         patience=5, 
         verbose=True, 
         early_stopping_enabled=early_stop,
-        num_epochs=num_epochs,
         )
 
     # Load checkpoint if resuming
@@ -354,12 +152,13 @@ def main(
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Extract val_loss and epoch from the checkpoint
-        val_loss = checkpoint['val_loss']
+        val_accuracy = checkpoint['val_accuracy']
         last_epoch = checkpoint['epoch']
 
         if dist.get_rank() == 0:
-            print(f"\nResuming training from epoch {last_epoch} using {save_path}")
-            print(f"Validation loss at resumed epoch: {val_loss}")
+            print(f"\nResuming training from epoch {last_epoch} using {save_path}.pth")
+            for i, param_group in enumerate(optimizer.param_groups):
+                print(f"Learning rate for param_group {i}: {param_group['lr']}")
 
     resume_epoch = last_epoch + 1 if resume_train else 0
 
@@ -463,10 +262,10 @@ if __name__ == "__main__":
     
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask_best'
+        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask'
     else:
         ratio = 0
-        save_path = f'checkpoints/mask_{ratio}/{model_name}_best'
+        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}'
 
     num_epochs = 100 if args.early_stop else args.num_epochs
     wandb_name = f"mask_{ratio}_{model_name}{finetune}_{args.mask_type}"
