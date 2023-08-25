@@ -259,15 +259,16 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
     finetune = 'ft' if args.pretrained else ''
-    
-    ckpt_folder = f'./checkpoints/mask_{ratio}'
-    os.makedirs(ckpt_folder, exist_ok=True)
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
+        ckpt_folder = f'./checkpoints/mask_{ratio}'
+        os.makedirs(ckpt_folder, exist_ok=True)
         save_path = f'{ckpt_folder}/{model_name}{finetune}_{args.mask_type}mask'
     else:
         ratio = 0
+        ckpt_folder = f'./checkpoints/mask_{ratio}'
+        os.makedirs(ckpt_folder, exist_ok=True)
         save_path = f'{ckpt_folder}/{model_name}{finetune}'
 
     num_epochs = 100 if args.early_stop else args.num_epochs
