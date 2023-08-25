@@ -260,12 +260,15 @@ if __name__ == "__main__":
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
     finetune = 'ft' if args.pretrained else ''
     
+    ckpt_folder = f'./checkpoints/mask_{ratio}'
+    os.makedirs(ckpt_folder, exist_ok=True)
+
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask'
+        save_path = f'{ckpt_folder}/{model_name}{finetune}_{args.mask_type}mask'
     else:
         ratio = 0
-        save_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}'
+        save_path = f'{ckpt_folder}/{model_name}{finetune}'
 
     num_epochs = 100 if args.early_stop else args.num_epochs
     wandb_name = f"mask_{ratio}_{model_name}{finetune}_{args.mask_type}"

@@ -537,10 +537,13 @@ def test_mask_generator(
     if image_to_save.dtype == np.float32 or image_to_save.dtype == np.float64:
         image_to_save = np.clip(image_to_save, 0, 1)
 
+    sample_path = f'./samples'
+    os.makedirs(sample_path, exist_ok=True)
+
     # Display and save the image
     plt.imshow(image_to_save)
     plt.axis('off')  # Optional, to turn off axes
-    plt.savefig(f"samples/masked_{mask_type}.jpg")
+    plt.savefig(f"{sample_path}/masked_{mask_type}.jpg")
 
 # Usage:
 test_mask_generator(
