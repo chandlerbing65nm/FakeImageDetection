@@ -26,7 +26,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN101', 'RN152',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
             'ViT_base_patch16_224', 'ViT_base_patch32_224',
             'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -109,17 +109,17 @@ if __name__ == "__main__":
 
     if args.data_type == 'Wang_CVPR20':
         datasets = {
-            'ProGAN': '../../Datasets/Wang_CVPR20/progan',
-            'CycleGAN': '../../Datasets/Wang_CVPR20/cyclegan',
-            'BigGAN': '../../Datasets/Wang_CVPR20/biggan',
-            'StyleGAN': '../../Datasets/Wang_CVPR20/stylegan',
-            'GauGAN': '../../Datasets/Wang_CVPR20/gaugan',
-            'StarGAN': '../../Datasets/Wang_CVPR20/stargan',
-            'DeepFake': '../../Datasets/Wang_CVPR20/deepfake',
-            'SITD': '../../Datasets/Wang_CVPR20/seeingdark',
-            'SAN': '../../Datasets/Wang_CVPR20/san',
-            'CRN': '../../Datasets/Wang_CVPR20/crn',
-            'IMLE': '../../Datasets/Wang_CVPR20/imle',
+            'ProGAN': '../../Datasets/Wang_CVPR2020/testing/progan',
+            'CycleGAN': '../../Datasets/Wang_CVPR2020/testing/cyclegan',
+            'BigGAN': '../../Datasets/Wang_CVPR2020/testing/biggan',
+            'StyleGAN': '../../Datasets/Wang_CVPR2020/testing/stylegan',
+            'GauGAN': '../../Datasets/Wang_CVPR2020/testing/gaugan',
+            'StarGAN': '../../Datasets/Wang_CVPR2020/testing/stargan',
+            'DeepFake': '../../Datasets/Wang_CVPR2020/testing/deepfake',
+            'SITD': '../../Datasets/Wang_CVPR2020/testing/seeingdark',
+            'SAN': '../../Datasets/Wang_CVPR2020/testing/san',
+            'CRN': '../../Datasets/Wang_CVPR2020/testing/crn',
+            'IMLE': '../../Datasets/Wang_CVPR2020/testing/imle',
         }
     # elif args.data_type == 'GenImage':
     #     datasets = {
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     for dataset_name, dataset_path in datasets.items():
         print(f"\nEvaluating {dataset_name}")
 
-        avg_ap, avg_acc = evaluate_model(
+        avg_ap, avg_acc, auc = evaluate_model(
             args.model_name,
             args.data_type,
             args.mask_type,
@@ -171,10 +171,10 @@ if __name__ == "__main__":
                 file.write(f"Checkpoint Type: {checkpoint_path}\n")
                 file.write(f"Results saved to: {results_path}/{filename}\n")
                 file.write("-" * 28 + "\n\n")
-                file.write("Dataset, Precision, Accuracy\n")
+                file.write("Dataset, Precision, Accuracy, AUC\n")
                 file.write("-" * 28)
                 file.write("\n")
-            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}\n")
+            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {avg_acc:.3f}\n")
 
         # Decrement the counter
         dataset_count -= 1

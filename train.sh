@@ -7,14 +7,20 @@ current_date=$(date)
 echo "The current date is: $current_date"
 
 # Define the arguments for your training script
-NUM_GPU=2
+GPUs="$1"
+NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
-PROJECT_NAME="Masked-ResNet"
-MODEL_NAME="RN50"
+PROJECT_NAME="Frequency-Masking"
+MODEL_NAME="RN50_mod" # RN50_mod, RN50
 MASK_TYPE="spectral"
 RATIO=15
-BATCH_SIZE=64
-WANDB_ID="teiavo07"
+BATCH_SIZE=16
+WANDB_ID="w4x308sc"
+
+# Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
+export CUDA_VISIBLE_DEVICES=$GPUs
+
+echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
 # Run the distributed training command
 python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
@@ -28,5 +34,5 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --early_stop \
   --pretrained \
   --wandb_online \
-  --wandb_run_id $WANDB_ID \
-  --resume_train \
+  # --wandb_run_id $WANDB_ID \
+  # --resume_train \

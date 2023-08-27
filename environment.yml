@@ -1,4 +1,4 @@
-name: unidetector
+name: fakedetector
 channels:
   - pytorch
   - nvidia
@@ -142,4 +142,4 @@ dependencies:
       - wandb==0.15.8
       - wcwidth==0.2.6
       - zipp==3.15.0
-prefix: /home/paperspace/miniconda3/envs/unidetector
+prefix: /home/timm/miniconda3/envs/fakedetector

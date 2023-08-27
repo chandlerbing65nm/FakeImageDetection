@@ -547,7 +547,7 @@ def test_mask_generator(
 
 # Usage:
 test_mask_generator(
-    '../../Datasets/Wang_CVPR20/wang_et_al/validation', 
+    '../../Datasets/Wang_CVPR2020/validation', 
     mask_type='spectral',
     ratio=0.7
     )

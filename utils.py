@@ -2,7 +2,7 @@
 import torch
 import numpy as np
 from tqdm import tqdm
-from sklearn.metrics import accuracy_score, average_precision_score
+from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 import torch.distributed as dist  # If distributed training is being used
 import wandb  # If Weights & Biases is being used for logging
 
@@ -126,7 +126,7 @@ def train_model(
             # Early stopping
             if phase == 'Validation':
                 if dist.get_rank() == 0:
-                    wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap})
+                    wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap}, step=epoch)
                 early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
                 if early_stopping.early_stop:
                     if dist.get_rank() == 0:
@@ -134,7 +134,7 @@ def train_model(
                     return model
             else:
                 if dist.get_rank() == 0:
-                    wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap})
+                    wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
 
         
         # Save the model after every epoch
@@ -188,16 +188,11 @@ def evaluate_model(
 
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    if model_name == 'RN18':
-        model = vis_models.resnet18(pretrained=False)
-    elif model_name == 'RN34':
-        model = vis_models.resnet34(pretrained=False)
-    elif model_name == 'RN50':
+
+    if model_name.startswith('RN50'):
         model = vis_models.resnet50(pretrained=False)
     elif model_name == 'RN101':
         model = vis_models.resnet101(pretrained=False)
-    elif model_name == 'RN152':
-        model = vis_models.resnet152(pretrained=False)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
         model = timm.create_model(model_variant, pretrained=False)
@@ -227,9 +222,11 @@ def evaluate_model(
 
     acc = accuracy_score(y_true, y_pred > 0.5)
     ap = average_precision_score(y_true, y_pred)
+    auc = roc_auc_score(y_true, y_pred)
 
     print(f'Average Precision: {ap}')
     print(f'Accuracy: {acc}')
+    print(f'ROC AUC Score: {auc}')
 
-    return ap, acc
+    return ap, acc, auc
 

@@ -3,11 +3,11 @@ import os
 import torch.distributed as dist
 
 class EarlyStopping:
-    def __init__(self, path, patience=7, verbose=False, min_lr=1e-6, early_stopping_enabled=True):
+    def __init__(self, path, patience=7, verbose=False, min_lr=1e-6, early_stopping_enabled=True, best_score=None):
         self.patience = patience
         self.verbose = verbose
         self.counter = 0
-        self.best_score = None
+        self.best_score = best_score
         self.early_stop = False
         self.path = path
         self.early_stopping_enabled = early_stopping_enabled

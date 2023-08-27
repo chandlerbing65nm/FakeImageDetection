@@ -5,19 +5,13 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset, Subset
 from torchvision import transforms
 from tqdm import tqdm
-from clip import load
 import numpy as np
-import pickle
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
-import clip
-from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import argparse
 import wandb
 import torchvision.models as vis_models
-import multiprocessing
 
 import torch.distributed as dist
-from tqdm.auto import tqdm as tqdm_auto
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
@@ -27,10 +21,16 @@ from augment import ImageAugmentor
 from mask import *
 from earlystop import EarlyStopping
 from utils import *
+from networks.resnet import resnet50
+from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 import os
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
+
+os.environ['WANDB_CONFIG_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
+os.environ['WANDB_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
+os.environ['WANDB_CACHE_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
 
 def main(
     local_rank=0,
@@ -113,19 +113,24 @@ def main(
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator)
 
     # Creating training dataset from images
-    train_data = ForenSynths('../../Datasets/Wang_CVPR20/wang_et_al/training', transform=train_transform)
+    train_data = ForenSynths('../../Datasets/Wang_CVPR2020/training', transform=train_transform)
     train_sampler = DistributedSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = ForenSynths('../../Datasets/Wang_CVPR20/wang_et_al/validation', transform=val_transform)
+    val_data = ForenSynths('../../Datasets/Wang_CVPR2020/validation', transform=val_transform)
     val_sampler = DistributedSampler(val_data, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
-        model = vis_models.resnet50(pretrained=pretrained)
+        # model = vis_models.resnet50(pretrained=pretrained)
+        # model.fc = nn.Linear(model.fc.in_features, 1)
+        model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_mod':
+        model = _resnet50(pretrained=pretrained, stride0=1)
+        model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
         model = timm.create_model(model_variant, pretrained=pretrained)
@@ -138,13 +143,6 @@ def main(
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-4) 
 
-    early_stopping = EarlyStopping(
-        path=save_path, 
-        patience=5, 
-        verbose=True, 
-        early_stopping_enabled=early_stop,
-        )
-
     # Load checkpoint if resuming
     if resume_train:
         checkpoint = torch.load(f'{save_path}.pth')
@@ -152,13 +150,25 @@ def main(
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Extract val_loss and epoch from the checkpoint
-        val_accuracy = checkpoint['val_accuracy']
         last_epoch = checkpoint['epoch']
 
         if dist.get_rank() == 0:
             print(f"\nResuming training from epoch {last_epoch} using {save_path}.pth")
+            print(f"Validation accuracy: {val_accuracy}")
             for i, param_group in enumerate(optimizer.param_groups):
                 print(f"Learning rate for param_group {i}: {param_group['lr']}")
+
+        best_score = checkpoint['val_accuracy']
+    else:
+        best_score = None
+
+    early_stopping = EarlyStopping(
+        path=save_path, 
+        patience=5, 
+        verbose=True, 
+        early_stopping_enabled=early_stop,
+        best_score=best_score
+        )
 
     resume_epoch = last_epoch + 1 if resume_train else 0
 
@@ -186,7 +196,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN101', 'RN152',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
             'ViT_base_patch16_224', 'ViT_base_patch32_224',
             'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -208,12 +218,6 @@ if __name__ == "__main__":
         type=str, 
         default=None,
         help='wandb run id'
-        )
-    parser.add_argument(
-        '--model', 
-        default='RN50', 
-        choices=['RN50', 'RN101'],
-        help='Type of model visual model'
         )
     parser.add_argument(
         '--resume_train', 
