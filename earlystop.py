@@ -3,11 +3,21 @@ import os
 import torch.distributed as dist
 
 class EarlyStopping:
-    def __init__(self, path, patience=7, verbose=False, min_lr=1e-6, early_stopping_enabled=True, best_score=None):
+    def __init__(
+        self, 
+        path, 
+        patience=7, 
+        verbose=False, 
+        min_lr=1e-6, 
+        early_stopping_enabled=True, 
+        best_score=None, 
+        counter=0
+        ):
+        
         self.patience = patience
         self.verbose = verbose
-        self.counter = 0
         self.best_score = best_score
+        self.counter = counter
         self.early_stop = False
         self.path = path
         self.early_stopping_enabled = early_stopping_enabled
@@ -50,6 +60,7 @@ class EarlyStopping:
         if dist.get_rank() == 0:
             state = {
                 'epoch': epoch,
+                'counter': self.counter,
                 'val_accuracy': val_accuracy,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
@@ -74,6 +85,7 @@ class EarlyStopping:
             if dist.get_rank() == 0:
                 state = {
                     'epoch': saved_epoch,
+                    'counter': self.counter,
                     'val_accuracy': saved_val_accuracy,
                     'model_state_dict': model_state_dict,
                     'optimizer_state_dict': optimizer_state_dict,
@@ -95,6 +107,7 @@ class EarlyStopping:
             if dist.get_rank() == 0:
                 state = {
                     'epoch': saved_epoch,
+                    'counter': self.counter,
                     'val_accuracy': saved_val_accuracy,
                     'model_state_dict': model_state_dict,
                     'optimizer_state_dict': optimizer_state_dict,
