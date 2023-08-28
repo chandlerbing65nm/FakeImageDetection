@@ -16,6 +16,8 @@ from dataset import *
 from augment import ImageAugmentor
 from mask import *
 from utils import *
+from networks.resnet import resnet50
+from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 
 def train_augment(augmentor, mask_generator):
@@ -189,17 +191,19 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
 
 
-    if model_name.startswith('RN50'):
-        model = vis_models.resnet50(pretrained=False)
-    elif model_name == 'RN101':
-        model = vis_models.resnet101(pretrained=False)
+    if model_name == 'RN50':
+        # model = vis_models.resnet50(pretrained=pretrained)
+        # model.fc = nn.Linear(model.fc.in_features, 1)
+        model = resnet50(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_mod':
+        model = _resnet50(pretrained=False, stride0=1)
+        model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=False)
+        model = timm.create_model(model_variant, pretrained=pretrained)
     else:
-        raise ValueError(f"Model {model} not recognized!")
-    
-    model.fc = torch.nn.Linear(model.fc.in_features, 1)
+        raise ValueError(f"Model {model_name} not recognized!")
 
     model = torch.nn.DataParallel(model)
     checkpoint = torch.load(checkpoint_path)
