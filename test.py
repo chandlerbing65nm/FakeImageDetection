@@ -64,9 +64,9 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--data_type', 
-        default="ForenSynths", 
+        default="Wang_CVPR20", 
         type=str, 
-        choices=['GenImage', 'Wang_CVPR20', 'Ojha_CVPR23'], 
+        choices=['Wang_CVPR20', 'Ojha_CVPR23'], 
         help="Dataset Type"
         )
     parser.add_argument(
@@ -87,7 +87,7 @@ if __name__ == "__main__":
         checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask.pth'
     else:
         ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
 
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
@@ -174,10 +174,11 @@ if __name__ == "__main__":
                 file.write("Dataset, Precision, Accuracy, AUC\n")
                 file.write("-" * 28)
                 file.write("\n")
-            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {avg_acc:.3f}\n")
+            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
 
         # Decrement the counter
         dataset_count -= 1
         if dataset_count == 0:
             with open(f'{results_path}/{filename}', 'a') as file:
+                file.write("-" * 28 + "\n")
                 file.write("\n")

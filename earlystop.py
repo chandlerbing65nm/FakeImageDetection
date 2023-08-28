@@ -13,7 +13,7 @@ class EarlyStopping:
         best_score=None, 
         counter=0
         ):
-        
+
         self.patience = patience
         self.verbose = verbose
         self.best_score = best_score
@@ -31,7 +31,7 @@ class EarlyStopping:
         if self.early_stopping_enabled:
             if self.best_score is None:
                 self.best_score = score
-                self.save_best_model(val_accuracy, model, optimizer, epoch)
+                self.save_best_model(model, optimizer, epoch)
             elif score < self.best_score + 0.001:
                 self.counter += 1
                 if dist.get_rank() == 0:
@@ -46,32 +46,30 @@ class EarlyStopping:
                         else:
                             self.early_stop = True
             else:
+                if self.verbose and dist.get_rank() == 0:
+                    print(f'Validation accuracy increased ({self.best_score:.4f} --> {score:.4f}).  Saving model ...')
+
                 self.best_score = score
-                self.save_best_model(val_accuracy, model, optimizer, epoch)
+                self.save_best_model(model, optimizer, epoch)
                 self.counter = 0
         
-        self.save_last_epochs(val_accuracy, model, optimizer, epoch, index=1, laststop=True)
+        self.save_last_epochs(model, optimizer, epoch, index=1, laststop=True)
 
-    def save_best_model(self, val_accuracy, model, optimizer, epoch):
-        if self.verbose:
-            if dist.get_rank() == 0:
-                print(f'Validation accuracy increased ({self.best_score:.4f} --> {val_accuracy:.4f}).  Saving model ...')
-
+    def save_best_model(self, model, optimizer, epoch):
         if dist.get_rank() == 0:
             state = {
                 'epoch': epoch,
                 'counter': self.counter,
-                'val_accuracy': val_accuracy,
+                'best_score': self.best_score,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
             }
             torch.save(state, self.path + '.pth')
 
-        self.save_best_epochs(val_accuracy, model, optimizer, epoch, index=1, earlystop=True)
-        self.best_score = val_accuracy
+        self.save_best_epochs(model, optimizer, epoch, index=1, earlystop=True)
 
-    def save_best_epochs(self, val_accuracy, model, optimizer, epoch, index=3, earlystop=False):
-        self.best_epochs.append((epoch, val_accuracy, model.state_dict(), optimizer.state_dict()))
+    def save_best_epochs(self, model, optimizer, epoch, index=3, earlystop=False):
+        self.best_epochs.append((epoch, model.state_dict(), optimizer.state_dict()))
         
         earlystop = '_best' if earlystop else ''
         # Keep only the latest 3 models
@@ -81,19 +79,19 @@ class EarlyStopping:
                 os.remove(f"{self.path}{earlystop}_ep{oldest_epoch}.pth")
 
         # Save the latest {index} models
-        for saved_epoch, saved_val_accuracy, model_state_dict, optimizer_state_dict in self.best_epochs[-index:]:
+        for saved_epoch, model_state_dict, optimizer_state_dict in self.best_epochs[-index:]:
             if dist.get_rank() == 0:
                 state = {
                     'epoch': saved_epoch,
                     'counter': self.counter,
-                    'val_accuracy': saved_val_accuracy,
+                    'best_score': self.best_score,
                     'model_state_dict': model_state_dict,
                     'optimizer_state_dict': optimizer_state_dict,
                 }
                 torch.save(state, f"{self.path}{earlystop}_ep{saved_epoch}.pth")
 
-    def save_last_epochs(self, val_accuracy, model, optimizer, epoch, index=3, laststop=False):
-        self.last_epochs.append((epoch, val_accuracy, model.state_dict(), optimizer.state_dict()))
+    def save_last_epochs(self, model, optimizer, epoch, index=3, laststop=False):
+        self.last_epochs.append((epoch, model.state_dict(), optimizer.state_dict()))
         
         laststop = '_last' if laststop else ''
         # Keep only the latest 3 models
@@ -103,12 +101,12 @@ class EarlyStopping:
                 os.remove(f"{self.path}{laststop}_ep{oldest_epoch}.pth")
 
         # Save the latest {index} models
-        for saved_epoch, saved_val_accuracy, model_state_dict, optimizer_state_dict in self.last_epochs[-index:]:
+        for saved_epoch, model_state_dict, optimizer_state_dict in self.last_epochs[-index:]:
             if dist.get_rank() == 0:
                 state = {
                     'epoch': saved_epoch,
                     'counter': self.counter,
-                    'val_accuracy': saved_val_accuracy,
+                    'best_score': self.best_score,
                     'model_state_dict': model_state_dict,
                     'optimizer_state_dict': optimizer_state_dict,
                 }
