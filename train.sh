@@ -15,7 +15,7 @@ MODEL_NAME="RN50_mod" # RN50_mod, RN50
 MASK_TYPE="spectral"
 RATIO=15
 BATCH_SIZE=16
-WANDB_ID="w4x308sc"
+WANDB_ID="qvlglly2"
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
 export CUDA_VISIBLE_DEVICES=$GPUs
@@ -34,5 +34,5 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --early_stop \
   --pretrained \
   --wandb_online \
-  # --wandb_run_id $WANDB_ID \
-  # --resume_train \
+  --wandb_run_id $WANDB_ID \
+  --resume_train \

@@ -74,7 +74,7 @@ class EarlyStopping:
         earlystop = '_best' if earlystop else ''
         # Keep only the latest 3 models
         while len(self.best_epochs) > index:
-            oldest_epoch, _, _, _ = self.best_epochs.pop(0)
+            oldest_epoch, _, _ = self.best_epochs.pop(0)
             if dist.get_rank() == 0:
                 os.remove(f"{self.path}{earlystop}_ep{oldest_epoch}.pth")
 
@@ -96,7 +96,7 @@ class EarlyStopping:
         laststop = '_last' if laststop else ''
         # Keep only the latest 3 models
         while len(self.last_epochs) > index:
-            oldest_epoch, _, _, _ = self.last_epochs.pop(0)
+            oldest_epoch, _, _ = self.last_epochs.pop(0)
             if dist.get_rank() == 0:
                 os.remove(f"{self.path}{laststop}_ep{oldest_epoch}.pth")
 

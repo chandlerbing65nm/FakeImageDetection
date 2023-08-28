@@ -152,7 +152,7 @@ def main(
         # Extract val_accuracy, counter and epoch from the checkpoint
         counter = checkpoint['counter']
         last_epoch = checkpoint['epoch']
-        best_score = checkpoint['best_score'] # val_accuracy
+        best_score = checkpoint['best_score'] # val_accuracy or best_score
 
         if dist.get_rank() == 0:
             print(f"\nResuming training from epoch {last_epoch} using {save_path}.pth")
