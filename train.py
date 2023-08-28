@@ -145,7 +145,21 @@ def main(
 
     # Load checkpoint if resuming
     if resume_train:
-        checkpoint = torch.load(f'{save_path}.pth')
+        resume_prefix = f'{save_path}_last_ep' if resume_train == 'from_last' else f'{save_path}_best_ep'
+        
+        # Separate the directory and base filename
+        folder_path = os.path.dirname(save_path)
+        base_filename = os.path.basename(save_path)
+        
+        checkpoint_files = os.listdir(folder_path)
+        if checkpoint_files:
+            ep_numbers = [int(re.search(f'{re.escape(resume_prefix)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix) and f.endswith('.pth')]
+            max_ep = max(ep_numbers)
+            checkpoint_path = f'{resume_prefix}{max_ep}.pth'
+            checkpoint = torch.load(checkpoint_path)
+        else:
+            raise ValueError("No matching checkpoint files found.")
+
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
@@ -223,8 +237,12 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--resume_train', 
-        action='store_true', 
-        help='Run wandb in offline mode'
+        default='from_last',
+        type=str,
+        choices=[
+            'from_last', 'from_best'
+        ],
+        help='Type of resume to use'
         )
     parser.add_argument(
         '--pretrained', 
@@ -297,7 +315,7 @@ if __name__ == "__main__":
     print(f"WandB Online: {args.wandb_online}")
     print(f"model type: {args.model_name}")
     print(f"Save path: {save_path}.pth")
-    print(f"Resume training: {args.resume_train}")
+    print(f"Resume training: {args.resume_train}_epoch")
     print(f"Device: cuda:{args.local_rank}")
     print("-" * 30, "\n")
 
