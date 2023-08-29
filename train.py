@@ -156,10 +156,10 @@ def main(
             ep_numbers = [int(re.search(f'{re.escape(resume_prefix)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix) and f.endswith('.pth')]
             max_ep = max(ep_numbers)
             checkpoint_path = f'{resume_prefix}{max_ep}.pth'
-            checkpoint = torch.load(checkpoint_path)
         else:
             raise ValueError("No matching checkpoint files found.")
 
+        checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
@@ -169,10 +169,10 @@ def main(
         best_score = checkpoint['best_score'] # val_accuracy or best_score
 
         if dist.get_rank() == 0:
-            print(f"\nResuming training from epoch {last_epoch} using {save_path}.pth")
-            print(f"Resumed validation accuracy: {best_score}")
+            print(f"\nResuming training from epoch {last_epoch} using {checkpoint_path}")
+            print(f"Best validation accuracy: {best_score}")
             for i, param_group in enumerate(optimizer.param_groups):
-                print(f"Learning rate for param_group {i}: {param_group['lr']}")
+                print(f"Resume learning rate: {param_group['lr']}")
     else:
         best_score = None
         counter=0
@@ -242,7 +242,7 @@ if __name__ == "__main__":
         choices=[
             'from_last', 'from_best'
         ],
-        help='Type of resume to use'
+        help='what epoch to resume training'
         )
     parser.add_argument(
         '--pretrained', 

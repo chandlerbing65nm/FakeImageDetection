@@ -16,6 +16,7 @@ MASK_TYPE="spectral"
 RATIO=15
 BATCH_SIZE=16
 WANDB_ID="qvlglly2"
+RESUME="from_last" # from_last or from_best
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
 export CUDA_VISIBLE_DEVICES=$GPUs
@@ -35,4 +36,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --pretrained \
   --wandb_online \
   --wandb_run_id $WANDB_ID \
-  --resume_train \
+  --resume_train $RESUME \
