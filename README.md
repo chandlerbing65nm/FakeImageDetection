@@ -1,63 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Train.py README</title>
-</head>
-<body>
-    <h1>train.py - A Distributed Training Script</h1>
+## Masked-ResNet Training Script (train.py)
 
-    <h2>Overview</h2>
-    <p>
-        The <code>train.py</code> script is used for distributed training of deep learning models. 
-        It supports various architectures including ResNet and Vision Transformer (ViT), 
-        and is designed for use with PyTorch.
-    </p>
+### Description
 
-    <h2>Arguments</h2>
-    <table border="1">
-        <tr>
-            <th>Argument</th>
-            <th>Description</th>
-            <th>Default Value</th>
-        </tr>
-        <tr>
-            <td><code>--local_rank</code></td>
-            <td>Local rank for distributed training</td>
-            <td>0</td>
-        </tr>
-        <!-- Add more rows for each argument -->
-    </table>
+This script `(train.py)` is designed for distributed training and evaluation of various Deep Learning models including ResNet and Vision Transformer (ViT) variants. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
 
-    <h2>Mathematical and Algorithmic Insights</h2>
-    <p>
-        <ul>
-            <li>
-                <strong>Optimizer:</strong> Uses AdamW, a variant of the Adam optimizer with weight decay fix.
-                The learning rate is set to \(0.0001\).
-            </li>
-            <li>
-                <strong>Loss Function:</strong> Binary Cross-Entropy with Logits (BCEWithLogitsLoss) is employed for binary classification.
-            </li>
-            <li>
-                <strong>Early Stopping:</strong> Implemented to prevent overfitting, configurable via the <code>--early_stop</code> flag.
-            </li>
-            <li>
-                <strong>Model Architectures:</strong> Supports ResNet variants and Vision Transformer (ViT) models, both pretrained and non-pretrained.
-            </li>
-        </ul>
-    </p>
+### Key Features
 
-    <h2>How to Run</h2>
-    <pre>
-        python -m torch.distributed.launch --nproc_per_node=2 train.py -- --args.parse
-    </pre>
+- Distributed Training using `torch.distributed`
+- Support for multiple model architectures including ResNet and ViT
+- Data Augmentation using custom mask generators
+- Loss function: Binary Cross-Entropy with Logits (BCEWithLogitsLoss)
+- Optimizer: AdamW with learning rate of 0.0001 and weight decay of 1e-4
 
-    <h2>Additional Information</h2>
-    <p>
-        For more advanced configurations, you can modify the <code>train_opt</code> and <code>val_opt</code> dictionaries.
-        These control the data augmentation strategies for the training and validation datasets, respectively.
-    </p>
+### Basic Command
 
-</body>
-</html>
+To run the script in a distributed environment:
+
+```bash
+python -m torch.distributed.launch --nproc_per_node=2 train.py -- [options]
+
+```
+
+### Command-Line Options
+
+```bash
+--local_rank     : Local rank for distributed training. Default is 0.
+--num_epochs     : Number of epochs for training. Default is 2.
+--model_name     : Type of the model. Choices include various ResNet and ViT variants.
+--wandb_online   : Run WandB in online mode. Default is offline.
+--project_name   : Name of the WandB project. Default is "Masked-ResNet".
+--wandb_run_id   : WandB run ID.
+--resume_train   : Resume training from last or best epoch.
+--pretrained     : Use pretrained model.
+--early_stop     : Enable early stopping.
+--mask_type      : Type of mask generator for data augmentation. Choices include 'zoom', 'patch', 'spectral', etc.
+--batch_size     : Batch size for training. Default is 64.
+--ratio          : Masking ratio for data augmentation. Default is 50.
+```
+
+### Examples
+Run with ResNet-50 and spectral mask:
+
+```bash
+python -m torch.distributed.launch --nproc_per_node=2 train.py -- --model_name=RN50 --mask_type=spectral
+```
+or
+```bash
+bash train.sh
+```
+
+## Testing Script (test.py)
+
+### Description
+The script `test.py` is designed for evaluating trained models on multiple datasets. It supports both ResNet and Vision Transformer (ViT) architectures and various masking strategies. The script leverages advanced metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
+
+### Key Features
+- Support for multiple model architectures including ResNet and ViT
+- Evaluation on multiple datasets including `Wang_CVPR20` and `Ojha_CVPR23`
+- Metrics: Average Precision, Accuracy, and AUC
+- Data Augmentation using custom mask generators
+
+### Usage
+Basic Command
+
+```bash
+python test.py [options]
+```
+Command-Line Options
+```bash
+--model_name : Type of the model. Choices include various ResNet and ViT variants.
+--mask_type  : Type of mask generator for data augmentation. Choices include 'zoom', 'patch', 'spectral', etc.
+--pretrained : Use pretrained model.
+--ratio      : Masking ratio for data augmentation.
+--batch_size : Batch size for evaluation. Default is 64.
+--data_type  : Type of dataset for evaluation. Choices are 'Wang_CVPR20' and 'Ojha_CVPR23'.
+--device     : Device to use for evaluation (default: auto-detect).
+```
+
+### Examples
+Evaluate a ResNet-50 model with spectral masking on the Wang_CVPR20 dataset:
+```bash
+python test.py --model_name=RN50 --mask_type=spectral --data_type=Wang_CVPR20
+```
+or
+```bash
+bash test.sh
+```
