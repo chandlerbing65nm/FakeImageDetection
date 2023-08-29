@@ -92,7 +92,7 @@ bash test.sh
 
 ## FrequencyMaskGenerator Class
 
-## Description
+### Description
 The `FrequencyMaskGenerator` class is designed for applying frequency domain masking to images. This is particularly useful as an advanced data augmentation technique, where the frequency components of an image are selectively blocked or passed.
 
 ### Key Features
