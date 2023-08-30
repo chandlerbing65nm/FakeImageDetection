@@ -19,22 +19,22 @@ python -m torch.distributed.launch --nproc_per_node=GPU_NUM train.py -- [options
 ### Command-Line Options
 
 ```bash
---local_rank     : Local rank for distributed training. Default is 0.
---num_epochs     : Number of epochs for training. Default is 2.
+--local_rank     : Local rank for distributed training. 
+--num_epochs     : Number of epochs for training. 
 --model_name     : Type of the model. Choices include various ResNet and ViT variants.
 --wandb_online   : Run WandB in online mode. Default is offline.
---project_name   : Name of the WandB project. Default is "Masked-ResNet".
+--project_name   : Name of the WandB project.
 --wandb_run_id   : WandB run ID.
 --resume_train   : Resume training from last or best epoch.
 --pretrained     : Use pretrained model.
 --early_stop     : Enable early stopping.
---mask_type      : Type of mask generator for data augmentation. Choices include 'zoom', 'patch', 'spectral', etc.
+--mask_type      : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
 --batch_size     : Batch size for training. Default is 64.
---ratio          : Masking ratio for data augmentation. Default is 50.
+--ratio          : Masking ratio for data augmentation.
 ```
 
 ### Bash Command
-edit training bash script:
+Edit training bash script:
 
 ```bash
 #!/bin/bash
@@ -78,7 +78,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --resume_train $RESUME \
 ```
 
-now, use this to run training:
+Now, use this to run training:
 ```bash
 bash train.sh
 ```
@@ -97,7 +97,7 @@ python test.py [options]
 Command-Line Options
 ```bash
 --model_name : Type of the model. Choices include various ResNet and ViT variants.
---mask_type  : Type of mask generator for data augmentation. Choices include 'zoom', 'patch', 'spectral', etc.
+--mask_type  : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
 --pretrained : Use pretrained model.
 --ratio      : Masking ratio for data augmentation.
 --batch_size : Batch size for evaluation. Default is 64.
@@ -106,7 +106,7 @@ Command-Line Options
 ```
 
 ### Bash Command
-edit testing bash script:
+Edit testing bash script:
 
 ```bash
 #!/bin/bash
@@ -129,7 +129,7 @@ python test.py \
   --batch_size $BATCH_SIZE \
   --device $DEVICE
 ```
-now, use this to run testing:
+Now, use this to run testing:
 ```bash
 bash test.sh
 ```
