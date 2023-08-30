@@ -10,6 +10,7 @@ from sklearn.metrics import average_precision_score, precision_score, recall_sco
 import argparse
 import wandb
 import torchvision.models as vis_models
+import re
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
@@ -153,7 +154,8 @@ def main(
         
         checkpoint_files = os.listdir(folder_path)
         if checkpoint_files:
-            ep_numbers = [int(re.search(f'{re.escape(resume_prefix)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix) and f.endswith('.pth')]
+            resume_prefix_base = f'{base_filename}_last_ep' if resume_train == 'from_last' else f'{base_filename}_best_ep'
+            ep_numbers = [int(re.search(f'{re.escape(resume_prefix_base)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix_base) and f.endswith('.pth')]
             max_ep = max(ep_numbers)
             checkpoint_path = f'{resume_prefix}{max_ep}.pth'
         else:

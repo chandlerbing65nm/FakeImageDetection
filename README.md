@@ -5,22 +5,14 @@
 
 ### Description
 
-This script `(train.py)` is designed for distributed training and evaluation of various Deep Learning models including ResNet and Vision Transformer (ViT) variants. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
-
-### Key Features
-
-- Distributed Training using `torch.distributed`
-- Support for multiple model architectures including ResNet and ViT
-- Data Augmentation using custom mask generators
-- Loss function: Binary Cross-Entropy with Logits (BCEWithLogitsLoss)
-- Optimizer: AdamW with learning rate of 0.0001 and weight decay of 1e-4
+This script `(train.py)` is designed for distributed training and evaluation of various Deep Learning models including ResNet variants. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
 
 ### Basic Command
 
 To run the script in a distributed environment:
 
 ```bash
-python -m torch.distributed.launch --nproc_per_node=2 train.py -- [options]
+python -m torch.distributed.launch --nproc_per_node=GPU_NUM train.py -- [options]
 
 ```
 
@@ -41,13 +33,52 @@ python -m torch.distributed.launch --nproc_per_node=2 train.py -- [options]
 --ratio          : Masking ratio for data augmentation. Default is 50.
 ```
 
-### Examples
-Run with ResNet-50 and spectral mask:
+### Bash Command
+edit training bash script:
 
 ```bash
-python -m torch.distributed.launch --nproc_per_node=2 train.py -- --model_name=RN50 --mask_type=spectral
+#!/bin/bash
+
+# Get the current date
+current_date=$(date)
+
+# Print the current date
+echo "The current date is: $current_date"
+
+# Define the arguments for your training script
+GPUs="$1"
+NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
+NUM_EPOCHS=10000
+PROJECT_NAME="Frequency-Masking"
+MODEL_NAME="RN50_mod" # RN50_mod, RN50
+MASK_TYPE="spectral"
+RATIO=15
+BATCH_SIZE=16
+WANDB_ID="qvlglly2"
+RESUME="from_last" # from_last or from_best
+
+# Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
+export CUDA_VISIBLE_DEVICES=$GPUs
+
+echo "Using $NUM_GPU GPUs with IDs: $GPUs"
+
+# Run the distributed training command
+python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
+  -- \
+  --num_epochs $NUM_EPOCHS \
+  --project_name $PROJECT_NAME \
+  --model_name $MODEL_NAME \
+  --mask_type $MASK_TYPE \
+  --ratio $RATIO \
+  --batch_size $BATCH_SIZE \
+  --early_stop \
+  --pretrained \
+  --wandb_online \
+  --wandb_run_id $WANDB_ID \
+  --resume_train $RESUME \
 ```
-or
+
+now, use this to run training:
 ```bash
 bash train.sh
 ```
@@ -55,13 +86,7 @@ bash train.sh
 ## Testing Script (test.py)
 
 ### Description
-The script `test.py` is designed for evaluating trained models on multiple datasets. It supports both ResNet and Vision Transformer (ViT) architectures and various masking strategies. The script leverages advanced metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
-
-### Key Features
-- Support for multiple model architectures including ResNet and ViT
-- Evaluation on multiple datasets including `Wang_CVPR20` and `Ojha_CVPR23`
-- Metrics: Average Precision, Accuracy, and AUC
-- Data Augmentation using custom mask generators
+The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
 
 ### Usage
 Basic Command
@@ -80,12 +105,31 @@ Command-Line Options
 --device     : Device to use for evaluation (default: auto-detect).
 ```
 
-### Examples
-Evaluate a ResNet-50 model with spectral masking on the Wang_CVPR20 dataset:
+### Bash Command
+edit testing bash script:
+
 ```bash
-python test.py --model_name=RN50 --mask_type=spectral --data_type=Wang_CVPR20
+#!/bin/bash
+
+# Define the arguments for your test script
+DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
+MODEL_NAME="RN50"
+MASK_TYPE="spectral"
+RATIO=15
+BATCH_SIZE=64
+DEVICE="cuda:0"
+
+# Run the test command
+python test.py \
+  --data_type $DATA_TYPE \
+  --pretrained \
+  --model_name $MODEL_NAME \
+  --mask_type $MASK_TYPE \
+  --ratio $RATIO \
+  --batch_size $BATCH_SIZE \
+  --device $DEVICE
 ```
-or
+now, use this to run testing:
 ```bash
 bash test.sh
 ```
