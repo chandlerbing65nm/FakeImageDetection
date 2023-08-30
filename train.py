@@ -47,7 +47,7 @@ def main(
     save_path=None,
     mask_type=None,
     pretrained=False,
-    resume_train=False,
+    resume_train=None,
     early_stop=True,
     wandb_online=False,
     ):
@@ -239,7 +239,7 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--resume_train', 
-        default='from_last',
+        default=None,
         type=str,
         choices=[
             'from_last', 'from_best'
@@ -317,7 +317,7 @@ if __name__ == "__main__":
     print(f"WandB Online: {args.wandb_online}")
     print(f"model type: {args.model_name}")
     print(f"Save path: {save_path}.pth")
-    print(f"Resume training: {args.resume_train}_epoch")
+    print(f"Resume training: {args.resume_train}")
     print(f"Device: cuda:{args.local_rank}")
     print("-" * 30, "\n")
 

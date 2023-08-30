@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define the arguments for your test script
-DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="RN50"
+DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
+MODEL_NAME="RN50_mod" # RN50_mod or RN50
 MASK_TYPE="spectral"
 RATIO=15
 BATCH_SIZE=64
