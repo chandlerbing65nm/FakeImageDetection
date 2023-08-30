@@ -16,7 +16,7 @@ python -m torch.distributed.launch --nproc_per_node=GPU_NUM train.py -- [options
 
 ```
 
-### Command-Line Options
+Command-Line Options
 
 ```bash
 --local_rank     : Local rank for distributed training. 
@@ -82,8 +82,7 @@ bash train.sh "0,1,2,4" # gpu ids to use
 ### Description
 The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
 
-### Usage
-Basic Command
+### Basic Command
 
 ```bash
 python test.py [options]
