@@ -39,12 +39,6 @@ Edit training bash script:
 ```bash
 #!/bin/bash
 
-# Get the current date
-current_date=$(date)
-
-# Print the current date
-echo "The current date is: $current_date"
-
 # Define the arguments for your training script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
@@ -80,7 +74,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
 
 Now, use this to run training:
 ```bash
-bash train.sh
+bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
 ## Testing Script (test.py)
