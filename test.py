@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import torchvision.transforms as transforms
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score

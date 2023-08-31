@@ -97,16 +97,6 @@ def main(
         mask_generator = FrequencyMaskGenerator(ratio=ratio)
     elif mask_type == 'zoom':
         mask_generator = ZoomBlockGenerator(ratio=ratio)
-    elif mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(ratio=ratio)
-    elif mask_type == 'shiftedpatch':
-        mask_generator = ShiftedPatchMaskGenerator(ratio=ratio)
-    elif mask_type == 'invblock':
-        mask_generator = InvBlockMaskGenerator(ratio=ratio)
-    elif mask_type == 'edge':
-        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
-    elif mask_type == 'highfreq':
-        mask_generator = HighFrequencyMaskGenerator()
     else:
         mask_generator = None
 

@@ -1,5 +1,6 @@
 
 import torch
+import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
@@ -20,38 +21,40 @@ from networks.resnet import resnet50
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 
-def train_augment(augmentor, mask_generator):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
-
-    transform = transforms.Compose([
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
+def train_augment(augmentor, mask_generator=None):
+    # Initialize an empty list to store transforms
+    transform_list = []
+    if mask_generator is not None:
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))  
+    transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(), 
+        transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        # masking_transform,
     ])
+    # Create the composed transform
+    transform = transforms.Compose(transform_list)
     return transform
 
-def val_augment(augmentor, mask_generator):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
-
-    transform = transforms.Compose([
-        transforms.Lambda(lambda img: mask_generator.transform(img)),
+def val_augment(augmentor, mask_generator=None):
+    # Initialize an empty list to store transforms
+    transform_list = []
+    if mask_generator is not None:
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img))) 
+    transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)), 
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-        # masking_transform, # Add the custom masking transform here
     ])
+    # Create the composed transform
+    transform = transforms.Compose(transform_list)
     return transform
     
-def test_augment(augmentor, mask_generator):
+def test_augment(augmentor, mask_generator=None):
     # Define the custom transform
     # masking_transform = MaskingTransform(mask_generator)
 

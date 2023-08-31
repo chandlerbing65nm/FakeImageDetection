@@ -11,11 +11,11 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
-MODEL_NAME="RN50" # RN50_mod, RN50
-MASK_TYPE="spectral"
+MODEL_NAME="RN50_mod" # RN50_mod, RN50
+MASK_TYPE="nomask" # nomask, spectral
 RATIO=15
-BATCH_SIZE=128
-WANDB_ID="qvlglly2"
+BATCH_SIZE=16
+WANDB_ID="0j9k8mif"
 RESUME="from_last" # from_last or from_best
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
