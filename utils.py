@@ -162,10 +162,8 @@ def evaluate_model(
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
         mask_generator = FrequencyMaskGenerator(ratio=ratio)
-    elif mask_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(ratio=ratio)
-    elif mask_type == 'edge':
-        mask_generator = EdgeAwareMaskGenerator(ratio=ratio)
+    elif mask_type == 'patch':
+        mask_generator = PatchMaskGenerator(ratio=ratio)
     else:
         mask_generator = None
 

@@ -28,21 +28,15 @@ if __name__ == "__main__":
         type=str,
         choices=[
             'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
-            'ViT_base_patch16_224', 'ViT_base_patch32_224',
-            'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
-        help='Type of model to use; includes ResNet and ViT variants'
+        help='Type of model to use; includes ResNet variants'
         )
     parser.add_argument(
         '--mask_type', 
-        default='zoom', 
+        default='spectral', 
         choices=[
-            'zoom', 
             'patch', 
             'spectral', 
-            'shiftedpatch', 
-            'invblock', 
-            'edge',
             'nomask'], 
         help='Type of mask generator'
         )

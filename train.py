@@ -95,8 +95,8 @@ def main(
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
         mask_generator = FrequencyMaskGenerator(ratio=ratio)
-    elif mask_type == 'zoom':
-        mask_generator = ZoomBlockGenerator(ratio=ratio)
+    elif mask_type == 'patch':
+        mask_generator = PatchMaskGenerator(ratio=ratio)
     else:
         mask_generator = None
 
@@ -122,9 +122,9 @@ def main(
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('ViT'):
-        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=pretrained)
+    # elif model_name.startswith('ViT'):
+    #     model_variant = model_name.split('_')[1]
+    #     model = timm.create_model(model_variant, pretrained=pretrained)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
@@ -205,10 +205,10 @@ if __name__ == "__main__":
         type=str,
         choices=[
             'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
-            'ViT_base_patch16_224', 'ViT_base_patch32_224',
-            'ViT_large_patch16_224', 'ViT_large_patch32_224'
+            # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
+            # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
-        help='Type of model to use; includes ResNet and ViT variants'
+        help='Type of model to use; includes ResNet'
         )
     parser.add_argument(
         '--wandb_online', 
@@ -248,14 +248,10 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--mask_type', 
-        default='zoom', 
+        default='spectral', 
         choices=[
-            'zoom', 
             'patch', 
             'spectral', 
-            'shiftedpatch', 
-            'invblock', 
-            'edge',
             'nomask'], 
         help='Type of mask generator'
         )
