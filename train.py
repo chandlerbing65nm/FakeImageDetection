@@ -192,6 +192,9 @@ def main(
         early_stopping=early_stopping,
         device=device,
         )
+        
+    if dist.get_rank() == 0:
+        wandb.finish()
 
 if __name__ == "__main__":
 
