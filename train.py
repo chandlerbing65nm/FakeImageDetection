@@ -42,6 +42,7 @@ def main(
     batch_size=64,
     wandb_run_id=None,
     model_name='RN50',
+    band='all',
     wandb_name=None,
     project_name=None,
     save_path=None,
@@ -94,7 +95,7 @@ def main(
 
     # Depending on the mask_type, create the appropriate mask generator
     if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio)
+        mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
     elif mask_type == 'patch':
         mask_generator = PatchMaskGenerator(ratio=ratio)
     else:
@@ -240,6 +241,14 @@ if __name__ == "__main__":
         help='what epoch to resume training'
         )
     parser.add_argument(
+        '--band', 
+        default='all',
+        type=str,
+        choices=[
+            'all', 'low', 'mid', 'high',
+        ]
+        )
+    parser.add_argument(
         '--pretrained', 
         action='store_true', 
         help='For pretraining'
@@ -274,20 +283,22 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
     finetune = 'ft' if args.pretrained else ''
+    band = '' if args.band == 'all' else args.band
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
         ckpt_folder = f'./checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
-        save_path = f'{ckpt_folder}/{model_name}{finetune}_{args.mask_type}mask'
+        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}{args.mask_type}mask'
+        wandb_name = f"mask_{ratio}_{model_name}{finetune}_{band}{args.mask_type}"
     else:
         ratio = 0
         ckpt_folder = f'./checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
         save_path = f'{ckpt_folder}/{model_name}{finetune}'
+        wandb_name = f"mask_{ratio}_{model_name}{finetune}"
 
     num_epochs = 100 if args.early_stop else args.num_epochs
-    wandb_name = f"mask_{ratio}_{model_name}{finetune}_{args.mask_type}"
 
     # # Retrieve resume path and epoch
     # resume_train = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
@@ -317,6 +328,7 @@ if __name__ == "__main__":
         batch_size=args.batch_size,
         wandb_run_id=args.wandb_run_id,
         model_name=args.model_name,
+        band=args.band,
         wandb_name=wandb_name,
         project_name=args.project_name,
         save_path=save_path, 

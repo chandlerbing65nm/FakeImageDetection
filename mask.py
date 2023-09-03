@@ -64,18 +64,16 @@ class PatchMaskGenerator:
         
 
 class FrequencyMaskGenerator:
-    def __init__(self, ratio: float = 0.3) -> None:
+    def __init__(self, ratio: float = 0.3, band: str = 'all') -> None:
         self.ratio = ratio
+        self.band = band  # 'low', 'mid', 'high', 'all'
 
     def transform(self, image: Image.Image) -> Image.Image:
-        # Convert the PIL Image to a complex-valued NumPy array
         image_array = np.array(image).astype(np.complex64)
         freq_image = np.fft.fftn(image_array, axes=(0, 1))
 
-        # Get the height and width of the image
         height, width, _ = image_array.shape
 
-        # Compute the balanced mask
         mask = self._create_balanced_mask(height, width)
         self.masked_freq_image = freq_image * mask
         masked_image_array = np.fft.ifftn(self.masked_freq_image, axes=(0, 1)).real
@@ -84,17 +82,30 @@ class FrequencyMaskGenerator:
 
     def _create_balanced_mask(self, height, width):
         mask = np.ones((height, width, 3), dtype=np.complex64)
-        num_frequencies = int(np.ceil(height * width * self.ratio))
-        mask_frequencies_indices = np.random.permutation(height * width)[:num_frequencies]
-        y_indices = mask_frequencies_indices // width
-        x_indices = mask_frequencies_indices % width
+
+        # Determine the region of the frequency domain to mask
+        if self.band == 'low':
+            y_start, y_end = 0, height // 4
+            x_start, x_end = 0, width // 4
+        elif self.band == 'mid':
+            y_start, y_end = height // 4, 3 * height // 4
+            x_start, x_end = width // 4, 3 * width // 4
+        elif self.band == 'high':
+            y_start, y_end = 3 * height // 4, height
+            x_start, x_end = 3 * width // 4, width
+        elif self.band == 'all':
+            y_start, y_end = 0, height
+            x_start, x_end = 0, width
+        else:
+            raise ValueError(f"Invalid band: {self.band}")
+
+        num_frequencies = int(np.ceil((y_end - y_start) * (x_end - x_start) * self.ratio))
+        mask_frequencies_indices = np.random.permutation((y_end - y_start) * (x_end - x_start))[:num_frequencies]
+        y_indices = mask_frequencies_indices // (x_end - x_start) + y_start
+        x_indices = mask_frequencies_indices % (x_end - x_start) + x_start
+
         mask[y_indices, x_indices, :] = 0
         return mask
-
-    def get_magnitude_and_phase(self):
-        magnitude = np.abs(self.masked_freq_image)
-        phase = np.angle(self.masked_freq_image)
-        return magnitude, phase
 
 def test_mask_generator(
     image_path, 
@@ -105,7 +116,7 @@ def test_mask_generator(
 
     # Create a MaskGenerator
     if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio)
+        mask_generator = FrequencyMaskGenerator(ratio=ratio, band='high')
     elif mask_type == 'patch':
         mask_generator = PatchMaskGenerator(ratio=ratio)
     else:
@@ -145,5 +156,5 @@ def test_mask_generator(
 test_mask_generator(
     '../../Datasets/Wang_CVPR2020/validation', 
     mask_type='spectral',
-    ratio=0.7
+    ratio=0
     )

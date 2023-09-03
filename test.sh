@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Define the arguments for your test script
-DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="RN50_mod" # RN50_mod or RN50 or RN50_mod_Grag21
-MASK_TYPE="nomask" # spectral or nomask
+DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
+MODEL_NAME="RN50" # RN50_mod or RN50
+MASK_TYPE="spectral" # spectral, patch or nomask
 RATIO=15
 BATCH_SIZE=64
 DEVICE="cuda:0"
