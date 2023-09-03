@@ -3,8 +3,8 @@
 # Define the arguments for your test script
 DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
 MODEL_NAME="RN50" # RN50_mod or RN50
-MASK_TYPE="spectral" # spectral, patch or nomask
-RATIO=15
+MASK_TYPE="spectral" # spectral, spatial or nomask
+RATIO=50
 BATCH_SIZE=64
 DEVICE="cuda:0"
 

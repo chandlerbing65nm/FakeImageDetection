@@ -93,13 +93,16 @@ def main(
         'jpg_qual': [int((30 + 100) / 2)]
     }
 
-    # Depending on the mask_type, create the appropriate mask generator
-    if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
-    elif mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(ratio=ratio)
+    if ratio > 1.0 or ratio < 0.0:
+        raise valueError(f"Invalid mask ratio {ratio}")
     else:
-        mask_generator = None
+        # Depending on the mask_type, create the appropriate mask generator
+        if mask_type == 'spectral':
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
+        elif mask_type == 'spatial':
+            mask_generator = SpatialMaskGenerator(ratio=ratio)
+        else:
+            mask_generator = None
 
     train_transform = train_augment(ImageAugmentor(train_opt), mask_generator)
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator)

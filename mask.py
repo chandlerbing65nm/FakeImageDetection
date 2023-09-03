@@ -14,54 +14,84 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
-class PatchMaskGenerator:
-    def __init__(self, ratio: float = 0.3) -> None:
+# class PatchMaskGenerator:
+#     def __init__(self, ratio: float = 0.3) -> None:
+#         self.ratio = ratio
+
+#     def transform(self, image: Image.Image) -> Image.Image:
+#         # Get the height and width of the image
+#         width, height = image.size
+
+#         # Compute the patch size
+#         patch_size = 16
+#         while height % patch_size != 0 or width % patch_size != 0:
+#             patch_size -= 1
+
+#         # Compute the number of patches
+#         num_patches = (height * width) // (patch_size * patch_size)
+
+#         # Compute the number of patches to mask
+#         mask_patches = int(np.ceil(num_patches * self.ratio))
+
+#         # Create a mask of ones
+#         mask = Image.new("L", (width, height), color=255)
+#         draw = ImageDraw.Draw(mask)
+
+#         # Randomly select patches to mask
+#         mask_patch_indices = random.sample(range(num_patches), mask_patches)
+        
+#         for index in mask_patch_indices:
+#             start_y = (index // (width // patch_size)) * patch_size
+#             start_x = (index % (width // patch_size)) * patch_size
+#             draw.rectangle([start_x, start_y, start_x + patch_size, start_y + patch_size], fill=0)
+
+#         # Convert both image and mask to numpy arrays
+#         image_np = np.array(image)
+#         mask_np = np.array(mask) / 255.0  # Normalize to [0, 1]
+
+#         # If the image is a 3-channel image, repeat the mask for all channels
+#         if len(image_np.shape) == 3:
+#             mask_np = np.expand_dims(mask_np, axis=-1)
+#             mask_np = np.repeat(mask_np, image_np.shape[-1], axis=-1)
+
+#         # Apply the mask
+#         masked_image_np = image_np * mask_np
+
+#         # Convert the numpy array back to a PIL Image
+#         masked_image = Image.fromarray(np.uint8(masked_image_np))
+
+#         return masked_image
+
+class SpatialMaskGenerator:
+    def __init__(self, ratio: float = 0.6) -> None:
         self.ratio = ratio
 
-    def transform(self, image: Image.Image) -> Image.Image:
-        # Get the height and width of the image
-        width, height = image.size
+    def transform(self, pil_image):
+        # Convert PIL image to numpy array
+        image = np.array(pil_image)
 
-        # Compute the patch size
-        patch_size = 16
-        while height % patch_size != 0 or width % patch_size != 0:
-            patch_size -= 1
-
-        # Compute the number of patches
-        num_patches = (height * width) // (patch_size * patch_size)
-
-        # Compute the number of patches to mask
-        mask_patches = int(np.ceil(num_patches * self.ratio))
-
-        # Create a mask of ones
-        mask = Image.new("L", (width, height), color=255)
-        draw = ImageDraw.Draw(mask)
-
-        # Randomly select patches to mask
-        mask_patch_indices = random.sample(range(num_patches), mask_patches)
+        # Infer the height and width from the image
+        height, width, channels = image.shape
         
-        for index in mask_patch_indices:
-            start_y = (index // (width // patch_size)) * patch_size
-            start_x = (index % (width // patch_size)) * patch_size
-            draw.rectangle([start_x, start_y, start_x + patch_size, start_y + patch_size], fill=0)
+        pixel_count = height * width
+        mask_count = int(np.ceil(pixel_count * self.ratio))
 
-        # Convert both image and mask to numpy arrays
-        image_np = np.array(image)
-        mask_np = np.array(mask) / 255.0  # Normalize to [0, 1]
+        # Generate random mask
+        mask_idx = np.random.permutation(pixel_count)[:mask_count]
+        mask = np.ones(pixel_count, dtype=np.float32)  # Initialize mask as ones
+        mask[mask_idx] = 0  # Set selected indices to zero
 
-        # If the image is a 3-channel image, repeat the mask for all channels
-        if len(image_np.shape) == 3:
-            mask_np = np.expand_dims(mask_np, axis=-1)
-            mask_np = np.repeat(mask_np, image_np.shape[-1], axis=-1)
+        mask = mask.reshape((height, width))
 
-        # Apply the mask
-        masked_image_np = image_np * mask_np
+        # Repeat the mask for all channels
+        mask = np.repeat(mask[:, :, np.newaxis], channels, axis=2)
 
-        # Convert the numpy array back to a PIL Image
-        masked_image = Image.fromarray(np.uint8(masked_image_np))
+        masked_image = image * mask
 
-        return masked_image
-        
+        # Convert numpy array back to PIL image
+        masked_pil_image = Image.fromarray(np.uint8(masked_image))
+
+        return masked_pil_image
 
 class FrequencyMaskGenerator:
     def __init__(self, ratio: float = 0.3, band: str = 'all') -> None:
@@ -117,8 +147,8 @@ def test_mask_generator(
     # Create a MaskGenerator
     if mask_type == 'spectral':
         mask_generator = FrequencyMaskGenerator(ratio=ratio, band='high')
-    elif mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(ratio=ratio)
+    elif mask_type == 'spatial':
+        mask_generator = SpatialMaskGenerator(ratio=ratio)
     else:
         mask_generator = None
 
@@ -155,6 +185,6 @@ def test_mask_generator(
 # Usage:
 test_mask_generator(
     '../../Datasets/Wang_CVPR2020/validation', 
-    mask_type='spectral',
-    ratio=0
+    mask_type='spatial',
+    ratio=0.1
     )

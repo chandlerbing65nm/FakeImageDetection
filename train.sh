@@ -13,8 +13,8 @@ NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50
 MASK_TYPE="spectral" # nomask, spectral, patch
-BAND="all" # all, low, mid, high
-RATIO=70
+BAND="low" # all, low, mid, high
+RATIO=15
 BATCH_SIZE=128
 WANDB_ID="gxm9g46z"
 RESUME="from_last" # from_last or from_best
@@ -37,5 +37,5 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --early_stop \
   --pretrained \
   --wandb_online \
-  --wandb_run_id $WANDB_ID \
-  --resume_train $RESUME 
+  # --wandb_run_id $WANDB_ID \
+  # --resume_train $RESUME 
