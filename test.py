@@ -41,6 +41,13 @@ if __name__ == "__main__":
         help='Type of mask generator'
         )
     parser.add_argument(
+        '--band', 
+        default='all',
+        type=str,
+        choices=[
+            'all', 'low', 'mid', 'high',]
+        )
+    parser.add_argument(
         '--pretrained', 
         action='store_true', 
         help='For pretraining'
@@ -76,10 +83,11 @@ if __name__ == "__main__":
     device = torch.device(args.device)
     model_name = args.model_name.lower()
     finetune = 'ft' if args.pretrained else ''
+    band = '' if args.band == 'all' else args.band
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{args.mask_type}mask.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
     else:
         ratio = 0
         checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
