@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Define the arguments for your test script
-DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
+DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
 MODEL_NAME="RN50" # RN50_mod or RN50
-MASK_TYPE="spectral" # spectral, spatial or nomask
-BAND="low" # all, low, mid, high
-RATIO=15
+MASK_TYPE="spectral" # spectral, spatial, patch or nomask
+BAND="all" # all, low, mid, high
+RATIO=10
 BATCH_SIZE=64
 DEVICE="cuda:0"
 

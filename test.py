@@ -36,7 +36,8 @@ if __name__ == "__main__":
         default='spectral', 
         choices=[
             'patch', 
-            'spectral', 
+            'spectral',
+            'spatial', 
             'nomask'], 
         help='Type of mask generator'
         )
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}{finetune}_{args.mask_type}mask{ratio}.txt'
+    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{ratio}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")

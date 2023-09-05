@@ -29,9 +29,9 @@ import os
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-os.environ['WANDB_CONFIG_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
-os.environ['WANDB_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
-os.environ['WANDB_CACHE_DIR'] = '/home/timm/chandler/Experiments/FakeDetection/wandb'
+os.environ['WANDB_CONFIG_DIR'] = './wandb'
+os.environ['WANDB_DIR'] = './wandb'
+os.environ['WANDB_CACHE_DIR'] = './wandb'
 
 def main(
     local_rank=0,
@@ -96,11 +96,13 @@ def main(
     if ratio > 1.0 or ratio < 0.0:
         raise valueError(f"Invalid mask ratio {ratio}")
     else:
-        # Depending on the mask_type, create the appropriate mask generator
+        # Create a MaskGenerator
         if mask_type == 'spectral':
             mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
         elif mask_type == 'spatial':
             mask_generator = SpatialMaskGenerator(ratio=ratio)
+        elif mask_type == 'patch':
+            mask_generator = PatchMaskGenerator(ratio=ratio)
         else:
             mask_generator = None
 
@@ -265,8 +267,9 @@ if __name__ == "__main__":
         '--mask_type', 
         default='spectral', 
         choices=[
-            'patch', 
+            'spatial', 
             'spectral', 
+            'patch',
             'nomask'], 
         help='Type of mask generator'
         )
