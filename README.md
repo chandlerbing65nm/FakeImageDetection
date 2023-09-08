@@ -1,4 +1,4 @@
-# Frequency Masking for Universal Deepfake Detection
+# Frequency Masking for Universal DeepFake Detection
 
 ## Abstract
 
