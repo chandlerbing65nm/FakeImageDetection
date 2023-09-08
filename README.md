@@ -1,5 +1,12 @@
+# Frequency Masking for Universal Deepfake Detection
 
+## Abstract
 
+As artificial intelligence increasingly facilitates the creation of convincing synthetic images, the need for effective universal deepfake detection has never been more critical. Existing approaches, primarily based on CNNs and Transformers, often yield suboptimal results due to an overemphasis on irrelevant features. In this work, we shift the paradigm by focusing on the frequency domain through the use of Fast Fourier Transform (FFT). We introduce a frequency-based masking technique explicitly designed for universal deepfake detection. Our method strategically targets specific frequency bands, capturing forensically important features often overlooked by conventional approaches. Comparative analyses reveal substantial performance gains over existing methods. This investigation marks a significant insights in the field of universal deepfake detection, supported by a comprehensive suite of analytical insights and experimental evidence. 
+
+<p align="center">
+  <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="500" height="500">
+</p>
 
 ## Training Script (train.py)
 
@@ -125,41 +132,4 @@ python test.py \
 Now, use this to run testing:
 ```bash
 bash test.sh
-```
-
-## FrequencyMaskGenerator Class
-
-### Description
-The `FrequencyMaskGenerator` class is designed for applying frequency domain masking to images. This is particularly useful as an advanced data augmentation technique, where the frequency components of an image are selectively blocked or passed.
-
-### Key Features
-
-- Frequency Domain Transformation: Converts the input image to its frequency representation using the Fast Fourier Transform (FFT).
-- Mask Generation: Creates a balanced binary mask in the frequency domain. The ratio of frequencies to be masked can be specified.
-- Inverse Transformation: Converts the masked frequency representation back to the spatial domain.
-
-### Methods
-- `__init__(self, ratio: float = 0.3):` Initializes the mask generator. The ratio parameter specifies the fraction of frequencies to be masked.
-
-- `transform(self, image: Image.Image) -> Image.Image:` Transforms an input PIL Image by applying a frequency mask and returns the masked image.
-
-- `_create_balanced_mask(self, height, width):` Internal method to create a balanced binary mask based on the image dimensions (height and width).
-
-### Usage Example
-```python
-from PIL import Image
-from FrequencyMaskGenerator import FrequencyMaskGenerator
-
-# Initialize the FrequencyMaskGenerator with a ratio of 0.5
-mask_generator = FrequencyMaskGenerator(ratio=0.5)
-
-# Read an image using PIL
-image = Image.open("sample_image.jpg")
-
-# Apply the frequency mask
-masked_image = mask_generator.transform(image)
-
-# Save or display the masked image
-masked_image.show()
-
 ```
