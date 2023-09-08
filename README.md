@@ -12,9 +12,46 @@ As artificial intelligence increasingly facilitates the creation of convincing s
   <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="500" height="500">
 </p>
 
+## &#9733; Datasets
+### [Wang_CVPR2020](https://github.com/PeterWang512/CNNDetection/tree/195892d93fc3f26599f93d8d9e1ca995991da2ee)
+
+```
+Wang_CVPR2020/
+├── testing/
+│   ├── crn/
+│   │   ├── 1_fake/
+│   │   └── 0_real/
+│   └── ...
+├── training/
+│   ├── car/
+│   │   ├── 1_fake/
+│   │   └── 0_real/
+│   └── ...
+└── validation/
+    ├── car/
+    │   ├── 1_fake/
+    │   └── 0_real/
+    └── ...
+```
+
+### [Ojha_CVPR2023](https://github.com/Yuheng-Li/UniversalFakeDetect)
+```
+Ojha_CVPR2023/
+├── guided/
+│   ├── 1_fake/
+│   └── 0_real/
+├── ldm_200_cfg/
+│   ├── 1_fake/
+│   └── 0_real/
+├── ldm_100/
+│   ├── 1_fake/
+│   └── 0_real/
+└── ...
+```
+
 ## &#9733; Training Script (train.py)
 
-### Description
+### - Description
 
 This script `(train.py)` is designed for distributed training and evaluation of various Deep Learning models including ResNet variants. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
 
