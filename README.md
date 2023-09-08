@@ -12,7 +12,7 @@ As artificial intelligence increasingly facilitates the creation of convincing s
   <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="500" height="500">
 </p>
 
-## Training Script (train.py)
+## &#9733; Training Script (train.py)
 
 ### Description
 
@@ -88,7 +88,7 @@ Now, use this to run training:
 bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
-## Testing Script (test.py)
+## &#9733; Testing Script (test.py)
 
 ### Description
 The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
