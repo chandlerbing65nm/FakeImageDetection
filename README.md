@@ -1,8 +1,12 @@
+<div align="center">
+
 # Frequency Masking for Universal DeepFake Detection
+
+</div>
 
 ## Abstract
 
-<div style="text-align: justify">
+<div align="justify">
 
 As artificial intelligence increasingly facilitates the creation of convincing synthetic images, the need for effective universal deepfake detection has never been more critical. Existing approaches, primarily based on CNNs and Transformers, often yield suboptimal results due to an overemphasis on irrelevant features. In this work, we shift the paradigm by focusing on the frequency domain through the use of Fast Fourier Transform (FFT). We introduce a frequency-based masking technique explicitly designed for universal deepfake detection. Our method strategically targets specific frequency bands, capturing forensically important features often overlooked by conventional approaches. Comparative analyses reveal substantial performance gains over existing methods. This investigation marks a significant insights in the field of universal deepfake detection, supported by a comprehensive suite of analytical insights and experimental evidence. 
 
