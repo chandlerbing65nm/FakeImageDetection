@@ -120,6 +120,21 @@ Now, use this to run testing:
 bash test.sh
 ```
 
+### Results
+You can find the results in this structure:
+
+```
+results/
+├── mask_15/
+└── ├── ojha_cvpr23
+    └── ├── rn50ft_spectralmask.txt
+        └── ...
+    ├── wang_cvpr20
+    └── ├── rn50ft_spectralmask.txt
+        └── ...
+```
+
+
 ## &#9733; Training Script (train.py)
 
 ### Description
