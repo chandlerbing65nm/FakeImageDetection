@@ -1,7 +1,143 @@
+<div align="center">
+
+# Frequency Masking for Universal DeepFake Detection
+
+</div>
+
+<div align="justify">
+
+We study universal deepfake detection. Our  goal is to detect synthetic images from a range of generative AI approaches, particularly emerging ones which are unseen during training of the deepfake detector. Universal deepfake detection requires outstanding generalization capability. Motivated by recently proposed masked image modeling which has demonstrated excellent generalization in self-supervised pre-training, we make the first attempt to explore masked image modeling for universal deepfake detection. We study spatial and frequency domain masking in training deepfake detector.Based on empirical analysis, we propose a novel deepfake detector via frequency masking.Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods. 
+
+</div>
+
+<p align="center">
+  <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="450" height="450">
+</p>
 
 
+## &#9733; Datasets
+Follow strictly the naming and structure of folders below:
 
-## Training Script (train.py)
+### [Wang_CVPR2020](https://github.com/PeterWang512/CNNDetection/tree/195892d93fc3f26599f93d8d9e1ca995991da2ee)
+```
+Wang_CVPR2020/
+├── testing/
+│   ├── crn/
+│   │   ├── 1_fake/
+│   │   └── 0_real/
+│   └── ...
+├── training/
+│   ├── car/
+│   │   ├── 1_fake/
+│   │   └── 0_real/
+│   └── ...
+└── validation/
+    ├── car/
+    │   ├── 1_fake/
+    │   └── 0_real/
+    └── ...
+```
+
+### [Ojha_CVPR2023](https://github.com/Yuheng-Li/UniversalFakeDetect)
+```
+Ojha_CVPR2023/
+├── guided/
+│   ├── 1_fake/
+│   └── 0_real/
+├── ldm_200_cfg/
+│   ├── 1_fake/
+│   └── 0_real/
+├── ldm_100/
+│   ├── 1_fake/
+│   └── 0_real/
+└── ...
+```
+
+## &#9733; Pretrained Models
+
+You can download the pretrained weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing). Put the files under the repository and don't change the name or anything!
+
+File structure should strictly be like this:
+```
+checkpoints/
+├── mask_15/
+│   ├── rn50ft_midspectralmask.pth
+│   ├── rn50ft_lowspectralmask.pth
+│   ├── rn50ft_highspectralmask.pth
+│   ├── rn50ft_spatialmask.pth (pixel masking in paper)
+│   ├── rn50ft_patchmask.pth
+│   ├── rn50ft_spectralmask.pth (Wang et al. + Ours)
+│   └── rn50_modft_spectralmask.pth (Gragnaniello et al. + Ours)
+│   └── ...
+└── ...
+```
+
+## &#9733; Testing Script (test.py)
+
+### Description
+The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
+
+### Basic Command
+
+```bash
+python test.py [options]
+```
+Command-Line Options
+```bash
+--model_name : Type of the model. Choices include various ResNet and ViT variants.
+--mask_type  : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
+--pretrained : Use pretrained model.
+--ratio      : Masking ratio for data augmentation.
+--batch_size : Batch size for evaluation. Default is 64.
+--data_type  : Type of dataset for evaluation. Choices are 'Wang_CVPR20' and 'Ojha_CVPR23'.
+--device     : Device to use for evaluation (default: auto-detect).
+```
+
+### Bash Command
+Edit testing bash script:
+
+```bash
+#!/bin/bash
+
+# Define the arguments for your test script
+DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
+MODEL_NAME="RN50"
+MASK_TYPE="spectral"
+RATIO=15
+BATCH_SIZE=64
+DEVICE="cuda:0"
+
+# Run the test command
+python test.py \
+  --data_type $DATA_TYPE \
+  --pretrained \
+  --model_name $MODEL_NAME \
+  --mask_type $MASK_TYPE \
+  --ratio $RATIO \
+  --batch_size $BATCH_SIZE \
+  --device $DEVICE
+```
+Now, use this to run testing:
+```bash
+bash test.sh
+```
+
+### Results
+You can find the results in this structure:
+
+```
+results/
+├── mask_15/
+└── ├── ojha_cvpr23/
+    └── ├── rn50ft_spectralmask.txt
+        └── ...
+    ├── wang_cvpr20/
+    └── ├── rn50ft_spectralmask.txt
+        └── ...
+```
+
+
+## &#9733; Training Script (train.py)
 
 ### Description
 
@@ -75,91 +211,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
 Now, use this to run training:
 ```bash
 bash train.sh "0,1,2,4" # gpu ids to use
-```
-
-## Testing Script (test.py)
-
-### Description
-The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
-
-### Basic Command
-
-```bash
-python test.py [options]
-```
-Command-Line Options
-```bash
---model_name : Type of the model. Choices include various ResNet and ViT variants.
---mask_type  : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
---pretrained : Use pretrained model.
---ratio      : Masking ratio for data augmentation.
---batch_size : Batch size for evaluation. Default is 64.
---data_type  : Type of dataset for evaluation. Choices are 'Wang_CVPR20' and 'Ojha_CVPR23'.
---device     : Device to use for evaluation (default: auto-detect).
-```
-
-### Bash Command
-Edit testing bash script:
-
-```bash
-#!/bin/bash
-
-# Define the arguments for your test script
-DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="RN50"
-MASK_TYPE="spectral"
-RATIO=15
-BATCH_SIZE=64
-DEVICE="cuda:0"
-
-# Run the test command
-python test.py \
-  --data_type $DATA_TYPE \
-  --pretrained \
-  --model_name $MODEL_NAME \
-  --mask_type $MASK_TYPE \
-  --ratio $RATIO \
-  --batch_size $BATCH_SIZE \
-  --device $DEVICE
-```
-Now, use this to run testing:
-```bash
-bash test.sh
-```
-
-## FrequencyMaskGenerator Class
-
-### Description
-The `FrequencyMaskGenerator` class is designed for applying frequency domain masking to images. This is particularly useful as an advanced data augmentation technique, where the frequency components of an image are selectively blocked or passed.
-
-### Key Features
-
-- Frequency Domain Transformation: Converts the input image to its frequency representation using the Fast Fourier Transform (FFT).
-- Mask Generation: Creates a balanced binary mask in the frequency domain. The ratio of frequencies to be masked can be specified.
-- Inverse Transformation: Converts the masked frequency representation back to the spatial domain.
-
-### Methods
-- `__init__(self, ratio: float = 0.3):` Initializes the mask generator. The ratio parameter specifies the fraction of frequencies to be masked.
-
-- `transform(self, image: Image.Image) -> Image.Image:` Transforms an input PIL Image by applying a frequency mask and returns the masked image.
-
-- `_create_balanced_mask(self, height, width):` Internal method to create a balanced binary mask based on the image dimensions (height and width).
-
-### Usage Example
-```python
-from PIL import Image
-from FrequencyMaskGenerator import FrequencyMaskGenerator
-
-# Initialize the FrequencyMaskGenerator with a ratio of 0.5
-mask_generator = FrequencyMaskGenerator(ratio=0.5)
-
-# Read an image using PIL
-image = Image.open("sample_image.jpg")
-
-# Apply the frequency mask
-masked_image = mask_generator.transform(image)
-
-# Save or display the masked image
-masked_image.show()
-
 ```
