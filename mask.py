@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
+from imageio import imsave
 
 class PatchMaskGenerator:
     def __init__(self, ratio: float = 0.3) -> None:
@@ -146,7 +147,7 @@ def test_mask_generator(
 
     # Create a MaskGenerator
     if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio, band='high')
+        mask_generator = FrequencyMaskGenerator(ratio=ratio, band='all')
     elif mask_type == 'spatial':
         mask_generator = SpatialMaskGenerator(ratio=ratio)
     elif mask_type == 'patch':
@@ -156,17 +157,18 @@ def test_mask_generator(
 
     transform = transforms.Compose([
         transforms.Lambda(lambda img: mask_generator.transform(img)),
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        # transforms.Resize(256),
+        # transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        # transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
 
-    data = ForenSynths(image_path, transform=transform)
-    dataloader = DataLoader(data, batch_size=32, shuffle=True)
+    # data = ForenSynths(image_path, transform=transform)
+    data = Wang_CVPR20(image_path, transform=transform)
+    dataloader = DataLoader(data, batch_size=32, shuffle=False)
 
     # Access the first image and label directly
-    image, label = data[123]
+    image, label = data[1]
     image_to_save = image
 
     # Convert the tensor image to NumPy and transpose if necessary
@@ -179,14 +181,17 @@ def test_mask_generator(
     sample_path = f'./samples'
     os.makedirs(sample_path, exist_ok=True)
 
-    # Display and save the image
-    plt.imshow(image_to_save)
-    plt.axis('off')  # Optional, to turn off axes
-    plt.savefig(f"{sample_path}/masked_{mask_type}.jpg")
+    # # Save the image using imageio's imsave
+    imsave(f"{sample_path}/masked_{mask_type}.jpg", (image_to_save * 255).astype(np.uint8))
+
+    # # Display and save the image
+    # plt.imshow(image_to_save)
+    # plt.axis('off')  # Optional, to turn off axes
+    # plt.savefig(f"{sample_path}/masked_{mask_type}.jpg")
 
 # Usage:
 test_mask_generator(
-    '../../Datasets/Wang_CVPR2020/validation', 
-    mask_type='spectral',
-    ratio=0.15
+    '/home/timm/chandler/Experiments/FakeDetection/samples/original', 
+    mask_type='patch', # spectral, spatial, patch
+    ratio=0.3
     )
