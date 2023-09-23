@@ -12,11 +12,11 @@ NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50
-MASK_TYPE="spectral" # nomask, spectral, spatial, patch
-BAND="mid" # all, low, mid, high
-RATIO=15
+MASK_TYPE="nomask" # nomask, spectral, spatial, patch
+BAND="all" # all, low, mid, high
+RATIO=0
 BATCH_SIZE=128
-WANDB_ID="d1z0quxm"
+WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
@@ -38,4 +38,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --pretrained \
   --wandb_online \
   --wandb_run_id $WANDB_ID \
-  --resume_train $RESUME 
+  --resume_train $RESUME \

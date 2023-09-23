@@ -64,7 +64,7 @@ checkpoints/
 │   ├── rn50ft_midspectralmask.pth
 │   ├── rn50ft_lowspectralmask.pth
 │   ├── rn50ft_highspectralmask.pth
-│   ├── rn50ft_spatialmask.pth (pixel masking in paper)
+│   ├── rn50ft_pixelmask.pth
 │   ├── rn50ft_patchmask.pth
 │   ├── rn50ft_spectralmask.pth (Wang et al. + Ours)
 │   └── rn50_modft_spectralmask.pth (Gragnaniello et al. + Ours)
@@ -88,6 +88,7 @@ Command-Line Options
 --mask_type  : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
 --pretrained : Use pretrained model.
 --ratio      : Masking ratio for data augmentation.
+--band       : Frequency band to randomly mask.
 --batch_size : Batch size for evaluation. Default is 64.
 --data_type  : Type of dataset for evaluation. Choices are 'Wang_CVPR20' and 'Ojha_CVPR23'.
 --device     : Device to use for evaluation (default: auto-detect).
@@ -101,8 +102,9 @@ Edit testing bash script:
 
 # Define the arguments for your test script
 DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="RN50"
-MASK_TYPE="spectral"
+MODEL_NAME="RN50" # RN50_mod or RN50
+MASK_TYPE="spectral" # spectral, spatial, patch or nomask
+BAND="mid" # all, low, mid, high
 RATIO=15
 BATCH_SIZE=64
 DEVICE="cuda:0"
@@ -113,6 +115,7 @@ python test.py \
   --pretrained \
   --model_name $MODEL_NAME \
   --mask_type $MASK_TYPE \
+  --band $BAND \
   --ratio $RATIO \
   --batch_size $BATCH_SIZE \
   --device $DEVICE
@@ -125,15 +128,16 @@ bash test.sh
 ### Results
 You can find the results in this structure:
 
-```
+```bash
 results/
 ├── mask_15/
-└── ├── ojha_cvpr23/
-    └── ├── rn50ft_spectralmask.txt
-        └── ...
-    ├── wang_cvpr20/
-    └── ├── rn50ft_spectralmask.txt
-        └── ...
+│   ├── ojha_cvpr23/
+│   │   ├── rn50ft_spectralmask.txt
+│   │   └── ...
+│   └── wang_cvpr20/
+│       ├── rn50ft_spectralmask.txt
+│       └── ...
+└── ...
 ```
 
 
@@ -141,7 +145,7 @@ results/
 
 ### Description
 
-This script `(train.py)` is designed for distributed training and evaluation of various Deep Learning models including ResNet variants. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
+This script `(train.py)` is designed for distributed training and evaluation of models. The script is highly configurable through command-line arguments and provides advanced features such as `WandB` integration, early stopping, and various masking options for data augmentation.
 
 ### Basic Command
 
@@ -167,27 +171,35 @@ Command-Line Options
 --mask_type      : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
 --batch_size     : Batch size for training. Default is 64.
 --ratio          : Masking ratio for data augmentation.
+--band           : Frequency band to randomly mask.
 ```
 
 ### Bash Command
-Edit training bash script:
+Edit training bash script `train.sh`:
 
 ```bash
 #!/bin/bash
+
+# Get the current date
+current_date=$(date)
+
+# Print the current date
+echo "The current date is: $current_date"
 
 # Define the arguments for your training script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
-MODEL_NAME="RN50_mod" # RN50_mod, RN50
-MASK_TYPE="spectral"
-RATIO=15
-BATCH_SIZE=16
-WANDB_ID="qvlglly2"
+MODEL_NAME="RN50" # RN50_mod, RN50
+MASK_TYPE="nomask" # nomask, spectral, spatial, patch
+BAND="all" # all, low, mid, high
+RATIO=0
+BATCH_SIZE=128
+WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
 
-# Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs 0 and 1
+# Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
 
 echo "Using $NUM_GPU GPUs with IDs: $GPUs"
@@ -199,6 +211,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --project_name $PROJECT_NAME \
   --model_name $MODEL_NAME \
   --mask_type $MASK_TYPE \
+  --band $BAND \
   --ratio $RATIO \
   --batch_size $BATCH_SIZE \
   --early_stop \

@@ -24,7 +24,7 @@ class PatchMaskGenerator:
         width, height = image.size
 
         # Compute the patch size
-        patch_size = 8
+        patch_size = 16
         while height % patch_size != 0 or width % patch_size != 0:
             patch_size -= 1
 
