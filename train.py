@@ -99,8 +99,8 @@ def main(
         # Create a MaskGenerator
         if mask_type == 'spectral':
             mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
-        elif mask_type == 'spatial':
-            mask_generator = SpatialMaskGenerator(ratio=ratio)
+        elif mask_type == 'pixel':
+            mask_generator = PixelMaskGenerator(ratio=ratio)
         elif mask_type == 'patch':
             mask_generator = PatchMaskGenerator(ratio=ratio)
         else:
@@ -267,7 +267,7 @@ if __name__ == "__main__":
         '--mask_type', 
         default='spectral', 
         choices=[
-            'spatial', 
+            'pixel', 
             'spectral', 
             'patch',
             'nomask'], 

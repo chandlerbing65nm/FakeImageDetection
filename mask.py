@@ -63,7 +63,7 @@ class PatchMaskGenerator:
 
         return masked_image
 
-class SpatialMaskGenerator:
+class PixelMaskGenerator:
     def __init__(self, ratio: float = 0.6) -> None:
         self.ratio = ratio
 
@@ -148,8 +148,8 @@ def test_mask_generator(
     # Create a MaskGenerator
     if mask_type == 'spectral':
         mask_generator = FrequencyMaskGenerator(ratio=ratio, band='all')
-    elif mask_type == 'spatial':
-        mask_generator = SpatialMaskGenerator(ratio=ratio)
+    elif mask_type == 'pixel':
+        mask_generator = PixelMaskGenerator(ratio=ratio)
     elif mask_type == 'patch':
         mask_generator = PatchMaskGenerator(ratio=ratio)
     else:
@@ -192,6 +192,6 @@ def test_mask_generator(
 # Usage:
 test_mask_generator(
     '/home/timm/chandler/Experiments/FakeDetection/samples/original', 
-    mask_type='patch', # spectral, spatial, patch
+    mask_type='patch', # spectral, pixel, patch
     ratio=0.3
     )

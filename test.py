@@ -37,7 +37,7 @@ if __name__ == "__main__":
         choices=[
             'patch', 
             'spectral',
-            'spatial', 
+            'pixel', 
             'nomask'], 
         help='Type of mask generator'
         )

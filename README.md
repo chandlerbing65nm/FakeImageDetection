@@ -103,7 +103,7 @@ Edit testing bash script `test.sh`:
 # Define the arguments for your test script
 DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
 MODEL_NAME="RN50" # RN50_mod or RN50
-MASK_TYPE="spectral" # spectral, spatial, patch or nomask
+MASK_TYPE="spectral" # spectral, pixel, patch or nomask
 BAND="mid" # all, low, mid, high
 RATIO=15
 BATCH_SIZE=64
@@ -192,7 +192,7 @@ NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50
-MASK_TYPE="nomask" # nomask, spectral, spatial, patch
+MASK_TYPE="nomask" # nomask, spectral, pixel, patch
 BAND="all" # all, low, mid, high
 RATIO=0
 BATCH_SIZE=128
@@ -225,3 +225,21 @@ Now, use this to run training:
 ```bash
 bash train.sh "0,1,2,4" # gpu ids to use
 ```
+
+## License
+
+This project is licensed under the [Apache License](LICENSE).
+
+## Citation
+
+If you use this code in your research, please consider citing it. Below is the BibTeX entry for citation:
+
+```bibtex
+@misc{Doloriel2023,
+  author = {Chandler Timm C. Doloriel, Ngai-Man Cheung},
+  title = {Frequency Masking for Universal DeepFake Detection},
+  year = {2023},
+  publisher = {GitHub},
+  <!-- journal = {GitHub Repository}, -->
+  <!-- howpublished = {\url{https://github.com/yourusername/yourrepository}}, -->
+}
