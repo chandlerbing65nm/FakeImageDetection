@@ -226,11 +226,11 @@ Now, use this to run training:
 bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
-## License
+## &#9733; License
 
 This project is licensed under the [Apache License](LICENSE).
 
-## Citation
+## &#9733; Citation
 
 If you use this code in your research, please consider citing it. Below is the BibTeX entry for citation:
 
@@ -239,7 +239,6 @@ If you use this code in your research, please consider citing it. Below is the B
   author = {Chandler Timm C. Doloriel, Ngai-Man Cheung},
   title = {Frequency Masking for Universal DeepFake Detection},
   year = {2023},
-  publisher = {GitHub},
-  <!-- journal = {GitHub Repository}, -->
-  <!-- howpublished = {\url{https://github.com/yourusername/yourrepository}}, -->
+  publisher = {},
+  journal = {},
 }
