@@ -95,7 +95,7 @@ Command-Line Options
 ```
 
 ### Bash Command
-Edit testing bash script:
+Edit testing bash script `test.sh`:
 
 ```bash
 #!/bin/bash
