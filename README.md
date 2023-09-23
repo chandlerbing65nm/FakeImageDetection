@@ -53,9 +53,9 @@ Ojha_CVPR2023/
 └── ...
 ```
 
-## &#9733; Pretrained Models
+## &#9733; Model Weights
 
-You can download the pretrained weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing). Put the files under the repository and don't change the name or anything!
+You can download the model weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing). Put the files under the repository and don't change the name or anything!
 
 File structure should strictly be like this:
 ```
