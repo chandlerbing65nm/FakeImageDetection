@@ -4,8 +4,8 @@
 
 </div>
 
-<p>
-<img align="right" width="380"  src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b"> 
+<p align="center">
+  <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="350" height="350">
 </p>
 
 >We study universal deepfake detection.
