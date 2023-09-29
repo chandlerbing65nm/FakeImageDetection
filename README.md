@@ -4,15 +4,16 @@
 
 </div>
 
-<div align="justify">
-
-We study universal deepfake detection. Our  goal is to detect synthetic images from a range of generative AI approaches, particularly emerging ones which are unseen during training of the deepfake detector. Universal deepfake detection requires outstanding generalization capability. Motivated by recently proposed masked image modeling which has demonstrated excellent generalization in self-supervised pre-training, we make the first attempt to explore masked image modeling for universal deepfake detection. We study spatial and frequency domain masking in training deepfake detector.Based on empirical analysis, we propose a novel deepfake detector via frequency masking.Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods. 
-
-</div>
-
-<p align="center">
-  <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="450" height="450">
+<p>
+<img align="right" width="340"  src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b"> 
 </p>
+
+>We study universal deepfake detection.
+>Our  goal is to detect synthetic images from a range of generative AI approaches, particularly emerging ones which are unseen during training of the deepfake detector.
+>Universal deepfake detection requires outstanding generalization capability.
+>Motivated by recently proposed masked image modeling which has demonstrated excellent generalization in self-supervised pre-training, we make the first attempt to explore masked image modeling for universal deepfake detection. We study spatial and frequency domain masking in training deepfake detector.
+>Based on empirical analysis, we propose a novel deepfake detector via frequency masking.
+>Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods. 
 
 
 ## &#9733; Datasets
