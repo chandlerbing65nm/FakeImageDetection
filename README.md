@@ -20,6 +20,8 @@
 Follow strictly the naming and structure of folders below:
 
 ### [Wang_CVPR2020](https://github.com/PeterWang512/CNNDetection/tree/195892d93fc3f26599f93d8d9e1ca995991da2ee)
+- training/validation: [link](https://drive.google.com/file/d/1iVNBV0glknyTYGA9bCxT_d0CVTOgGcKh/view)
+- testing: [link](https://drive.google.com/file/d/1z_fD3UKgWQyOTZIBbYSaQ-hz4AzUrLC1/view)
 ```
 Wang_CVPR2020/
 ├── testing/
@@ -40,6 +42,7 @@ Wang_CVPR2020/
 ```
 
 ### [Ojha_CVPR2023](https://github.com/Yuheng-Li/UniversalFakeDetect)
+- download: [link](https://drive.google.com/file/d/1FXlGIRh_Ud3cScMgSVDbEWmPDmjcrm1t/view)
 ```
 Ojha_CVPR2023/
 ├── guided/
