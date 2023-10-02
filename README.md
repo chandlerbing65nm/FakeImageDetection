@@ -230,6 +230,8 @@ Now, use this to run training:
 bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
+* Note: If you notice that the training process stalls during an epoch (e.g., epoch 22 or 33), please interrupt it by pressing Ctrl+C. The bash script is configured to resume training from the last saved epoch.
+
 ## &#9733; License
 
 This project is licensed under the [Apache License](LICENSE).
