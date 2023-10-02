@@ -230,7 +230,9 @@ Now, use this to run training:
 bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
-* Note: If you notice that the training process stalls during an epoch (e.g., epoch 22 or 33), please interrupt it by pressing Ctrl+C. The bash script is configured to resume training from the last saved epoch.
+Important:
+- When starting the training (from epoch 1), please comment out  `--resume_train $RESUME \`. And if you don't want to use `wandb`, comment out `--wandb_online \` and `--wandb_run_id $WANDB_ID \`. In general, I just comment out the last three lines in the bash script.
+- If you notice that the training process stalls during an epoch (e.g., epoch 22 or 33), please interrupt it by pressing Ctrl+C. The bash script is configured to resume training from the last saved epoch.
 
 ## &#9733; License
 
