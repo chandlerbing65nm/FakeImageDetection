@@ -57,6 +57,16 @@ Ojha_CVPR2023/
 └── ...
 ```
 
+#### Make sure to change the path based on where you saved the data:
+
+train.py
+
+- [training/validation](https://github.com/chandlerbing65nm/FakeDetection/blob/9699fa5137420ffc611885fc79479a99cd313438/train.py#L113C1-L120C97)
+
+test.py
+
+- [testing](https://github.com/chandlerbing65nm/FakeDetection/blob/9699fa5137420ffc611885fc79479a99cd313438/test.py#L114C1-L145C47)
+
 ## &#9733; Model Weights
 
 You can download the model weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing). Put the files under the repository and don't change the name or anything!
