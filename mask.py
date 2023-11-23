@@ -190,8 +190,8 @@ def test_mask_generator(
     # plt.savefig(f"{sample_path}/masked_{mask_type}.jpg")
 
 # Usage:
-test_mask_generator(
-    '/home/timm/chandler/Experiments/FakeDetection/samples/original', 
-    mask_type='patch', # spectral, pixel, patch
-    ratio=0.3
-    )
+# test_mask_generator(
+#     '/home/timm/chandler/Experiments/FakeDetection/samples/original', 
+#     mask_type='patch', # spectral, pixel, patch
+#     ratio=0.3
+#     )

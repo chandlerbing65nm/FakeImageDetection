@@ -27,7 +27,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
         ],
         help='Type of model to use; includes ResNet variants'
         )
@@ -159,6 +159,7 @@ if __name__ == "__main__":
             args.batch_size,
             checkpoint_path,
             device,
+            args,
         )
 
         # Write the results to the file

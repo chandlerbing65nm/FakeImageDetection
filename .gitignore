@@ -8,6 +8,7 @@ wandb/
 few-shot/
 evaluation/
 results/
+clip_features/
 *.pkl
 *.pth
 wangetal_*

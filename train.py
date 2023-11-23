@@ -25,6 +25,7 @@ from utils import *
 from networks.resnet import resnet50
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
+from networks.clip_models import CLIPModel
 import os
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
@@ -51,6 +52,7 @@ def main(
     resume_train=None,
     early_stop=True,
     wandb_online=False,
+    args=None,
     ):
 
     seed = 42
@@ -106,16 +108,20 @@ def main(
         else:
             mask_generator = None
 
-    train_transform = train_augment(ImageAugmentor(train_opt), mask_generator)
-    val_transform = val_augment(ImageAugmentor(val_opt), mask_generator)
+    train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
+    val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
     # Creating training dataset from images
-    train_data = ForenSynths('../../Datasets/Wang_CVPR2020/training', transform=train_transform)
+    train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    if args.debug:
+        subset_size = int(0.01 * len(train_data))
+        subset_indices = random.sample(range(len(train_data)), subset_size)
+        train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = ForenSynths('../../Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
     val_sampler = DistributedSampler(val_data, shuffle=False)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
@@ -128,9 +134,9 @@ def main(
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    # elif model_name.startswith('ViT'):
-    #     model_variant = model_name.split('_')[1]
-    #     model = timm.create_model(model_variant, pretrained=pretrained)
+    elif model_name.startswith('clip'):
+        clip_model_name = 'ViT-L/14'
+        model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
@@ -197,6 +203,7 @@ def main(
         save_path=save_path,
         early_stopping=early_stopping,
         device=device,
+        args=args,
         )
         
     if dist.get_rank() == 0:
@@ -213,7 +220,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'RN101', 'RN152',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
             # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
             # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -262,6 +269,11 @@ if __name__ == "__main__":
         '--early_stop', 
         action='store_true', 
         help='For early stopping'
+        )
+    parser.add_argument(
+        '--debug', 
+        action='store_true', 
+        help='For debugging'
         )
     parser.add_argument(
         '--mask_type', 
@@ -343,6 +355,7 @@ if __name__ == "__main__":
         resume_train=args.resume_train,
         early_stop=args.early_stop,
         wandb_online=args.wandb_online,
+        args=args
     )
 
 

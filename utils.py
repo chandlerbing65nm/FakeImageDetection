@@ -20,50 +20,51 @@ from utils import *
 from networks.resnet import resnet50
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
+import clip
 
-def train_augment(augmentor, mask_generator=None):
-    # Initialize an empty list to store transforms
+def train_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
     if mask_generator is not None:
-        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))  
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)),  # Pass opt dictionary here
+        transforms.Lambda(lambda img: augmentor.data_augment(img)),
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
-    # Create the composed transform
-    transform = transforms.Compose(transform_list)
-    return transform
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
 
-def val_augment(augmentor, mask_generator=None):
-    # Initialize an empty list to store transforms
+def val_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
     if mask_generator is not None:
-        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img))) 
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)), 
+        transforms.Lambda(lambda img: augmentor.data_augment(img)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
     ])
-    # Create the composed transform
-    transform = transforms.Compose(transform_list)
-    return transform
-    
-def test_augment(augmentor, mask_generator=None):
-    # Define the custom transform
-    # masking_transform = MaskingTransform(mask_generator)
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
 
-    transform = transforms.Compose([
+def test_augment(augmentor, mask_generator=None, args=None):
+    transform_list = [
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
-    ])
-    return transform
+    ]
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
 
 
 def train_model(
@@ -76,9 +77,12 @@ def train_model(
     resume_epoch=0,
     save_path='./', 
     early_stopping=None,
-    device='cpu'
+    device='cpu',
+    args=None,
     ):
 
+    features_path = f"./clip_features.pth"
+    
     for epoch in range(resume_epoch, num_epochs):
         if epoch % 1 == 0:  # Only print every 20 epochs
             if dist.get_rank() == 0:
@@ -86,10 +90,31 @@ def train_model(
                 print(f'Epoch {epoch}/{num_epochs}')
                 print('-' * 10)
 
+        # For CLIP model, extract features only once
+        if args.model_name == 'clip' and epoch == 0:
+            # Only the process with rank 0 performs the extraction
+            if dist.get_rank() == 0:
+                if not os.path.exists(features_path):
+                    extract_and_save_features(model, train_loader, features_path, device)
+                # Signal completion of extraction to other processes
+                dist.barrier()
+            else:
+                # Other processes wait for rank 0 to complete extraction
+                dist.barrier()
+
+            # All processes load the features after extraction
+            if os.path.exists(features_path):
+                train_features, train_labels = load_features(features_path)
+
         for phase in ['Training', 'Validation']:
             if phase == 'Training':
-                model.train()
-                data_loader = train_loader
+                if args.model_name=='clip':
+                    inputs, labels = train_features, train_labels
+                    total_samples = len(inputs)
+                else:
+                    model.train()
+                    data_loader = train_loader
+                    total_samples = len(data_loader.dataset)
             else:
                 model.eval()
                 data_loader = val_loader
@@ -98,33 +123,43 @@ def train_model(
             y_true, y_pred = [], []
 
             disable_tqdm = dist.get_rank() != 0
-            data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
+            loop_range = range(0, len(inputs), args.batch_size) if args.model_name=='clip' and phase == 'Training' else data_loader
+            data_loader_with_tqdm = tqdm(loop_range, f"{phase}", disable=disable_tqdm)
 
-            for inputs, labels in data_loader_with_tqdm: #tqdm(data_loader, f"{phase}"):
-                inputs = inputs.to(device)
-                labels = labels.float().to(device)
+            for batch_data in data_loader_with_tqdm:
+                if args.model_name=='clip' and phase == 'Training':
+                    batch_inputs, batch_labels = inputs[batch_data:batch_data+args.batch_size], labels[batch_data:batch_data+args.batch_size]
+                    batch_inputs = batch_inputs.to(device)
+                    batch_labels = batch_labels.float().to(device)
+                else:
+                    batch_inputs, batch_labels = batch_data
+                    batch_inputs = batch_inputs.to(device)
+                    batch_labels = batch_labels.float().to(device)
 
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'Training'):
-                    outputs = model(inputs).view(-1).unsqueeze(1)
-                    loss = criterion(outputs.squeeze(1), labels)
+                    if phase == 'Validation' and args.model_name=='clip':
+                        outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
+                    else:
+                        outputs = model(batch_inputs).view(-1).unsqueeze(1)
+                    loss = criterion(outputs.squeeze(1), batch_labels)
 
                     if phase == 'Training':
                         loss.backward()
                         optimizer.step()
 
-                running_loss += loss.item() * inputs.size(0)
+                running_loss += loss.item() * batch_inputs.size(0)
                 y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
-                y_true.extend(labels.cpu().numpy())
+                y_true.extend(batch_labels.cpu().numpy())
 
-            epoch_loss = running_loss / len(data_loader.dataset)
-            
+            epoch_loss = running_loss / total_samples
+
             y_true, y_pred = np.array(y_true), np.array(y_pred)
             acc = accuracy_score(y_true, y_pred > 0.5)
             ap = average_precision_score(y_true, y_pred)
-            
-            if epoch % 1 == 0:  # Only print every 20 epochs
+
+            if epoch % 1 == 0:  # Only print every epoch
                 if dist.get_rank() == 0:
                     print(f'{phase} Loss: {epoch_loss:.4f} Acc: {acc:.4f} AP: {ap:.4f}')
 
@@ -141,10 +176,6 @@ def train_model(
                 if dist.get_rank() == 0:
                     wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
 
-        
-        # Save the model after every epoch
-        # torch.save(model.state_dict(), f'checkpoints/model_{epoch+1}.pth')
-
     return model
 
 
@@ -156,7 +187,8 @@ def evaluate_model(
     dataset_path, 
     batch_size,
     checkpoint_path, 
-    device
+    device,
+    args
     ):
 
     # Depending on the mask_type, create the appropriate mask generator
@@ -178,7 +210,7 @@ def evaluate_model(
         'jpg_qual': [int((30 + 100) / 2)]
     }
 
-    test_transform = test_augment(ImageAugmentor(test_opt), mask_generator)
+    test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
 
     if data_type == 'GenImage':
         test_dataset = GenImage(dataset_path, transform=test_transform)
@@ -203,12 +235,19 @@ def evaluate_model(
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
         model = timm.create_model(model_variant, pretrained=pretrained)
+    elif model_name.startswith('clip'):
+        clip_model_name = 'ViT-L/14'
+        model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
     model = torch.nn.DataParallel(model)
     checkpoint = torch.load(checkpoint_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
+
+    if args.model_name=='clip':
+        model.fc.load_state_dict(checkpoint['model_state_dict'])
+    else:
+        model.load_state_dict(checkpoint['model_state_dict'])
     model = model.to(device)
 
     model.eval() 
@@ -219,7 +258,10 @@ def evaluate_model(
         for inputs, labels in tqdm(test_dataloader, "Accessing test dataloader"):
             inputs = inputs.to(device)
             labels = labels.float().to(device)
-            outputs = model(inputs).view(-1).unsqueeze(1)
+            if args.model_name=='clip':
+                outputs = model(inputs, return_all=True).view(-1).unsqueeze(1)
+            else:
+                outputs = model(inputs).view(-1).unsqueeze(1)
             y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
             y_true.extend(labels.cpu().numpy())
 
@@ -234,4 +276,27 @@ def evaluate_model(
     print(f'ROC AUC Score: {auc}')
 
     return ap, acc, auc
+
+
+def extract_and_save_features(model, data_loader, save_path, device='cpu'):
+    model.eval()
+    features = []
+    labels_list = []
+
+    disable_tqdm = dist.get_rank() != 0
+    data_loader_with_tqdm = tqdm(data_loader, "Extracting CLIP Features", disable=disable_tqdm)
+
+    with torch.no_grad():
+        for inputs, labels in data_loader_with_tqdm:
+            inputs = inputs.to(device)
+            features.append(model(inputs, return_feature=True).detach().cpu())
+            labels_list.append(labels)
+
+    features = torch.cat(features)
+    labels = torch.cat(labels_list)
+    if dist.get_rank() == 0:
+        torch.save((features, labels), save_path)
+
+def load_features(save_path):
+    return torch.load(save_path)
 
