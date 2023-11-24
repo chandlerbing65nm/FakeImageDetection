@@ -15,7 +15,7 @@ MODEL_NAME="clip" # RN50_mod, RN50, clip
 MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="all" # all, low, mid, high
 RATIO=15
-BATCH_SIZE=128
+BATCH_SIZE=256
 WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
 
@@ -36,7 +36,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --batch_size $BATCH_SIZE \
   --early_stop \
   --pretrained \
+  # --resume_train $RESUME \
   # --debug \
   # --wandb_online \
   # --wandb_run_id $WANDB_ID \
-  # --resume_train $RESUME \

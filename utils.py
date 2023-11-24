@@ -8,7 +8,7 @@ import torch.distributed as dist  # If distributed training is being used
 import wandb  # If Weights & Biases is being used for logging
 
 from torchvision import transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 import timm 
 
 import torchvision.models as vis_models
@@ -20,7 +20,14 @@ from utils import *
 from networks.resnet import resnet50
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
-import clip
+from networks.clip_models import CLIPModel
+import time
+
+from torch.nn.parallel import DistributedDataParallel
+from torch.utils.data.distributed import DistributedSampler
+
+os.environ['NCCL_BLOCKING_WAIT'] = '1'
+os.environ['NCCL_DEBUG'] = 'WARN'
 
 def train_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
@@ -82,7 +89,8 @@ def train_model(
     ):
 
     features_path = f"./clip_features.pth"
-    
+    features_exist = os.path.exists(features_path)
+
     for epoch in range(resume_epoch, num_epochs):
         if epoch % 1 == 0:  # Only print every 20 epochs
             if dist.get_rank() == 0:
@@ -91,50 +99,46 @@ def train_model(
                 print('-' * 10)
 
         # For CLIP model, extract features only once
-        if args.model_name == 'clip' and epoch == 0:
-            # Only the process with rank 0 performs the extraction
+        if args.model_name == 'clip' and not features_exist:
+            # Process with rank 0 performs the extraction
             if dist.get_rank() == 0:
-                if not os.path.exists(features_path):
-                    extract_and_save_features(model, train_loader, features_path, device)
-                # Signal completion of extraction to other processes
-                dist.barrier()
+                extract_and_save_features(model, train_loader, features_path, device)
+                # Create a temporary file to signal completion
+                with open(f'{features_path}.done', 'w') as f:
+                    f.write('done')
+            
+            # Other processes wait until the .done file is created
             else:
-                # Other processes wait for rank 0 to complete extraction
-                dist.barrier()
+                while not os.path.exists(f'{features_path}.done'):
+                    time.sleep(5)  # Sleep to avoid busy waiting
 
-            # All processes load the features after extraction
-            if os.path.exists(features_path):
-                train_features, train_labels = load_features(features_path)
+            features_exist = True  # Set this to True after extraction
+
+        # Load the features for all processes if not done already
+        if args.model_name == 'clip' and features_exist and epoch == resume_epoch:
+            train_loader = load_features(features_path, batch_size=args.batch_size, shuffle=True)
+
 
         for phase in ['Training', 'Validation']:
             if phase == 'Training':
-                if args.model_name=='clip':
-                    inputs, labels = train_features, train_labels
-                    total_samples = len(inputs)
-                else:
-                    model.train()
-                    data_loader = train_loader
-                    total_samples = len(data_loader.dataset)
+                model.train()
+                data_loader = train_loader
             else:
                 model.eval()
                 data_loader = val_loader
 
+            total_samples = len(data_loader.dataset)
             running_loss = 0.0
             y_true, y_pred = [], []
 
             disable_tqdm = dist.get_rank() != 0
-            loop_range = range(0, len(inputs), args.batch_size) if args.model_name=='clip' and phase == 'Training' else data_loader
-            data_loader_with_tqdm = tqdm(loop_range, f"{phase}", disable=disable_tqdm)
+            # loop_range = range(0, len(inputs), args.batch_size) if args.model_name=='clip' and phase == 'Training' else data_loader
+            data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
 
             for batch_data in data_loader_with_tqdm:
-                if args.model_name=='clip' and phase == 'Training':
-                    batch_inputs, batch_labels = inputs[batch_data:batch_data+args.batch_size], labels[batch_data:batch_data+args.batch_size]
-                    batch_inputs = batch_inputs.to(device)
-                    batch_labels = batch_labels.float().to(device)
-                else:
-                    batch_inputs, batch_labels = batch_data
-                    batch_inputs = batch_inputs.to(device)
-                    batch_labels = batch_labels.float().to(device)
+                batch_inputs, batch_labels = batch_data
+                batch_inputs = batch_inputs.to(device)
+                batch_labels = batch_labels.float().to(device)
 
                 optimizer.zero_grad()
 
@@ -221,7 +225,8 @@ def evaluate_model(
     else:
         raise ValueError("wrong dataset input")
 
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    test_sampler = DistributedSampler(test_dataset)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
 
     if model_name == 'RN50':
@@ -241,21 +246,28 @@ def evaluate_model(
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
-    model = torch.nn.DataParallel(model)
+    model = model.to(device)
+    model = DistributedDataParallel(model)
+
     checkpoint = torch.load(checkpoint_path)
 
-    if args.model_name=='clip':
-        model.fc.load_state_dict(checkpoint['model_state_dict'])
+    if args.model_name=='clip' and args.other_model != True:
+        model.module.fc.load_state_dict(checkpoint['model_state_dict'])
+    elif args.other_model:
+        model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])
-    model = model.to(device)
 
+    model = model.to(device)
     model.eval() 
 
     y_true, y_pred = [], []
 
+    disable_tqdm = dist.get_rank() != 0
+    data_loader_with_tqdm = tqdm(test_dataloader, "test dataloading", disable=disable_tqdm)
+
     with torch.no_grad():
-        for inputs, labels in tqdm(test_dataloader, "Accessing test dataloader"):
+        for inputs, labels in data_loader_with_tqdm:
             inputs = inputs.to(device)
             labels = labels.float().to(device)
             if args.model_name=='clip':
@@ -271,9 +283,10 @@ def evaluate_model(
     ap = average_precision_score(y_true, y_pred)
     auc = roc_auc_score(y_true, y_pred)
 
-    print(f'Average Precision: {ap}')
-    print(f'Accuracy: {acc}')
-    print(f'ROC AUC Score: {auc}')
+    if dist.get_rank() == 0:
+        print(f'Average Precision: {ap}')
+        print(f'Accuracy: {acc}')
+        print(f'ROC AUC Score: {auc}')
 
     return ap, acc, auc
 
@@ -294,9 +307,10 @@ def extract_and_save_features(model, data_loader, save_path, device='cpu'):
 
     features = torch.cat(features)
     labels = torch.cat(labels_list)
-    if dist.get_rank() == 0:
-        torch.save((features, labels), save_path)
+    torch.save((features, labels), save_path)
 
-def load_features(save_path):
-    return torch.load(save_path)
+def load_features(save_path, batch_size=32, shuffle=True):
+    features, labels = torch.load(save_path)
+    dataset = TensorDataset(features, labels)
+    return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
 

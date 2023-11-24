@@ -144,7 +144,7 @@ def main(
     model = DistributedDataParallel(model)
 
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=0) 
+    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-4) 
 
     # Load checkpoint if resuming
     if resume_train:
@@ -164,7 +164,10 @@ def main(
             raise ValueError("No matching checkpoint files found.")
 
         checkpoint = torch.load(checkpoint_path)
-        model.load_state_dict(checkpoint['model_state_dict'])
+        if args.model_name == 'clip':
+            model.module.fc.load_state_dict(checkpoint['model_state_dict'])
+        else:
+            model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Extract val_accuracy, counter and epoch from the checkpoint
@@ -187,7 +190,8 @@ def main(
         verbose=True, 
         early_stopping_enabled=early_stop,
         best_score=best_score,
-        counter=counter
+        counter=counter,
+        args=args
         )
 
     resume_epoch = last_epoch + 1 if resume_train else 0

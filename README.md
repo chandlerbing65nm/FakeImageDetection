@@ -65,7 +65,7 @@ You can download the model weights [here](https://drive.google.com/drive/folders
 
 File structure should strictly be like this:
 ```
-checkpoints/
+FakeImageDetection/checkpoints/
 ├── mask_15/
 │   ├── rn50ft_midspectralmask.pth
 │   ├── rn50ft_lowspectralmask.pth
@@ -73,7 +73,8 @@ checkpoints/
 │   ├── rn50ft_pixelmask.pth
 │   ├── rn50ft_patchmask.pth
 │   ├── rn50ft_spectralmask.pth (Wang et al. + Ours)
-│   └── rn50_modft_spectralmask.pth (Gragnaniello et al. + Ours)
+│   ├── rn50_modft_spectralmask.pth (Gragnaniello et al. + Ours)
+│   ├── clipft_spectralmask.pth (Ojha et al. + Ours)
 │   └── ...
 └── ...
 ```
@@ -86,7 +87,7 @@ The script `test.py` is designed for evaluating trained models on multiple datas
 ### Basic Command
 
 ```bash
-python test.py [options]
+python -m torch.distributed.launch --nproc_per_node=GPU_NUM test.py -- [options]
 ```
 Command-Line Options
 ```bash
@@ -107,16 +108,23 @@ Edit testing bash script `test.sh`:
 #!/bin/bash
 
 # Define the arguments for your test script
+GPUs="$1"
+NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="RN50" # RN50_mod or RN50
-MASK_TYPE="spectral" # spectral, pixel, patch or nomask
-BAND="mid" # all, low, mid, high
+MODEL_NAME="clip" # clip, RN50_mod or RN50
+MASK_TYPE="nomask" # spectral, pixel, patch or nomask
+BAND="all" # all, low, mid, high
 RATIO=15
 BATCH_SIZE=64
-DEVICE="cuda:0"
+
+# Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
+export CUDA_VISIBLE_DEVICES=$GPUs
+
+echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
 # Run the test command
-python test.py \
+python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
+  -- \
   --data_type $DATA_TYPE \
   --pretrained \
   --model_name $MODEL_NAME \
@@ -124,12 +132,13 @@ python test.py \
   --band $BAND \
   --ratio $RATIO \
   --batch_size $BATCH_SIZE \
-  --device $DEVICE
+  --other_model
 ```
+
 Now, use this to run testing:
 ```bash
-bash test.sh
-```
+bash test.sh "0" # gpu id/s to use
+``` 
 
 ### Results
 You can find the results in this structure:
@@ -197,10 +206,10 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
-MODEL_NAME="RN50" # RN50_mod, RN50
-MASK_TYPE="nomask" # nomask, spectral, pixel, patch
+MODEL_NAME="clip" # RN50_mod, RN50, clip
+MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="all" # all, low, mid, high
-RATIO=0
+RATIO=15
 BATCH_SIZE=128
 WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
@@ -222,9 +231,10 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --batch_size $BATCH_SIZE \
   --early_stop \
   --pretrained \
-  --wandb_online \
-  --wandb_run_id $WANDB_ID \
-  --resume_train $RESUME \
+  # --resume_train $RESUME \
+  # --debug \
+  # --wandb_online \
+  # --wandb_run_id $WANDB_ID \
 ```
 
 Now, use this to run training:
@@ -233,8 +243,8 @@ bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
 Important:
-- When starting the training (from epoch 1), please comment out  `--resume_train $RESUME \`. And if you don't want to use `wandb`, comment out `--wandb_online \` and `--wandb_run_id $WANDB_ID \`. In general, I just comment out the last three lines in the bash script.
-- If you notice that the training process stalls during an epoch (e.g., epoch 22 or 33), please interrupt it by pressing Ctrl+C. The bash script is configured to resume training from the last saved epoch.
+- When starting the training (from 1st epoch), please comment out  `--resume_train $RESUME \` and `--debug \`. And if you don't want to use `wandb` logging, comment out `--wandb_online \` and `--wandb_run_id $WANDB_ID \`. In short, just comment out the last three lines in the bash script.
+- If you notice that the training process stalls during an epoch (e.g., epoch 20+ or 30+), please interrupt it by pressing ctrl+c. The bash script is configured to resume training from the last saved epoch (if you uncomment `--resume_train $RESUME \`).
 
 ## &#9733; License
 

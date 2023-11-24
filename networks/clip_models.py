@@ -18,6 +18,8 @@ class CLIPModel(nn.Module):
             param.requires_grad = False
 
     def forward(self, x, return_feature=False, return_all=False):
+        # print(x.shape)
+        # raise False
         if return_feature:
             return self.model.encode_image(x) 
         elif return_all:

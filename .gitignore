@@ -11,6 +11,7 @@ results/
 clip_features/
 *.pkl
 *.pth
+*.done
 wangetal_*
 auxiliary_test.py
 auxiliary_train.py

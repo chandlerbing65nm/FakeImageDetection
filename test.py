@@ -18,7 +18,14 @@ from dataset import *
 from augment import ImageAugmentor
 from mask import *
 from utils import *
-    
+
+import torch.distributed as dist
+from torch.nn.parallel import DistributedDataParallel
+from torch.utils.data.distributed import DistributedSampler
+
+os.environ['NCCL_BLOCKING_WAIT'] = '1'
+os.environ['NCCL_DEBUG'] = 'WARN'
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Settings for your script")
 
@@ -73,15 +80,26 @@ if __name__ == "__main__":
         help="Dataset Type"
         )
     parser.add_argument(
-        '--device', 
-        default="cuda:0" if torch.cuda.is_available() else "cpu", 
-        type=str, 
-        help="Device to use (default: auto-detect)"
+        '--other_model', 
+        action='store_true', 
+        help='if the model is from my own code'
         )
+    parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
     args = parser.parse_args()
 
-    device = torch.device(args.device)
+    seed = 42
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    device = torch.device(f'cuda:{args.local_rank}')
+    torch.cuda.set_device(device)
+    dist.init_process_group(backend='nccl')
+
     model_name = args.model_name.lower()
     finetune = 'ft' if args.pretrained else ''
     band = '' if args.band == 'all' else args.band
@@ -101,7 +119,7 @@ if __name__ == "__main__":
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
-    print(f"Device: {args.device}")
+    print(f"Device: {args.local_rank}")
     print(f"Dataset Type: {args.data_type}")
     print(f"Model type: {args.model_name}")
     print(f"Ratio of mask: {ratio}")
@@ -113,33 +131,33 @@ if __name__ == "__main__":
 
     if args.data_type == 'Wang_CVPR20':
         datasets = {
-            'ProGAN': '../../Datasets/Wang_CVPR2020/testing/progan',
-            'CycleGAN': '../../Datasets/Wang_CVPR2020/testing/cyclegan',
-            'BigGAN': '../../Datasets/Wang_CVPR2020/testing/biggan',
-            'StyleGAN': '../../Datasets/Wang_CVPR2020/testing/stylegan',
-            'GauGAN': '../../Datasets/Wang_CVPR2020/testing/gaugan',
-            'StarGAN': '../../Datasets/Wang_CVPR2020/testing/stargan',
-            'DeepFake': '../../Datasets/Wang_CVPR2020/testing/deepfake',
-            'SITD': '../../Datasets/Wang_CVPR2020/testing/seeingdark',
-            'SAN': '../../Datasets/Wang_CVPR2020/testing/san',
-            'CRN': '../../Datasets/Wang_CVPR2020/testing/crn',
-            'IMLE': '../../Datasets/Wang_CVPR2020/testing/imle',
+            'ProGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/progan',
+            'CycleGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/cyclegan',
+            'BigGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/biggan',
+            'StyleGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/stylegan',
+            'GauGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/gaugan',
+            'StarGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/stargan',
+            'DeepFake': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/deepfake',
+            'SITD': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/seeingdark',
+            'SAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/san',
+            'CRN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/crn',
+            'IMLE': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/imle',
         }
     # elif args.data_type == 'GenImage':
     #     datasets = {
-    #         'VQDM': '../../Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
-    #         'Glide': '../../Datasets/GenImage/imagenet_glide/imagenet_glide/val',
+    #         'VQDM': '/home/users/chandler_doloriel/scratch/Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
+    #         'Glide': '/home/users/chandler_doloriel/scratch/Datasets/GenImage/imagenet_glide/imagenet_glide/val',
     #     }
     elif args.data_type == 'Ojha_CVPR23':
         datasets = {
-            'Guided': '../../Datasets/Ojha_CVPR23/guided',
-            'LDM_200': '../../Datasets/Ojha_CVPR23/ldm_200',
-            'LDM_200_cfg': '../../Datasets/Ojha_CVPR23/ldm_200_cfg',
-            'LDM_100': '../../Datasets/Ojha_CVPR23/ldm_100',
-            'Glide_100_27': '../../Datasets/Ojha_CVPR23/glide_100_27',
-            'Glide_50_27': '../../Datasets/Ojha_CVPR23/glide_50_27',
-            'Glide_100_10': '../../Datasets/Ojha_CVPR23/glide_100_10',
-            'DALL-E': '../../Datasets/Ojha_CVPR23/dalle',       
+            'Guided': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/guided',
+            'LDM_200': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200',
+            'LDM_200_cfg': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200_cfg',
+            'LDM_100': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_100',
+            'Glide_100_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_27',
+            'Glide_50_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_50_27',
+            'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
+            'DALL-E': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/dalle',       
         }
     else:
         raise ValueError("wrong dataset type")
@@ -148,7 +166,8 @@ if __name__ == "__main__":
     dataset_count = len(datasets)
 
     for dataset_name, dataset_path in datasets.items():
-        print(f"\nEvaluating {dataset_name}")
+        if dist.get_rank() == 0:
+            print(f"\nEvaluating {dataset_name}")
 
         avg_ap, avg_acc, auc = evaluate_model(
             args.model_name,
@@ -161,29 +180,29 @@ if __name__ == "__main__":
             device,
             args,
         )
-
-        # Write the results to the file
-        with open(f'{results_path}/{filename}', 'a') as file:
-            if file.tell() == 0: # Check if the file is empty
-                file.write("Selected Configuration:\n")
-                file.write("-" * 28 + "\n")
-                file.write(f"Device: {args.device}\n")
-                file.write(f"Dataset Type: {args.data_type}\n")
-                file.write(f"Model type: {args.model_name}\n")
-                file.write(f"Ratio of mask: {ratio}\n")
-                file.write(f"Batch Size: {args.batch_size}\n")
-                file.write(f"Mask Type: {args.mask_type}\n")
-                file.write(f"Checkpoint Type: {checkpoint_path}\n")
-                file.write(f"Results saved to: {results_path}/{filename}\n")
-                file.write("-" * 28 + "\n\n")
-                file.write("Dataset, Precision, Accuracy, AUC\n")
-                file.write("-" * 28)
-                file.write("\n")
-            file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
-
-        # Decrement the counter
-        dataset_count -= 1
-        if dataset_count == 0:
+        if dist.get_rank() == 0:
+            # Write the results to the file
             with open(f'{results_path}/{filename}', 'a') as file:
-                file.write("-" * 28 + "\n")
-                file.write("\n")
+                if file.tell() == 0: # Check if the file is empty
+                    file.write("Selected Configuration:\n")
+                    file.write("-" * 28 + "\n")
+                    file.write(f"Device: {args.local_rank}\n")
+                    file.write(f"Dataset Type: {args.data_type}\n")
+                    file.write(f"Model type: {args.model_name}\n")
+                    file.write(f"Ratio of mask: {ratio}\n")
+                    file.write(f"Batch Size: {args.batch_size}\n")
+                    file.write(f"Mask Type: {args.mask_type}\n")
+                    file.write(f"Checkpoint Type: {checkpoint_path}\n")
+                    file.write(f"Results saved to: {results_path}/{filename}\n")
+                    file.write("-" * 28 + "\n\n")
+                    file.write("Dataset, Precision, Accuracy, AUC\n")
+                    file.write("-" * 28)
+                    file.write("\n")
+                file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
+
+            # Decrement the counter
+            dataset_count -= 1
+            if dataset_count == 0:
+                with open(f'{results_path}/{filename}', 'a') as file:
+                    file.write("-" * 28 + "\n")
+                    file.write("\n")

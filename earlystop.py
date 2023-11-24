@@ -11,7 +11,8 @@ class EarlyStopping:
         min_lr=1e-6, 
         early_stopping_enabled=True, 
         best_score=None, 
-        counter=0
+        counter=0,
+        args=None,
         ):
 
         self.patience = patience
@@ -24,6 +25,7 @@ class EarlyStopping:
         self.best_epochs = []
         self.last_epochs = []
         self.min_lr = min_lr
+        self.model_name = args.model_name
 
     def __call__(self, val_accuracy, model, optimizer, epoch):
         score = val_accuracy
@@ -56,12 +58,18 @@ class EarlyStopping:
         self.save_last_epochs(model, optimizer, epoch, index=1, laststop=True)
 
     def save_best_model(self, model, optimizer, epoch):
+        # Check if the model is CLIPModel and save only fc layer's state_dict
+        if self.model_name == 'clip':
+            model_state_dict = model.module.fc.state_dict()
+        else:
+            model_state_dict = model.state_dict()
+
         if dist.get_rank() == 0:
             state = {
                 'epoch': epoch,
                 'counter': self.counter,
                 'best_score': self.best_score,
-                'model_state_dict': model.state_dict(),
+                'model_state_dict': model_state_dict,
                 'optimizer_state_dict': optimizer.state_dict(),
             }
             torch.save(state, self.path + '.pth')
@@ -69,7 +77,13 @@ class EarlyStopping:
         self.save_best_epochs(model, optimizer, epoch, index=1, earlystop=True)
 
     def save_best_epochs(self, model, optimizer, epoch, index=3, earlystop=False):
-        self.best_epochs.append((epoch, model.state_dict(), optimizer.state_dict()))
+        # Check if the model is CLIPModel and save only fc layer's state_dict
+        if self.model_name == 'clip':
+            model_state_dict = model.module.fc.state_dict()
+        else:
+            model_state_dict = model.state_dict()
+
+        self.best_epochs.append((epoch, model_state_dict, optimizer.state_dict()))
         
         earlystop = '_best' if earlystop else ''
         # Keep only the latest 3 models
@@ -91,7 +105,13 @@ class EarlyStopping:
                 torch.save(state, f"{self.path}{earlystop}_ep{saved_epoch}.pth")
 
     def save_last_epochs(self, model, optimizer, epoch, index=3, laststop=False):
-        self.last_epochs.append((epoch, model.state_dict(), optimizer.state_dict()))
+        # Check if the model is CLIPModel and save only fc layer's state_dict
+        if self.model_name == 'clip':
+            model_state_dict = model.module.fc.state_dict()
+        else:
+            model_state_dict = model.state_dict()
+        
+        self.last_epochs.append((epoch, model_state_dict, optimizer.state_dict()))
         
         laststop = '_last' if laststop else ''
         # Keep only the latest 3 models
