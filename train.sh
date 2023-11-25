@@ -15,9 +15,10 @@ MODEL_NAME="clip" # RN50_mod, RN50, clip
 MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="all" # all, low, mid, high
 RATIO=15
-BATCH_SIZE=256
+BATCH_SIZE=128
 WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
+learning_rate=0.0002
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
@@ -33,6 +34,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --mask_type $MASK_TYPE \
   --band $BAND \
   --ratio $RATIO \
+  --lr ${learning_rate} \
   --batch_size $BATCH_SIZE \
   --early_stop \
   --pretrained \

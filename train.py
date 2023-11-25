@@ -55,7 +55,7 @@ def main(
     args=None,
     ):
 
-    seed = 42
+    seed = 44
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -144,7 +144,7 @@ def main(
     model = DistributedDataParallel(model)
 
     criterion = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001, betas=(0.9, 0.999), weight_decay=1e-4) 
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
 
     # Load checkpoint if resuming
     if resume_train:
@@ -188,6 +188,7 @@ def main(
         path=save_path, 
         patience=5, 
         verbose=True, 
+        min_lr=args.lr/100,
         early_stopping_enabled=early_stop,
         best_score=best_score,
         counter=counter,
@@ -301,6 +302,12 @@ if __name__ == "__main__":
         default=50, 
         help='Masking ratio'
         )
+    parser.add_argument(
+        '--lr', 
+        type=float, 
+        default=0.0001, 
+        help='learning rate'
+        )
 
     args = parser.parse_args()
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
@@ -324,7 +331,7 @@ if __name__ == "__main__":
 
     # # Retrieve resume path and epoch
     # resume_train = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
-
+    
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
@@ -340,7 +347,6 @@ if __name__ == "__main__":
     print(f"model type: {args.model_name}")
     print(f"Save path: {save_path}.pth")
     print(f"Resume training: {args.resume_train}")
-    print(f"Device: cuda:{args.local_rank}")
     print("-" * 30, "\n")
 
     main(

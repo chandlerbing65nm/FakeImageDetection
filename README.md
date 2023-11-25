@@ -66,6 +66,11 @@ You can download the model weights [here](https://drive.google.com/drive/folders
 File structure should strictly be like this:
 ```
 FakeImageDetection/checkpoints/
+├── mask_0/
+│   ├── rn50ft.pth (Wang et al.)
+│   ├── rn50_modft.pth (Gragnaniello et al.)
+│   ├── clipft.pth (Ojha et al.)
+│   └── ...
 ├── mask_15/
 │   ├── rn50ft_midspectralmask.pth
 │   ├── rn50ft_lowspectralmask.pth

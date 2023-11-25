@@ -3,7 +3,7 @@
 # Define the arguments for your test script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
+DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
 MODEL_NAME="clip" # clip, RN50_mod or RN50
 MASK_TYPE="spectral" # spectral, pixel, patch or nomask
 BAND="all" # all, low, mid, high

@@ -64,6 +64,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
 
 def test_augment(augmentor, mask_generator=None, args=None):
     transform_list = [
+        # transforms.Resize(256),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ]
@@ -88,8 +89,8 @@ def train_model(
     args=None,
     ):
 
-    features_path = f"./clip_features.pth"
-    features_exist = os.path.exists(features_path)
+    features_path = f"features.pth"
+    features_exist = os.path.exists("./clip_train_" + features_path)
 
     for epoch in range(resume_epoch, num_epochs):
         if epoch % 1 == 0:  # Only print every 20 epochs
@@ -102,22 +103,23 @@ def train_model(
         if args.model_name == 'clip' and not features_exist:
             # Process with rank 0 performs the extraction
             if dist.get_rank() == 0:
-                extract_and_save_features(model, train_loader, features_path, device)
+                extract_and_save_features(model, train_loader, "./clip_train_" + features_path, device)
+                extract_and_save_features(model, val_loader, "./clip_val_" + features_path, device)
                 # Create a temporary file to signal completion
-                with open(f'{features_path}.done', 'w') as f:
+                with open(f'clip_extract.done', 'w') as f:
                     f.write('done')
             
             # Other processes wait until the .done file is created
             else:
-                while not os.path.exists(f'{features_path}.done'):
+                while not os.path.exists(f'clip_extract.done'):
                     time.sleep(5)  # Sleep to avoid busy waiting
 
             features_exist = True  # Set this to True after extraction
 
         # Load the features for all processes if not done already
         if args.model_name == 'clip' and features_exist and epoch == resume_epoch:
-            train_loader = load_features(features_path, batch_size=args.batch_size, shuffle=True)
-
+            train_loader = load_features("./clip_train_" + features_path, batch_size=args.batch_size, shuffle=False)
+            val_loader = load_features("./clip_val_" + features_path, batch_size=args.batch_size, shuffle=False)
 
         for phase in ['Training', 'Validation']:
             if phase == 'Training':
@@ -132,7 +134,6 @@ def train_model(
             y_true, y_pred = [], []
 
             disable_tqdm = dist.get_rank() != 0
-            # loop_range = range(0, len(inputs), args.batch_size) if args.model_name=='clip' and phase == 'Training' else data_loader
             data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
 
             for batch_data in data_loader_with_tqdm:
@@ -143,10 +144,7 @@ def train_model(
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'Training'):
-                    if phase == 'Validation' and args.model_name=='clip':
-                        outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
-                    else:
-                        outputs = model(batch_inputs).view(-1).unsqueeze(1)
+                    outputs = model(batch_inputs).view(-1).unsqueeze(1)
                     loss = criterion(outputs.squeeze(1), batch_labels)
 
                     if phase == 'Training':
@@ -227,7 +225,6 @@ def evaluate_model(
 
     test_sampler = DistributedSampler(test_dataset)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
-
 
     if model_name == 'RN50':
         # model = vis_models.resnet50(pretrained=pretrained)
@@ -313,4 +310,3 @@ def load_features(save_path, batch_size=32, shuffle=True):
     features, labels = torch.load(save_path)
     dataset = TensorDataset(features, labels)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
-
