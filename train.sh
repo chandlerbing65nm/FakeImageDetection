@@ -9,7 +9,7 @@ echo "The current date is: $current_date"
 # Define the arguments for your training script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-NUM_EPOCHS=10
+NUM_EPOCHS=20
 PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50, clip
 MASK_TYPE="nomask" # nomask, spectral, pixel, patch

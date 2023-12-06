@@ -114,7 +114,7 @@ def main(
     # Creating training dataset from images
     train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
-        subset_size = int(0.01 * len(train_data))
+        subset_size = int(0.20 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data)
@@ -145,6 +145,7 @@ def main(
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones = [8, 15], gamma = 0.1, last_epoch = -1)
 
     # Load checkpoint if resuming
     if resume_train:
@@ -204,19 +205,39 @@ def main(
 
     resume_epoch = last_epoch + 1 if resume_train and args.prune==False else 0
 
-    trained_model = train_model(
-        model, 
-        criterion, 
-        optimizer, 
-        train_loader, 
-        val_loader, 
-        num_epochs=num_epochs, 
-        resume_epoch=resume_epoch,
-        save_path=save_path,
-        early_stopping=early_stopping,
-        device=device,
-        args=args,
-        )
+    if args.prune==False:
+        trained_model = train_model(
+            model, 
+            criterion, 
+            optimizer, 
+            scheduler,
+            train_loader, 
+            val_loader, 
+            num_epochs=num_epochs, 
+            resume_epoch=resume_epoch,
+            save_path=save_path,
+            early_stopping=early_stopping,
+            device=device,
+            args=args,
+            )
+    else:
+        pruned_model = iterative_pruning_finetuning(
+            model, 
+            criterion, 
+            optimizer, 
+            scheduler,
+            train_loader, 
+            val_loader, 
+            device,
+            args.lr, 
+            conv2d_prune_amount=args.conv2d_prune_amount, 
+            linear_prune_amount=args.linear_prune_amount,
+            num_pruning = 21, 
+            num_epochs_per_pruning=num_epochs,
+            save_path=save_path,
+            grouped_pruning = True,
+            args=args
+            )
         
     if dist.get_rank() == 0:
         wandb.finish()

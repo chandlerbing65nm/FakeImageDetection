@@ -26,68 +26,28 @@ import time
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
+import torch.nn.utils.prune as prune
+
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
-
-def train_augment(augmentor, mask_generator=None, args=None):
-    transform_list = []
-    if mask_generator is not None:
-        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
-    transform_list.extend([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)),
-        transforms.RandomCrop(224),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-    ])
-    if args is not None and args.model_name == 'clip':
-        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
-    else:
-        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
-    return transforms.Compose(transform_list)
-
-def val_augment(augmentor, mask_generator=None, args=None):
-    transform_list = []
-    if mask_generator is not None:
-        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
-    transform_list.extend([
-        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
-        transforms.Lambda(lambda img: augmentor.data_augment(img)),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-    ])
-    if args is not None and args.model_name == 'clip':
-        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
-    else:
-        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
-    return transforms.Compose(transform_list)
-
-def test_augment(augmentor, mask_generator=None, args=None):
-    transform_list = [
-        # transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-    ]
-    if args is not None and args.model_name == 'clip':
-        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
-    else:
-        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
-    return transforms.Compose(transform_list)
 
 
 def iterative_pruning_finetuning(
     model, 
+    criterion, 
+    optimizer, 
+    scheduler,
     train_loader, 
-    test_loader, 
+    val_loader, 
     device,
     learning_rate, 
     conv2d_prune_amount = 0.2, 
     linear_prune_amount = 0.1,
     num_pruning = 10, 
     num_epochs_per_pruning = 10,
-    model_filename_prefix = "pruned_model", 
-    model_dir = "saved_models",
-    grouped_pruning = True
+    grouped_pruning = True,
+    save_path='./',
+    args=None
     ):
     
     '''
@@ -96,12 +56,11 @@ def iterative_pruning_finetuning(
     '''
 
     for i in range(num_pruning):
-
-        print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
-
-        print("Pruning...")
-
+        if dist.get_rank() == 0:
+            print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
+            print("Pruning...")
         # NOTE: For global pruning, linear/dense layer can also be pruned!
+        dist.barrier() # Synchronize all processes
         if grouped_pruning == True:
             # grouped_pruning -> Global pruning
             parameters_to_prune = []
@@ -118,36 +77,96 @@ def iterative_pruning_finetuning(
                 pruning_method = prune.L1Unstructured,
                 amount = conv2d_prune_amount,
             )
-        
-        # layer-wise pruning-
         else:
-            for module_name, module in model.named_modules():
-                if isinstance(module, torch.nn.Conv2d):
-                    prune.l1_unstructured(
-                        module, name = "weight",
-                        amount = conv2d_prune_amount)
-                elif isinstance(module, torch.nn.Linear):
-                    prune.l1_unstructured(
-                        module, name = "weight",
-                        amount = linear_prune_amount)
+            raise ValueError("layer wise pruning not supported")
 
-        print("\nFine-tuning...")
-        fine_tuned_model = fine_tune_train_model(
+        # Compute global sparsity
+        _, _, sparsity = measure_global_sparsity(
             model, 
-            train_loader,
-            test_loader, 
-            device,
-            learning_rate,
-            num_epochs_per_pruning
+            weight = True,
+            bias = False, 
+            conv2d_use_mask = True,
+            linear_use_mask = False
             )
         
-    return model
+        if dist.get_rank() == 0:
+            print(f"\n[before finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
+
+        if dist.get_rank() == 0:
+            print("\nFine-tuning...")
+        dist.barrier() # Synchronize all processes
+        fine_tuned_model = train_model(
+            model, 
+            criterion, 
+            optimizer, 
+            scheduler,
+            train_loader, 
+            val_loader, 
+            num_epochs=num_epochs_per_pruning, 
+            resume_epoch=0,
+            save_path=save_path,
+            early_stopping=None,
+            device=device,
+            args=args,
+            )
+
+        _, _, sparsity = measure_global_sparsity(
+            fine_tuned_model, 
+            weight = True,
+            bias = False, 
+            conv2d_use_mask = True,
+            linear_use_mask = False
+            )
+
+        if dist.get_rank() == 0:
+            print(f"\n[after finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
+
+        # Save the model after fine-tuning
+        if dist.get_rank() == 0:
+            state = {
+                'model_state_dict': fine_tuned_model.state_dict(),
+            }
+
+            save_dir="./pruned_ckpts"
+            os.makedirs(save_dir, exist_ok=True)
+            model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}.pth")
+            torch.save(state, model_save_path)
+            print(f"Pruned model saved to {model_save_path}")
+
+    # Remove pruning parameters-
+    final_pruned_model = remove_parameters(fine_tuned_model)
+
+    _, _, sparsity = measure_global_sparsity(
+        final_pruned_model, 
+        weight = True,
+        bias = False, 
+        conv2d_use_mask = True,
+        linear_use_mask = False
+        )
+
+    if dist.get_rank() == 0:
+        print(f"\nFinal Pruned Model Global Sparsity = {sparsity * 100:.3f}%")
+
+    # Save the model after fine-tuning
+    if dist.get_rank() == 0:
+        state = {
+            'model_state_dict': fine_tuned_model.state_dict(),
+        }
+
+        save_dir="./pruned_ckpts"
+        os.makedirs(save_dir, exist_ok=True)
+        final_model_save_path = os.path.join(save_dir, f"final_pruned_model.pth")
+        torch.save(state, final_model_save_path)
+        print(f"Pruned model saved to {model_save_path}")
+
+    return final_pruned_model
 
 
 def train_model(
     model, 
     criterion, 
     optimizer, 
+    scheduler,
     train_loader, 
     val_loader, 
     num_epochs=25, 
@@ -190,7 +209,9 @@ def train_model(
             train_loader = load_features("./clip_train_" + features_path, batch_size=args.batch_size, shuffle=False)
             val_loader = load_features("./clip_val_" + features_path, batch_size=args.batch_size, shuffle=False)
 
-        for phase in ['Training', 'Validation']:
+        phases = ['Validation', 'Training', 'Validation'] if epoch==resume_epoch else ['Training', 'Validation']
+        # Iterate through the phases
+        for phase in phases:
             if phase == 'Training':
                 model.train()
                 data_loader = train_loader
@@ -233,7 +254,7 @@ def train_model(
                                 if mask is not None and weight is not None:
                                     l1_reg += torch.norm(mask * weight, 1)
 
-                            loss += l1_reg
+                            loss += 0 * l1_reg
 
                         loss.backward()
                         optimizer.step()
@@ -264,6 +285,9 @@ def train_model(
                             print("Early stopping")
                         return model
             else:
+                if args.prune:
+                    scheduler.step()
+
                 if dist.get_rank() == 0:
                     wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
 
@@ -399,3 +423,144 @@ def load_features(save_path, batch_size=32, shuffle=True):
     features, labels = torch.load(save_path)
     dataset = TensorDataset(features, labels)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
+
+def train_augment(augmentor, mask_generator=None, args=None):
+    transform_list = []
+    if mask_generator is not None:
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
+    transform_list.extend([
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
+        transforms.Lambda(lambda img: augmentor.data_augment(img)),
+        transforms.RandomCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+    ])
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
+
+def val_augment(augmentor, mask_generator=None, args=None):
+    transform_list = []
+    if mask_generator is not None:
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
+    transform_list.extend([
+        transforms.Lambda(lambda img: augmentor.custom_resize(img)),
+        transforms.Lambda(lambda img: augmentor.data_augment(img)),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+    ])
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
+
+def test_augment(augmentor, mask_generator=None, args=None):
+    transform_list = [
+        # transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+    ]
+    if args is not None and args.model_name == 'clip':
+        transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
+    else:
+        transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    return transforms.Compose(transform_list)
+
+
+def remove_parameters(model):
+
+    for module_name, module in model.named_modules():
+        if isinstance(module, torch.nn.Conv2d):
+            try:
+                prune.remove(module, "weight")
+            except:
+                pass
+            try:
+                prune.remove(module, "bias")
+            except:
+                pass
+        elif isinstance(module, torch.nn.Linear):
+            try:
+                prune.remove(module, "weight")
+            except:
+                pass
+            try:
+                prune.remove(module, "bias")
+            except:
+                pass
+
+    return model
+
+def compute_final_pruning_rate(pruning_rate, num_iterations):
+    '''
+    A function to compute the final pruning rate for iterative pruning.
+        Note that this cannot be applied for global pruning rate if the pruning rate is heterogeneous among different layers.
+    Args:
+        pruning_rate (float): Pruning rate.
+        num_iterations (int): Number of iterations.
+    Returns:
+        float: Final pruning rate.
+    '''
+
+    final_pruning_rate = 1 - (1 - pruning_rate) ** num_iterations
+
+    return final_pruning_rate
+
+def measure_module_sparsity(module, weight=True, bias=False, use_mask=False):
+    num_zeros = 0
+    num_elements = 0
+
+    if use_mask == True:
+        for buffer_name, buffer in module.named_buffers():
+            if "weight_mask" in buffer_name and weight == True:
+                num_zeros += torch.sum(buffer == 0).item()
+                num_elements += buffer.nelement()
+            if "bias_mask" in buffer_name and bias == True:
+                num_zeros += torch.sum(buffer == 0).item()
+                num_elements += buffer.nelement()
+    else:
+        for param_name, param in module.named_parameters():
+            if "weight" in param_name and weight == True:
+                num_zeros += torch.sum(param == 0).item()
+                num_elements += param.nelement()
+            if "bias" in param_name and bias == True:
+                num_zeros += torch.sum(param == 0).item()
+                num_elements += param.nelement()
+
+    sparsity = num_zeros / num_elements
+
+    return num_zeros, num_elements, sparsity
+
+def measure_global_sparsity(
+    model, 
+    weight = True,
+    bias = False, 
+    conv2d_use_mask = False,
+    linear_use_mask = False
+    ):
+
+    num_zeros = 0
+    num_elements = 0
+
+    for module_name, module in model.named_modules():
+
+        if isinstance(module, torch.nn.Conv2d):
+
+            module_num_zeros, module_num_elements, _ = measure_module_sparsity(
+                module, weight=weight, bias=bias, use_mask=conv2d_use_mask)
+            num_zeros += module_num_zeros
+            num_elements += module_num_elements
+
+        elif isinstance(module, torch.nn.Linear):
+
+            module_num_zeros, module_num_elements, _ = measure_module_sparsity(
+                module, weight=weight, bias=bias, use_mask=linear_use_mask)
+            num_zeros += module_num_zeros
+            num_elements += module_num_elements
+
+    sparsity = num_zeros / num_elements
+
+    return num_zeros, num_elements, sparsity
