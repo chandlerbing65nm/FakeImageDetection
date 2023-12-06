@@ -4,10 +4,10 @@
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="clip" # clip, RN50_mod or RN50
-MASK_TYPE="spectral" # spectral, pixel, patch or nomask
+MODEL_NAME="RN50" # clip, RN50_mod or RN50
+MASK_TYPE="nomask" # spectral, pixel, patch or nomask
 BAND="all" # all, low, mid, high
-RATIO=15
+RATIO=0
 BATCH_SIZE=64
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs

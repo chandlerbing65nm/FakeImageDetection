@@ -156,10 +156,13 @@ def main(
         
         checkpoint_files = os.listdir(folder_path)
         if checkpoint_files:
-            resume_prefix_base = f'{base_filename}_last_ep' if resume_train == 'from_last' else f'{base_filename}_best_ep'
-            ep_numbers = [int(re.search(f'{re.escape(resume_prefix_base)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix_base) and f.endswith('.pth')]
-            max_ep = max(ep_numbers)
-            checkpoint_path = f'{resume_prefix}{max_ep}.pth'
+            if args.prune==False:
+                resume_prefix_base = f'{base_filename}_last_ep' if resume_train == 'from_last' else f'{base_filename}_best_ep'
+                ep_numbers = [int(re.search(f'{re.escape(resume_prefix_base)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix_base) and f.endswith('.pth')]
+                max_ep = max(ep_numbers)
+                checkpoint_path = f'{resume_prefix}{max_ep}.pth'
+            else:
+                checkpoint_path = f'{save_path}.pth'
         else:
             raise ValueError("No matching checkpoint files found.")
 
@@ -168,18 +171,22 @@ def main(
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-        # Extract val_accuracy, counter and epoch from the checkpoint
-        counter = checkpoint['counter']
-        last_epoch = checkpoint['epoch']
-        best_score = checkpoint['best_score'] # val_accuracy or best_score
+        if args.prune == False: #load previous states if not pruning
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            # Extract val_accuracy, counter and epoch from the checkpoint
+            counter = checkpoint['counter']
+            last_epoch = checkpoint['epoch']
+            best_score = checkpoint['best_score'] # val_accuracy or best_score
 
-        if dist.get_rank() == 0:
-            print(f"\nResuming training from epoch {last_epoch} using {checkpoint_path}")
-            print(f"Best validation accuracy: {best_score}")
-            for i, param_group in enumerate(optimizer.param_groups):
-                print(f"Resume learning rate: {param_group['lr']}")
+            if dist.get_rank() == 0:
+                print(f"\nResuming training from epoch {last_epoch} using {checkpoint_path}")
+                print(f"Best validation accuracy: {best_score}")
+                for i, param_group in enumerate(optimizer.param_groups):
+                    print(f"Resume learning rate: {param_group['lr']}")
+        else:
+            best_score = None
+            counter=0
     else:
         best_score = None
         counter=0
@@ -188,14 +195,14 @@ def main(
         path=save_path, 
         patience=5, 
         verbose=True, 
-        min_lr=args.lr/100,
+        min_lr=(args.lr)**2,
         early_stopping_enabled=early_stop,
         best_score=best_score,
         counter=counter,
         args=args
         )
 
-    resume_epoch = last_epoch + 1 if resume_train else 0
+    resume_epoch = last_epoch + 1 if resume_train and args.prune==False else 0
 
     trained_model = train_model(
         model, 
@@ -307,6 +314,23 @@ if __name__ == "__main__":
         type=float, 
         default=0.0001, 
         help='learning rate'
+        )
+    parser.add_argument(
+        '--prune', 
+        action='store_true', 
+        help='For pruning'
+        )
+    parser.add_argument(
+        '--conv2d_prune_amount', 
+        type=float, 
+        default=0.2, 
+        help='amount to prune'
+        )
+    parser.add_argument(
+        '--linear_prune_amount', 
+        type=float, 
+        default=0.1, 
+        help='amount to prune'
         )
 
     args = parser.parse_args()

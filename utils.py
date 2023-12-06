@@ -75,6 +75,75 @@ def test_augment(augmentor, mask_generator=None, args=None):
     return transforms.Compose(transform_list)
 
 
+def iterative_pruning_finetuning(
+    model, 
+    train_loader, 
+    test_loader, 
+    device,
+    learning_rate, 
+    conv2d_prune_amount = 0.2, 
+    linear_prune_amount = 0.1,
+    num_pruning = 10, 
+    num_epochs_per_pruning = 10,
+    model_filename_prefix = "pruned_model", 
+    model_dir = "saved_models",
+    grouped_pruning = True
+    ):
+    
+    '''
+    num_pruning - number of pruning rounds
+    num_epochs_per_pruning - number of epochs per pruning round
+    '''
+
+    for i in range(num_pruning):
+
+        print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
+
+        print("Pruning...")
+
+        # NOTE: For global pruning, linear/dense layer can also be pruned!
+        if grouped_pruning == True:
+            # grouped_pruning -> Global pruning
+            parameters_to_prune = []
+            for module_name, module in model.named_modules():
+                if isinstance(module, torch.nn.Conv2d):
+                    parameters_to_prune.append((module, "weight"))
+                elif isinstance(module, torch.nn.Linear):
+                    parameters_to_prune.append((module, "weight"))
+        
+            # L1Unstructured - prune (currently unpruned) entries in a tensor by zeroing
+            # out the ones with the lowest absolute magnitude-
+            prune.global_unstructured(
+                parameters_to_prune,
+                pruning_method = prune.L1Unstructured,
+                amount = conv2d_prune_amount,
+            )
+        
+        # layer-wise pruning-
+        else:
+            for module_name, module in model.named_modules():
+                if isinstance(module, torch.nn.Conv2d):
+                    prune.l1_unstructured(
+                        module, name = "weight",
+                        amount = conv2d_prune_amount)
+                elif isinstance(module, torch.nn.Linear):
+                    prune.l1_unstructured(
+                        module, name = "weight",
+                        amount = linear_prune_amount)
+
+        print("\nFine-tuning...")
+        fine_tuned_model = fine_tune_train_model(
+            model, 
+            train_loader,
+            test_loader, 
+            device,
+            learning_rate,
+            num_epochs_per_pruning
+            )
+        
+    return model
+
+
 def train_model(
     model, 
     criterion, 
@@ -148,6 +217,24 @@ def train_model(
                     loss = criterion(outputs.squeeze(1), batch_labels)
 
                     if phase == 'Training':
+                        if args.prune:
+                            l1_reg = torch.tensor(0.).to(device)
+                            for module in model.modules():
+                                mask = None
+                                weight = None
+                                for name, buffer in module.named_buffers():
+                                    if name == "weight_mask":
+                                        mask = buffer
+                                for name, param in module.named_parameters():
+                                    if name == "weight_orig":
+                                        weight = param
+                                # We usually only want to introduce sparsity to weights and prune weights.
+                                # Do the same for bias if necessary.
+                                if mask is not None and weight is not None:
+                                    l1_reg += torch.norm(mask * weight, 1)
+
+                            loss += l1_reg
+
                         loss.backward()
                         optimizer.step()
 
@@ -169,11 +256,13 @@ def train_model(
             if phase == 'Validation':
                 if dist.get_rank() == 0:
                     wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap}, step=epoch)
-                early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
-                if early_stopping.early_stop:
-                    if dist.get_rank() == 0:
-                        print("Early stopping")
-                    return model
+                
+                if args.prune==False:
+                    early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
+                    if early_stopping.early_stop:
+                        if dist.get_rank() == 0:
+                            print("Early stopping")
+                        return model
             else:
                 if dist.get_rank() == 0:
                     wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
