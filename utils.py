@@ -223,10 +223,10 @@ def train_model(
             running_loss = 0.0
             y_true, y_pred = [], []
 
-            disable_tqdm = dist.get_rank() != 0
-            data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
+            # disable_tqdm = dist.get_rank() != 0
+            # data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
 
-            for batch_data in data_loader_with_tqdm:
+            for batch_data in tqdm(data_loader, f"{phase}", disable=dist.get_rank() != 0):
                 batch_inputs, batch_labels = batch_data
                 batch_inputs = batch_inputs.to(device)
                 batch_labels = batch_labels.float().to(device)
@@ -373,11 +373,11 @@ def evaluate_model(
 
     y_true, y_pred = [], []
 
-    disable_tqdm = dist.get_rank() != 0
-    data_loader_with_tqdm = tqdm(test_dataloader, "test dataloading", disable=disable_tqdm)
+    # disable_tqdm = dist.get_rank() != 0
+    # data_loader_with_tqdm = tqdm(test_dataloader, "test dataloading", disable=dist.get_rank() != 0):
 
     with torch.no_grad():
-        for inputs, labels in data_loader_with_tqdm:
+        for inputs, labels in tqdm(test_dataloader, "test dataloading", disable=dist.get_rank() != 0):
             inputs = inputs.to(device)
             labels = labels.float().to(device)
             if args.model_name=='clip':
@@ -406,11 +406,11 @@ def extract_and_save_features(model, data_loader, save_path, device='cpu'):
     features = []
     labels_list = []
 
-    disable_tqdm = dist.get_rank() != 0
-    data_loader_with_tqdm = tqdm(data_loader, "Extracting CLIP Features", disable=disable_tqdm)
+    # disable_tqdm = dist.get_rank() != 0
+    # data_loader_with_tqdm = tqdm(data_loader, "Extracting CLIP Features", disable=dist.get_rank() != 0)
 
     with torch.no_grad():
-        for inputs, labels in data_loader_with_tqdm:
+        for inputs, labels in tqdm(data_loader, "Extracting CLIP Features", disable=dist.get_rank() != 0):
             inputs = inputs.to(device)
             features.append(model(inputs, return_feature=True).detach().cpu())
             labels_list.append(labels)
