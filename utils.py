@@ -342,29 +342,12 @@ def evaluate_model(
 
     if args.model_name=='clip' and args.other_model != True:
         model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    # elif args.other_model:
-    #     model.module.fc.load_state_dict(checkpoint)
+    elif args.other_model:
+        model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])
 
-    # if args.pruned_model:
-    #     model = copy.deepcopy(model)
-    #     model = remove_parameters(model)
-
-    #     # Measure sparsity
-    #     _, _, sparsity = measure_global_sparsity(
-    #         model, 
-    #         weight=True, 
-    #         bias=False, 
-    #         conv2d_use_mask=True, 
-    #         linear_use_mask=False
-    #     )
-
-    #     if dist.get_rank() == 0:
-    #         print(f"\nPruned Model Global Sparsity = {sparsity * 100:.3f}%")
-
     model = model.to(device)
-
     model.eval() 
 
     y_true, y_pred = [], []
@@ -490,21 +473,6 @@ def remove_parameters(model):
 
     return model
 
-def compute_final_pruning_rate(pruning_rate, num_iterations):
-    '''
-    A function to compute the final pruning rate for iterative pruning.
-        Note that this cannot be applied for global pruning rate if the pruning rate is heterogeneous among different layers.
-    Args:
-        pruning_rate (float): Pruning rate.
-        num_iterations (int): Number of iterations.
-    Returns:
-        float: Final pruning rate.
-    '''
-
-    final_pruning_rate = 1 - (1 - pruning_rate) ** num_iterations
-
-    return final_pruning_rate
-
 def measure_module_sparsity(module, weight=True, bias=False, use_mask=False):
     num_zeros = 0
     num_elements = 0
@@ -560,61 +528,3 @@ def measure_global_sparsity(
     sparsity = num_zeros / num_elements
 
     return num_zeros, num_elements, sparsity
-
-
-def prune_and_save_model(folder_path, filename, model_name='RN50'):
-    """
-    Prunes a given PyTorch model and saves the pruned model.
-
-    Parameters:
-    folder_path (str): Directory containing the model file.
-    filename (str): Name of the model file without extension.
-    """
-
-    model_filepath = os.path.join(folder_path, filename + '.pth')
-    
-    # Load the model
-    state = torch.load(model_filepath)
-
-    if model_name == 'RN50':
-        # model = vis_models.resnet50(pretrained=pretrained)
-        # model.fc = nn.Linear(model.fc.in_features, 1)
-        model = resnet50(pretrained=False)
-        model.fc = nn.Linear(model.fc.in_features, 1)
-    elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=False, stride0=1)
-        model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('ViT'):
-        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=pretrained)
-    elif model_name.startswith('clip'):
-        clip_model_name = 'ViT-L/14'
-        model = CLIPModel(clip_model_name, num_classes=1)
-    else:
-        raise ValueError(f"Model {model_name} not recognized!")
-
-
-    if args.model_name == 'clip':
-        model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    else:
-        model.load_state_dict(checkpoint['model_state_dict'])
-
-    # Prune the model
-    pruned_model = remove_parameters(model)
-
-    # Measure sparsity
-    _, _, sparsity = measure_global_sparsity(
-        pruned_model, 
-        weight=True, 
-        bias=False, 
-        conv2d_use_mask=True, 
-        linear_use_mask=False
-    )
-
-    print(f"\n{filename} Pruned Model Global Sparsity = {sparsity * 100:.3f}%")
-
-    # Save the pruned model
-    pruned_model_filename = filename + '_pruned.pth'
-    pruned_model_filepath = os.path.join(folder_path, pruned_model_filename)
-    torch.save({'model_state_dict': pruned_model.state_dict()}, pruned_model_filepath)
-    print(f"Pruned model saved to {pruned_model_filepath}")
