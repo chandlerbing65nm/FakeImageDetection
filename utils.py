@@ -32,17 +32,6 @@ import torch.nn.utils.prune as prune
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-import subprocess
-
-def call_bash_script(script_path):
-    try:
-        # Run the script and wait for it to complete
-        result = subprocess.run([script_path], check=True, text=True, capture_output=True)
-        # Print the output from the script
-        print("Script output:", result.stdout)
-    except subprocess.CalledProcessError as e:
-        # Handle errors in the called script
-        print("Error occurred:", e)
         
 def iterative_pruning_finetuning(
     model, 
@@ -69,7 +58,7 @@ def iterative_pruning_finetuning(
 
     for i in range(num_pruning):
         if dist.get_rank() == 0:
-            print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
+            # print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
             print("Pruning...")
         # NOTE: For global pruning, linear/dense layer can also be pruned!
         dist.barrier() # Synchronize all processes
@@ -105,8 +94,9 @@ def iterative_pruning_finetuning(
             print(f"\nPruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
 
         if dist.get_rank() == 0:
-            print("\nFine-tuning...")
+            # print("\nFine-tuning...")
         dist.barrier() # Synchronize all processes
+
         # fine_tuned_model = train_model(
         #     model, 
         #     criterion, 
@@ -121,23 +111,22 @@ def iterative_pruning_finetuning(
         #     device=device,
         #     args=args,
         #     )
-
         # model = copy.deepcopy(model)
 
-        _, _, sparsity = measure_global_sparsity(
-            model, 
-            weight = True,
-            bias = False, 
-            conv2d_use_mask = True,
-            linear_use_mask = False
-            )
+        # _, _, sparsity = measure_global_sparsity(
+        #     model, 
+        #     weight = True,
+        #     bias = False, 
+        #     conv2d_use_mask = True,
+        #     linear_use_mask = False
+        #     )
 
-        if dist.get_rank() == 0:
-            print(f"\n[after finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
+        # if dist.get_rank() == 0:
+        #     print(f"\n[after finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
 
         model = remove_parameters(model)
 
-        # Save the model after fine-tuning
+        # Save the model after pruning/fine-tuning
         if dist.get_rank() == 0:
             state = {
                 'model_state_dict': model.state_dict(),
