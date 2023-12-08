@@ -10,6 +10,7 @@ import wandb  # If Weights & Biases is being used for logging
 from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
 import timm 
+import copy
 
 import torchvision.models as vis_models
 
@@ -31,7 +32,18 @@ import torch.nn.utils.prune as prune
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
+import subprocess
 
+def call_bash_script(script_path):
+    try:
+        # Run the script and wait for it to complete
+        result = subprocess.run([script_path], check=True, text=True, capture_output=True)
+        # Print the output from the script
+        print("Script output:", result.stdout)
+    except subprocess.CalledProcessError as e:
+        # Handle errors in the called script
+        print("Error occurred:", e)
+        
 def iterative_pruning_finetuning(
     model, 
     criterion, 
@@ -90,28 +102,30 @@ def iterative_pruning_finetuning(
             )
         
         if dist.get_rank() == 0:
-            print(f"\n[before finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
+            print(f"\nPruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
 
         if dist.get_rank() == 0:
             print("\nFine-tuning...")
         dist.barrier() # Synchronize all processes
-        fine_tuned_model = train_model(
-            model, 
-            criterion, 
-            optimizer, 
-            scheduler,
-            train_loader, 
-            val_loader, 
-            num_epochs=num_epochs_per_pruning, 
-            resume_epoch=0,
-            save_path=save_path,
-            early_stopping=None,
-            device=device,
-            args=args,
-            )
+        # fine_tuned_model = train_model(
+        #     model, 
+        #     criterion, 
+        #     optimizer, 
+        #     scheduler,
+        #     train_loader, 
+        #     val_loader, 
+        #     num_epochs=num_epochs_per_pruning, 
+        #     resume_epoch=0,
+        #     save_path=save_path,
+        #     early_stopping=None,
+        #     device=device,
+        #     args=args,
+        #     )
+
+        # model = copy.deepcopy(model)
 
         _, _, sparsity = measure_global_sparsity(
-            fine_tuned_model, 
+            model, 
             weight = True,
             bias = False, 
             conv2d_use_mask = True,
@@ -121,45 +135,21 @@ def iterative_pruning_finetuning(
         if dist.get_rank() == 0:
             print(f"\n[after finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
 
+        model = remove_parameters(model)
+
         # Save the model after fine-tuning
         if dist.get_rank() == 0:
             state = {
-                'model_state_dict': fine_tuned_model.state_dict(),
+                'model_state_dict': model.state_dict(),
             }
 
             save_dir="./pruned_ckpts"
             os.makedirs(save_dir, exist_ok=True)
-            model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}.pth")
+            model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
             torch.save(state, model_save_path)
             print(f"Pruned model saved to {model_save_path}")
 
-    # Remove pruning parameters-
-    final_pruned_model = remove_parameters(fine_tuned_model)
-
-    _, _, sparsity = measure_global_sparsity(
-        final_pruned_model, 
-        weight = True,
-        bias = False, 
-        conv2d_use_mask = True,
-        linear_use_mask = False
-        )
-
-    if dist.get_rank() == 0:
-        print(f"\nFinal Pruned Model Global Sparsity = {sparsity * 100:.3f}%")
-
-    # Save the model after fine-tuning
-    if dist.get_rank() == 0:
-        state = {
-            'model_state_dict': fine_tuned_model.state_dict(),
-        }
-
-        save_dir="./pruned_ckpts"
-        os.makedirs(save_dir, exist_ok=True)
-        final_model_save_path = os.path.join(save_dir, f"final_pruned_model.pth")
-        torch.save(state, final_model_save_path)
-        print(f"Pruned model saved to {model_save_path}")
-
-    return final_pruned_model
+    return model
 
 
 def train_model(
@@ -342,14 +332,14 @@ def evaluate_model(
     if model_name == 'RN50':
         # model = vis_models.resnet50(pretrained=pretrained)
         # model.fc = nn.Linear(model.fc.in_features, 1)
-        model = resnet50(pretrained=False)
+        model = resnet50(pretrained=True)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=False, stride0=1)
+        model = _resnet50(pretrained=True, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name.startswith('ViT'):
         model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=pretrained)
+        model = timm.create_model(model_variant, pretrained=True)
     elif model_name.startswith('clip'):
         clip_model_name = 'ViT-L/14'
         model = CLIPModel(clip_model_name, num_classes=1)
@@ -363,12 +353,29 @@ def evaluate_model(
 
     if args.model_name=='clip' and args.other_model != True:
         model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    elif args.other_model:
-        model.module.fc.load_state_dict(checkpoint)
+    # elif args.other_model:
+    #     model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])
 
+    # if args.pruned_model:
+    #     model = copy.deepcopy(model)
+    #     model = remove_parameters(model)
+
+    #     # Measure sparsity
+    #     _, _, sparsity = measure_global_sparsity(
+    #         model, 
+    #         weight=True, 
+    #         bias=False, 
+    #         conv2d_use_mask=True, 
+    #         linear_use_mask=False
+    #     )
+
+    #     if dist.get_rank() == 0:
+    #         print(f"\nPruned Model Global Sparsity = {sparsity * 100:.3f}%")
+
     model = model.to(device)
+
     model.eval() 
 
     y_true, y_pred = [], []
@@ -564,3 +571,61 @@ def measure_global_sparsity(
     sparsity = num_zeros / num_elements
 
     return num_zeros, num_elements, sparsity
+
+
+def prune_and_save_model(folder_path, filename, model_name='RN50'):
+    """
+    Prunes a given PyTorch model and saves the pruned model.
+
+    Parameters:
+    folder_path (str): Directory containing the model file.
+    filename (str): Name of the model file without extension.
+    """
+
+    model_filepath = os.path.join(folder_path, filename + '.pth')
+    
+    # Load the model
+    state = torch.load(model_filepath)
+
+    if model_name == 'RN50':
+        # model = vis_models.resnet50(pretrained=pretrained)
+        # model.fc = nn.Linear(model.fc.in_features, 1)
+        model = resnet50(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_mod':
+        model = _resnet50(pretrained=False, stride0=1)
+        model.fc = ChannelLinear(model.fc.in_features, 1)
+    elif model_name.startswith('ViT'):
+        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
+        model = timm.create_model(model_variant, pretrained=pretrained)
+    elif model_name.startswith('clip'):
+        clip_model_name = 'ViT-L/14'
+        model = CLIPModel(clip_model_name, num_classes=1)
+    else:
+        raise ValueError(f"Model {model_name} not recognized!")
+
+
+    if args.model_name == 'clip':
+        model.module.fc.load_state_dict(checkpoint['model_state_dict'])
+    else:
+        model.load_state_dict(checkpoint['model_state_dict'])
+
+    # Prune the model
+    pruned_model = remove_parameters(model)
+
+    # Measure sparsity
+    _, _, sparsity = measure_global_sparsity(
+        pruned_model, 
+        weight=True, 
+        bias=False, 
+        conv2d_use_mask=True, 
+        linear_use_mask=False
+    )
+
+    print(f"\n{filename} Pruned Model Global Sparsity = {sparsity * 100:.3f}%")
+
+    # Save the pruned model
+    pruned_model_filename = filename + '_pruned.pth'
+    pruned_model_filepath = os.path.join(folder_path, pruned_model_filename)
+    torch.save({'model_state_dict': pruned_model.state_dict()}, pruned_model_filepath)
+    print(f"Pruned model saved to {pruned_model_filepath}")

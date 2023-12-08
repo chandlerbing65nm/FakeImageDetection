@@ -114,7 +114,7 @@ def main(
     # Creating training dataset from images
     train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
-        subset_size = int(0.20 * len(train_data))
+        subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data)
@@ -145,7 +145,7 @@ def main(
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones = [8, 15], gamma = 0.1, last_epoch = -1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3], gamma=0.1, last_epoch=-1)
 
     # Load checkpoint if resuming
     if resume_train:
@@ -232,7 +232,7 @@ def main(
             args.lr, 
             conv2d_prune_amount=args.conv2d_prune_amount, 
             linear_prune_amount=args.linear_prune_amount,
-            num_pruning = 21, 
+            num_pruning = args.pruning_rounds, 
             num_epochs_per_pruning=num_epochs,
             save_path=save_path,
             grouped_pruning = True,
@@ -352,6 +352,12 @@ if __name__ == "__main__":
         type=float, 
         default=0.1, 
         help='amount to prune'
+        )
+    parser.add_argument(
+        '--pruning_rounds', 
+        type=int, 
+        default=1, 
+        help='Masking ratio'
         )
 
     args = parser.parse_args()
