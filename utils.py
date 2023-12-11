@@ -46,7 +46,7 @@ def iterative_pruning_finetuning(
     linear_prune_amount = 0.1,
     num_pruning = 10, 
     num_epochs_per_pruning = 10,
-    grouped_pruning = True,
+    grouped_pruning = False,
     save_path='./',
     args=None
     ):
@@ -75,11 +75,20 @@ def iterative_pruning_finetuning(
             # out the ones with the lowest absolute magnitude-
             prune.global_unstructured(
                 parameters_to_prune,
-                pruning_method = prune.L1Unstructured,
+                pruning_method = prune.L1Unstructured, # L1Unstructured or LnStructured
                 amount = conv2d_prune_amount,
             )
+        # layer-wise pruning-
         else:
-            raise ValueError("layer wise pruning not supported")
+            for module_name, module in model.named_modules():
+                if isinstance(module, torch.nn.Conv2d):
+                    prune.ln_structured(
+                        module, name = "weight",
+                        amount = conv2d_prune_amount)
+                elif isinstance(module, torch.nn.Linear):
+                    prune.ln_structured(
+                        module, name = "weight",
+                        amount = linear_prune_amount)
 
         # Compute global sparsity
         _, _, sparsity = measure_global_sparsity(
@@ -93,37 +102,26 @@ def iterative_pruning_finetuning(
         if dist.get_rank() == 0:
             print(f"\nPruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
 
-        if dist.get_rank() == 0:
-            # print("\nFine-tuning...")
+        # if dist.get_rank() == 0:
+        #     print("\nFine-tuning...")
         dist.barrier() # Synchronize all processes
 
-        # fine_tuned_model = train_model(
-        #     model, 
-        #     criterion, 
-        #     optimizer, 
-        #     scheduler,
-        #     train_loader, 
-        #     val_loader, 
-        #     num_epochs=num_epochs_per_pruning, 
-        #     resume_epoch=0,
-        #     save_path=save_path,
-        #     early_stopping=None,
-        #     device=device,
-        #     args=args,
-        #     )
-        # model = copy.deepcopy(model)
+        model = train_model(
+            model, 
+            criterion, 
+            optimizer, 
+            scheduler,
+            train_loader, 
+            val_loader, 
+            num_epochs=num_epochs_per_pruning, 
+            resume_epoch=0,
+            save_path=save_path,
+            early_stopping=None,
+            device=device,
+            args=args,
+            )
 
-        # _, _, sparsity = measure_global_sparsity(
-        #     model, 
-        #     weight = True,
-        #     bias = False, 
-        #     conv2d_use_mask = True,
-        #     linear_use_mask = False
-        #     )
-
-        # if dist.get_rank() == 0:
-        #     print(f"\n[after finetuning] Pruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
-
+        model = copy.deepcopy(model)
         model = remove_parameters(model)
 
         # Save the model after pruning/fine-tuning
@@ -134,7 +132,7 @@ def iterative_pruning_finetuning(
 
             save_dir="./pruned_ckpts"
             os.makedirs(save_dir, exist_ok=True)
-            model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+            model_save_path = os.path.join(save_dir, f"pruned+ft_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
             torch.save(state, model_save_path)
             print(f"Pruned model saved to {model_save_path}")
 
@@ -342,8 +340,8 @@ def evaluate_model(
 
     if args.model_name=='clip' and args.other_model != True:
         model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    elif args.other_model:
-        model.module.fc.load_state_dict(checkpoint)
+    # elif args.other_model:
+    #     model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])
 

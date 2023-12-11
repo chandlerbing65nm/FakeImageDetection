@@ -9,7 +9,7 @@ echo "The current date is: $current_date"
 # Define the arguments for your training script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-NUM_EPOCHS=1
+NUM_EPOCHS=5
 PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50, clip
 MASK_TYPE="nomask" # nomask, spectral, pixel, patch
@@ -19,8 +19,8 @@ BATCH_SIZE=128
 WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
 learning_rate=0.0001
-conv2d_prune_amount=0.2 # ratio to prune
-linear_prune_amount=0.1
+conv2d_prune_amount=0.98 # ratio to prune
+linear_prune_amount=0.98
 pruning_rounds=1
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
@@ -45,7 +45,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --pretrained \
   --prune \
   --resume_train $RESUME \
-  # --debug \
+  --debug \
   # --early_stop \
   # --wandb_online \
   # --wandb_run_id $WANDB_ID \
