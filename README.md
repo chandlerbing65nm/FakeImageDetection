@@ -1,7 +1,7 @@
 <div align="center">
 
 # Frequency Masking for Universal DeepFake Detection
-
+[Paper](https://arxiv.org/abs/2401.06506)
 </div>
 
 <p align="center">
