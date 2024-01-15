@@ -260,10 +260,11 @@ This project is licensed under the [Apache License](LICENSE).
 If you use this code in your research, please consider citing it. Below is the BibTeX entry for citation:
 
 ```bibtex
-@misc{Doloriel2023,
-  author = {Chandler Timm C. Doloriel, Ngai-Man Cheung},
-  title = {Frequency Masking for Universal DeepFake Detection},
-  year = {2023},
-  publisher = {},
-  journal = {},
+@misc{doloriel2024frequency,
+      title={Frequency Masking for Universal Deepfake Detection}, 
+      author={Chandler Timm Doloriel and Ngai-Man Cheung},
+      year={2024},
+      eprint={2401.06506},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
