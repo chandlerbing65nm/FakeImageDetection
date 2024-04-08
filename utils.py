@@ -3,12 +3,14 @@ import torch
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
+from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, classification_report, precision_score, recall_score, f1_score
+from sklearn.preprocessing import label_binarize
 import torch.distributed as dist  # If distributed training is being used
 import wandb  # If Weights & Biases is being used for logging
 
+import torchvision
 from torchvision import transforms
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, TensorDataset, Subset
 import timm 
 import copy
 
@@ -28,6 +30,7 @@ from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 
 import torch.nn.utils.prune as prune
+import shap
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
@@ -48,7 +51,7 @@ def iterative_pruning_finetuning(
     num_epochs_per_pruning = 10,
     grouped_pruning = False,
     save_path='./',
-    args=None
+    args=None,
     ):
     
     '''
@@ -60,8 +63,10 @@ def iterative_pruning_finetuning(
         if dist.get_rank() == 0:
             # print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
             print("Pruning...")
-        # NOTE: For global pruning, linear/dense layer can also be pruned!
+        
         dist.barrier() # Synchronize all processes
+
+        # NOTE: For global pruning, linear/dense layer can also be pruned!
         if grouped_pruning == True:
             # grouped_pruning -> Global pruning
             parameters_to_prune = []
@@ -106,22 +111,23 @@ def iterative_pruning_finetuning(
         #     print("\nFine-tuning...")
         dist.barrier() # Synchronize all processes
 
-        model = train_model(
-            model, 
-            criterion, 
-            optimizer, 
-            scheduler,
-            train_loader, 
-            val_loader, 
-            num_epochs=num_epochs_per_pruning, 
-            resume_epoch=0,
-            save_path=save_path,
-            early_stopping=None,
-            device=device,
-            args=args,
-            )
-
-        model = copy.deepcopy(model)
+        if args.pruning_ft == True:
+            model = train_model(
+                model, 
+                criterion, 
+                optimizer, 
+                scheduler,
+                train_loader, 
+                val_loader, 
+                num_epochs=num_epochs_per_pruning, 
+                resume_epoch=0,
+                save_path=save_path,
+                early_stopping=None,
+                device=device,
+                args=args,
+                )
+            model = copy.deepcopy(model)
+        
         model = remove_parameters(model)
 
         # Save the model after pruning/fine-tuning
@@ -130,9 +136,18 @@ def iterative_pruning_finetuning(
                 'model_state_dict': model.state_dict(),
             }
 
-            save_dir="./pruned_ckpts"
+            if grouped_pruning == True:
+                save_dir="./checkpoints/pruned_globall1unstructured"
+            else:
+                save_dir="./checkpoints/pruned_layerwiselnstructured"
+
             os.makedirs(save_dir, exist_ok=True)
-            model_save_path = os.path.join(save_dir, f"pruned+ft_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+
+            if args.pruning_ft == True:
+                model_save_path = os.path.join(save_dir, f"pruned+ft_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+            else:
+                model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+            
             torch.save(state, model_save_path)
             print(f"Pruned model saved to {model_save_path}")
 
@@ -151,6 +166,7 @@ def train_model(
     save_path='./', 
     early_stopping=None,
     device='cpu',
+    sampler=None,
     args=None,
     ):
 
@@ -190,6 +206,8 @@ def train_model(
         # Iterate through the phases
         for phase in phases:
             if phase == 'Training':
+                if sampler is not None:
+                    sampler.set_epoch(epoch)
                 model.train()
                 data_loader = train_loader
             else:
@@ -280,18 +298,11 @@ def evaluate_model(
     batch_size,
     checkpoint_path, 
     device,
-    args
+    args,
+    per_class_metrics=False
     ):
 
-    # Depending on the mask_type, create the appropriate mask generator
-    if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio)
-    elif mask_type == 'pixel':
-        mask_generator = PixelMaskGenerator(ratio=ratio)
-    else:
-        mask_generator = None
-
-
+    mask_generator = None
     test_opt = {
         'rz_interp': ['bilinear'],
         'loadSize': 256,
@@ -302,25 +313,39 @@ def evaluate_model(
         'jpg_qual': [int((30 + 100) / 2)]
     }
 
-    test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
+    test_transform = train_augment(ImageAugmentor(test_opt), mask_generator, args)
 
-    if data_type == 'GenImage':
-        test_dataset = GenImage(dataset_path, transform=test_transform)
-    elif data_type == 'Wang_CVPR20' :
+
+    if data_type == 'Wang_CVPR20' :
         test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
     elif data_type == 'Ojha_CVPR23' :
         test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
+    elif data_type in ['ImageNet_mini']:
+        # test_transform = transforms.Compose([ 
+        #     transforms.Resize((224, 224)), 
+        #     transforms.ToTensor(),
+        #     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # ])
+        test_dataset = torchvision.datasets.ImageFolder(dataset_path, transform=test_transform)
     else:
         raise ValueError("wrong dataset input")
 
-    test_sampler = DistributedSampler(test_dataset)
-    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
+    if args.conv_features or data_type == 'ImageNet':
+        subset_size = int(0.1 * len(test_dataset))
+        subset_indices = random.sample(range(len(test_dataset)), subset_size)
+        test_dataset = Subset(test_dataset, subset_indices)
 
-    if model_name == 'RN50':
+    test_sampler = DistributedSampler(test_dataset, shuffle=False, seed=args.seed)
+    test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, num_workers=4)
+
+    if model_name == 'RN50' and data_type in ['Wang_CVPR20', 'Ojha_CVPR23']:
         # model = vis_models.resnet50(pretrained=pretrained)
         # model.fc = nn.Linear(model.fc.in_features, 1)
         model = resnet50(pretrained=True)
         model.fc = nn.Linear(model.fc.in_features, 1)
+    elif data_type == 'ImageNet_mini':
+        model = resnet50(pretrained=True)
+        model.fc = nn.Linear(model.fc.in_features, 1000)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=True, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
@@ -330,7 +355,6 @@ def evaluate_model(
     elif model_name.startswith('clip'):
         clip_model_name = 'ViT-L/14'
         model = CLIPModel(clip_model_name, num_classes=1)
-    else:
         raise ValueError(f"Model {model_name} not recognized!")
 
     model = model.to(device)
@@ -340,14 +364,40 @@ def evaluate_model(
 
     if args.model_name=='clip' and args.other_model != True:
         model.module.fc.load_state_dict(checkpoint['model_state_dict'])
+    elif args.other_model:
+        model.module.fc.load_state_dict(checkpoint)
     # elif args.other_model:
     #     model.module.fc.load_state_dict(checkpoint)
-    else:
-        model.load_state_dict(checkpoint['model_state_dict'])
 
     model = model.to(device)
+
+    if args.conv_features and dist.get_rank() == 0:
+        # Define a dictionary to hold features for each convolutional block, organized by stage and block
+        features_dict = {stage: {block: [] for block in range(blocks)} for stage, blocks in enumerate([3, 4, 6, 3], start=1)}
+
+        def hook_fn(module, input, output, stage, block):
+            """Function to be called by hooks. It will save the output of each block."""
+            features_dict[stage][block].append(output)
+
+        def register_hooks(model):
+            """Registers hooks on the convolutional blocks of the model."""
+            # Check if the model is wrapped with DDP
+            if hasattr(model, 'module'):
+                # Access the underlying model
+                model = model.module
+            
+            stages = [model.layer1, model.layer2, model.layer3, model.layer4]
+            for stage_idx, stage in enumerate(stages, start=1):
+                for block_idx, block in enumerate(stage.children(), start=0):
+                    # The lambda function ensures that stage_idx and block_idx are captured correctly at hook registration time
+                    block.register_forward_hook(lambda module, input, output, s=stage_idx, b=block_idx: hook_fn(module, input, output, s, b))
+
+        # Register the hooks
+        register_hooks(model)
+
     model.eval() 
 
+    # Initialize containers for predictions and true labels
     y_true, y_pred = [], []
 
     # disable_tqdm = dist.get_rank() != 0
@@ -355,27 +405,79 @@ def evaluate_model(
 
     with torch.no_grad():
         for inputs, labels in tqdm(test_dataloader, "test dataloading", disable=dist.get_rank() != 0):
+
+            # inputs = torch.rand(inputs.shape[0], inputs.shape[1], 224, 224)  # Dummy inputs
+            # labels = torch.randint(0, 1, (inputs.shape[0],))  # Dummy labels for classification
+
             inputs = inputs.to(device)
             labels = labels.float().to(device)
-            if args.model_name=='clip':
-                outputs = model(inputs, return_all=True).view(-1).unsqueeze(1)
+
+            if args.data_type in ['Wang_CVPR20', 'Ojha_CVPR23']: 
+                if args.model_name=='clip':
+                    outputs = model(inputs, return_all=True).view(-1).unsqueeze(1)
+                else:
+                    outputs = model(inputs).view(-1).unsqueeze(1)
+
+                y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
+                y_true.extend(labels.cpu().numpy())
             else:
-                outputs = model(inputs).view(-1).unsqueeze(1)
-            y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
-            y_true.extend(labels.cpu().numpy())
+                outputs = model(inputs)
+                y_pred.extend(outputs.detach().cpu().numpy())
+                y_true.extend(labels.cpu().numpy())
+
+    if args.conv_features and dist.get_rank() == 0:
+        from artifacts import extraction_tensor
+        import re
+
+        # Combine features for each block across all batches and save
+        for stage, blocks in features_dict.items():
+            for block, features in blocks.items():
+                combined_features = torch.cat(features, dim=0)
+                extraction_tensor(combined_features, "./artifacts/resnet50", f'stage_{stage}_block_{block}', device=device, print_scalars=True)
+                # print(f"stage_{stage}_block_{block} | shape: {combined_features.shape}")
 
     y_true, y_pred = np.array(y_true), np.array(y_pred)
 
-    acc = accuracy_score(y_true, y_pred > 0.5)
-    ap = average_precision_score(y_true, y_pred)
-    auc = roc_auc_score(y_true, y_pred)
+    if data_type == 'ImageNet_mini':
+        import scipy
+        probs = scipy.special.softmax(y_pred, axis=1)
+        y_pred_ac = np.argmax(probs, axis=1)
+        acc = accuracy_score(y_true, y_pred_ac)
+        ap = 0
+        auc = 0
+    else:
+        # General metrics
+        acc = accuracy_score(y_true, y_pred > 0.5)
+        ap = average_precision_score(y_true, y_pred)
+        auc = roc_auc_score(y_true, y_pred)
 
     if dist.get_rank() == 0:
         print(f'Average Precision: {ap}')
         print(f'Accuracy: {acc}')
         print(f'ROC AUC Score: {auc}')
 
-    return ap, acc, auc
+    # Convert predictions to binary labels based on a threshold
+    y_pred_binary = (y_pred > 0.5).astype(int)
+
+    if per_class_metrics:
+        # Compute per-class metrics and store in a dictionary
+        per_class_results = {}
+        for class_label in np.unique(y_true):
+            precision = precision_score(y_true, y_pred_binary, pos_label=class_label, zero_division=0)
+            recall = recall_score(y_true, y_pred_binary, pos_label=class_label, zero_division=0)
+            f1 = f1_score(y_true, y_pred_binary, pos_label=class_label, zero_division=0)
+
+            per_class_results[f'class_{int(class_label)}'] = {
+                'precision': precision,
+                'recall': recall,
+                'f1-score': f1,
+            }
+
+        # Return a structured dictionary with overall and per-class metrics
+        return {'overall': {'accuracy': acc, 'average_precision': ap, 'auc': auc}, 'per_class': per_class_results}
+    else:
+        # Return metrics in the original format if per_class_metrics is False
+        return ap, acc, auc
 
 
 def extract_and_save_features(model, data_loader, save_path, device='cpu'):
@@ -436,7 +538,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
 
 def test_augment(augmentor, mask_generator=None, args=None):
     transform_list = [
-        # transforms.Resize(256),
+        # transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ]

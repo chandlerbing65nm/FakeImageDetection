@@ -76,7 +76,6 @@ if __name__ == "__main__":
         '--data_type', 
         default="Wang_CVPR20", 
         type=str, 
-        choices=['Wang_CVPR20', 'Ojha_CVPR23'], 
         help="Dataset Type"
         )
     parser.add_argument(
@@ -84,11 +83,22 @@ if __name__ == "__main__":
         action='store_true', 
         help='if the model is from my own code'
         )
+    parser.add_argument(
+        '--conv_features', 
+        action='store_true', 
+        help='get the conv blocks features'
+        )
+    parser.add_argument(
+        '--seed', 
+        type=int, 
+        default=44, 
+        help='seed'
+        )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
     args = parser.parse_args()
 
-    seed = 42
+    seed = args.seed
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -103,6 +113,7 @@ if __name__ == "__main__":
     model_name = args.model_name.lower()
     finetune = 'ft' if args.pretrained else ''
     band = '' if args.band == 'all' else args.band
+    convfeat = '_convfeats' if args.conv_features else ''
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
@@ -114,7 +125,7 @@ if __name__ == "__main__":
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{ratio}.txt'
+    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{ratio}{convfeat}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -150,17 +161,28 @@ if __name__ == "__main__":
     #     }
     elif args.data_type == 'Ojha_CVPR23':
         datasets = {
-            'Guided': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/guided',
-            'LDM_200': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200',
-            'LDM_200_cfg': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200_cfg',
-            'LDM_100': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_100',
-            'Glide_100_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_27',
+            # 'Guided': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/guided',
+            # 'LDM_200': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200',
+            # 'LDM_200_cfg': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200_cfg',
+            # 'LDM_100': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_100',
+            # 'Glide_100_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_27',
             'Glide_50_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_50_27',
-            'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
-            'DALL-E': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/dalle',       
+            # 'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
+            # 'DALL-E': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/dalle',       
         }
+    elif args.data_type == 'ImageNet_mini':
+        datasets = {
+            'ImageNet-mini': '/home/users/chandler_doloriel/scratch/Datasets/imagenet-mini/val',
+            # 'Tiny-ImageNet': '/home/users/chandler_doloriel/scratch/Datasets/tiny-imagenet-200/train',   
+            }
     else:
         raise ValueError("wrong dataset type")
+
+    # datasets = {
+    #     'ImageNet-mini': '/home/users/chandler_doloriel/scratch/Datasets/imagenet-mini/val',
+    #     'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
+    #     'ProGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/progan',
+    #     }
 
     # Initialize a counter
     dataset_count = len(datasets)

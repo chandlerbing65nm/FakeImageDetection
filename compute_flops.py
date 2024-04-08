@@ -26,7 +26,7 @@ def calculate_resnet50_flops(input_size, pruning_ratio=0.0):
     total_flops = calculate_conv_flops(conv1_out_channels, 3, 7, output_size, stride=2)
 
     layers = [3, 4, 6, 3]
-    channels = [(64, 64, 256), (256, 128, 512), (512, 256, 1024), (1024, 512, 2048)]  # (in_channels, mid_channels, out_channels)
+    channels = [(64, 64, 256), (128, 128, 512), (256, 256, 1024), (512, 512, 2048)]  # (in_channels, mid_channels, out_channels)
 
     for i, (in_c, mid_c, out_c) in enumerate(channels):
         for _ in range(layers[i]):
@@ -44,7 +44,7 @@ def calculate_fc_flops(out_features, in_features):
     return 2 * out_features * in_features
 
 
-for ratio in [0.90, 0.92, 0.94, 0.96, 0.98]:
+for ratio in [0, 0.80, 0.90, 0.92, 0.94, 0.96, 0.98]:
     last_conv_output_channels = 2048
     pruned_last_conv_output_channels = int(last_conv_output_channels * (1 - ratio))
     fc_output_features = 1

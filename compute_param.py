@@ -23,7 +23,7 @@ def calculate_resnet50_params(pruning_ratio=0.0):
     total_params = calculate_conv_params(conv1_out_channels, 3, 7)
 
     layers = [3, 4, 6, 3]
-    channels = [(64, 64, 256), (256, 128, 512), (512, 256, 1024), (1024, 512, 2048)] # (in_channels, mid_channels, out_channels)
+    channels = [(64, 64, 256), (128, 128, 512), (256, 256, 1024), (512, 512, 2048)] # (in_channels, mid_channels, out_channels)
 
     for (in_c, mid_c, out_c) in channels:
         for _ in range(layers[channels.index((in_c, mid_c, out_c))]):

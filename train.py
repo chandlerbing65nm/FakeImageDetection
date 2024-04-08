@@ -55,7 +55,7 @@ def main(
     args=None,
     ):
 
-    seed = 44
+    seed = args.seed
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
@@ -113,22 +113,20 @@ def main(
 
     # Creating training dataset from images
     train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
-    if args.debug:
+    if args.smallset:
         subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
-    train_sampler = DistributedSampler(train_data)
+    train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
     val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
-    val_sampler = DistributedSampler(val_data, shuffle=False)
+    val_sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
-        # model = vis_models.resnet50(pretrained=pretrained)
-        # model.fc = nn.Linear(model.fc.in_features, 1)
         model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
@@ -218,6 +216,7 @@ def main(
             save_path=save_path,
             early_stopping=early_stopping,
             device=device,
+            sampler=train_sampler,
             args=args,
             )
     else:
@@ -235,7 +234,7 @@ def main(
             num_pruning = args.pruning_rounds, 
             num_epochs_per_pruning=num_epochs,
             save_path=save_path,
-            grouped_pruning = True,
+            grouped_pruning = args.global_prune,
             args=args
             )
         
@@ -304,9 +303,9 @@ if __name__ == "__main__":
         help='For early stopping'
         )
     parser.add_argument(
-        '--debug', 
+        '--smallset', 
         action='store_true', 
-        help='For debugging'
+        help='For using small subset of training set'
         )
     parser.add_argument(
         '--mask_type', 
@@ -342,6 +341,16 @@ if __name__ == "__main__":
         help='For pruning'
         )
     parser.add_argument(
+        '--pruning_ft', 
+        action='store_true', 
+        help='For finetuning after pruning'
+        )
+    parser.add_argument(
+        '--global_prune', 
+        action='store_true', 
+        help='to apply global unstructured pruning or not'
+        )
+    parser.add_argument(
         '--conv2d_prune_amount', 
         type=float, 
         default=0.2, 
@@ -357,7 +366,13 @@ if __name__ == "__main__":
         '--pruning_rounds', 
         type=int, 
         default=1, 
-        help='Masking ratio'
+        help='pruning iteration'
+        )
+    parser.add_argument(
+        '--seed', 
+        type=int, 
+        default=44, 
+        help='seed number'
         )
 
     args = parser.parse_args()
@@ -386,6 +401,7 @@ if __name__ == "__main__":
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
+    print(f"Seed: {args.seed}")
     print(f"Number of Epochs: {num_epochs}")
     print(f"Early Stopping: {args.early_stop}")
     print(f"Mask Generator Type: {args.mask_type}")

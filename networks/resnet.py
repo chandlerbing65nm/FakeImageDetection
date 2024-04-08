@@ -80,13 +80,16 @@ class Bottleneck(nn.Module):
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
+        # print(f'Bottleneck - After conv1: {out.shape}')
 
         out = self.conv2(out)
         out = self.bn2(out)
         out = self.relu(out)
+        # print(f'Bottleneck - After conv2: {out.shape}')
 
         out = self.conv3(out)
         out = self.bn3(out)
+        # print(f'Bottleneck - After conv3: {out.shape}')
 
         if self.downsample is not None:
             identity = self.downsample(x)

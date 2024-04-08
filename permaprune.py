@@ -98,6 +98,11 @@ if __name__ == "__main__":
         action='store_true', 
         help='check if it is pruned model'
         )
+    parser.add_argument(
+        '--per_class', 
+        action='store_true', 
+        help='if you want per class results'
+        )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
     args = parser.parse_args()
@@ -158,7 +163,8 @@ if __name__ == "__main__":
         if dist.get_rank() == 0:
             print(f"\nEvaluating {dataset_name}")
 
-        avg_ap, avg_acc, auc = evaluate_model(
+        # Adjust the call to evaluate_model to handle both return types
+        results = evaluate_model(
             args.model_name,
             args.data_type,
             args.mask_type,
@@ -168,11 +174,12 @@ if __name__ == "__main__":
             checkpoint_path,
             device,
             args,
+            args.per_class,
         )
+
         if dist.get_rank() == 0:
-            # Write the results to the file
             with open(f'{results_path}/{txtname}', 'a') as file:
-                if file.tell() == 0: # Check if the file is empty
+                if file.tell() == 0:  # Header for the file, write only once
                     file.write("Selected Configuration:\n")
                     file.write("-" * 28 + "\n")
                     file.write(f"Device: {args.local_rank}\n")
@@ -184,14 +191,22 @@ if __name__ == "__main__":
                     file.write(f"Checkpoint Type: {checkpoint_path}\n")
                     file.write(f"Results saved to: {results_path}/{txtname}\n")
                     file.write("-" * 28 + "\n\n")
-                    file.write("Dataset, Precision, Accuracy, AUC\n")
-                    file.write("-" * 28)
-                    file.write("\n")
-                file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
-
-            # Decrement the counter
-            dataset_count -= 1
-            if dataset_count == 0:
-                with open(f'{results_path}/{txtname}', 'a') as file:
+                    file.write("Dataset, Metrics, Values\n")
                     file.write("-" * 28 + "\n")
-                    file.write("\n")
+
+                # Check if per_class_metrics was requested and the results are in a dictionary
+                if args.per_class:
+                    avg_ap, avg_acc, auc = results['overall']['average_precision'], results['overall']['accuracy'], results['overall']['auc']
+                    file.write(f"{dataset_name}, Overall, AP: {avg_ap*100:.2f}, Acc: {avg_acc*100:.2f}, AUC: {auc:.3f}\n")
+                    for class_label, metrics in results['per_class'].items():
+                        file.write(f"{dataset_name}, {class_label}, Precision: {metrics['precision']*100:.2f}, Recall: {metrics['recall']*100:.2f}, F1score: {metrics['f1-score']*100:.2f}\n")
+                else:
+                    # If per_class_metrics was not requested, the results are a tuple
+                    avg_ap, avg_acc, auc = results
+                    file.write(f"{dataset_name}, Overall, AP: {avg_ap*100:.2f}, Acc: {avg_acc*100:.2f}, AUC: {auc:.3f}\n")
+
+                # Decrement the counter and write a footer if it's the last dataset
+                dataset_count -= 1
+                if dataset_count == 0:
+                    file.write("-" * 28 + "\n\n")
+
