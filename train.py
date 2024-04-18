@@ -117,7 +117,7 @@ def main(
         subset_size = int(0.01 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
-    train_sampler = DistributedSampler(train_data)
+    train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
@@ -208,6 +208,7 @@ def main(
         save_path=save_path,
         early_stopping=early_stopping,
         device=device,
+        sampler=train_sampler,
         args=args,
         )
         

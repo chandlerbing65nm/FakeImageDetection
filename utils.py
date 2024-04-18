@@ -36,6 +36,7 @@ def train_augment(augmentor, mask_generator=None, args=None):
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),
+        # transforms.RandomRotation(degrees=45),
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -53,6 +54,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),
+        # transforms.RandomRotation(degrees=45),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ])
@@ -86,6 +88,7 @@ def train_model(
     save_path='./', 
     early_stopping=None,
     device='cpu',
+    sampler=None,
     args=None,
     ):
 
@@ -123,6 +126,8 @@ def train_model(
 
         for phase in ['Training', 'Validation']:
             if phase == 'Training':
+                if sampler is not None and args.model_name != 'clip':
+                    sampler.set_epoch(epoch)
                 model.train()
                 data_loader = train_loader
             else:
