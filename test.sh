@@ -3,8 +3,8 @@
 # Define the arguments for your test script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="clip" # clip, RN50_mod or RN50
+DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
+MODEL_NAME="clip_rn50" # # RN50_mod, RN50, clip_vitl14, clip_rn50
 MASK_TYPE="nomask" # spectral, pixel, patch or nomask
 BAND="all" # all, low, mid, high
 RATIO=15
@@ -25,4 +25,5 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
   --band $BAND \
   --ratio $RATIO \
   --batch_size $BATCH_SIZE \
+  --clip_ft \
   # --other_model

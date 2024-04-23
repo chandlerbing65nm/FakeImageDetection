@@ -34,9 +34,14 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_rn50', 'clip_vitl14',
         ],
         help='Type of model to use; includes ResNet variants'
+        )
+    parser.add_argument(
+        '--clip_ft', 
+        action='store_true', 
+        help='For loading a finetuned clip model'
         )
     parser.add_argument(
         '--mask_type', 

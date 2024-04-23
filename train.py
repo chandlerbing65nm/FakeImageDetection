@@ -114,7 +114,7 @@ def main(
     # Creating training dataset from images
     train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
-        subset_size = int(0.01 * len(train_data))
+        subset_size = int(0.2 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
@@ -122,8 +122,9 @@ def main(
 
     # Creating validation dataset from images
     val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
-    val_sampler = DistributedSampler(val_data, shuffle=False)
-    val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
+    # val_sampler = DistributedSampler(val_data, shuffle=False)
+    # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
+    val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
@@ -134,14 +135,17 @@ def main(
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('clip'):
+    elif model_name.startswith('clip_vitl14'):
         clip_model_name = 'ViT-L/14'
-        model = CLIPModel(clip_model_name, num_classes=1)
+        model = CLIPModel(clip_model_name, num_classes=1, clip_grad=args.clip_grad)
+    elif model_name.startswith('clip_rn50'):
+        clip_model_name = 'RN50'
+        model = CLIPModel(clip_model_name, num_classes=1, clip_grad=args.clip_grad)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
     model = model.to(device)
-    model = DistributedDataParallel(model)
+    model = DistributedDataParallel(model, find_unused_parameters=True)
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
@@ -164,7 +168,7 @@ def main(
             raise ValueError("No matching checkpoint files found.")
 
         checkpoint = torch.load(checkpoint_path)
-        if args.model_name == 'clip':
+        if 'clip' in args.model_name:
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -226,7 +230,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_vitl14', 'clip_rn50'
             # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
             # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -280,6 +284,11 @@ if __name__ == "__main__":
         '--debug', 
         action='store_true', 
         help='For debugging'
+        )
+    parser.add_argument(
+        '--clip_grad', 
+        action='store_true', 
+        help='For finetuning clip model'
         )
     parser.add_argument(
         '--mask_type', 
