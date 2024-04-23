@@ -10,37 +10,36 @@ echo "The current date is: $current_date"
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
-PROJECT_NAME="Frequency-Masking"
 MODEL_NAME="RN50" # RN50_mod, RN50, clip
-MASK_TYPE="nomask" # nomask, spectral, pixel, patch
-BAND="all" # all, low, mid, high
-RATIO=0
-BATCH_SIZE=128
-WANDB_ID="2w0btkas"
-RESUME="from_last" # from_last or from_best
+AUTHOR="wang"
+MASK_TYPE="spectral" # nomask, spectral, pixel, patch
+BAND="high" # all, low, mid, high
+RATIO=70
+BATCH_SIZE=8
 learning_rate=0.0002
 SEED=44
 
+# Define the arguments for pruning
+CHECKPOINT="./checkpoints/mask_0/rn50_modft.pth"
+CONV_PRUNING_RATIO=0.0
+PRUNING_ITER=1
+
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
-
 echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
 # Run the distributed training command
-python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
+python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
   -- \
   --seed $SEED \
   --num_epochs $NUM_EPOCHS \
-  --project_name $PROJECT_NAME \
   --model_name $MODEL_NAME \
   --mask_type $MASK_TYPE \
   --band $BAND \
   --ratio $RATIO \
   --lr ${learning_rate} \
   --batch_size $BATCH_SIZE \
-  --early_stop \
-  --pretrained \
-  # --prune \
-  # --resume_train $RESUME \
-  # --wandb_online \
-  # --wandb_run_id $WANDB_ID \
+  --conv2d_prune_amount ${CONV_PRUNING_RATIO} \
+  --pruning_rounds ${PRUNING_ITER} \
+  --checkpoint_path ${CHECKPOINT} \
+  --pruning_test \

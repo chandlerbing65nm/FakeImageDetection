@@ -35,7 +35,25 @@ import shap
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-        
+
+def calculate_model_sparsity(model):
+    total_zeros = 0
+    total_elements = 0
+    for module in model.modules():
+        if hasattr(module, 'weight') and module.weight is not None:
+            weight = module.weight.data
+            total_zeros += torch.sum(weight == 0).item()
+            total_elements += weight.nelement()
+        if hasattr(module, 'bias') and module.bias is not None:
+            bias = module.bias.data
+            total_zeros += torch.sum(bias == 0).item()
+            total_elements += bias.nelement()
+
+    overall_sparsity = total_zeros / total_elements
+    print(f"model sparsity: {overall_sparsity:.4f} ({total_zeros}/{total_elements})")
+    return overall_sparsity
+
+
 def iterative_pruning_finetuning(
     model, 
     criterion, 
@@ -44,31 +62,27 @@ def iterative_pruning_finetuning(
     train_loader, 
     val_loader, 
     device,
-    learning_rate, 
-    conv2d_prune_amount = 0.2, 
-    linear_prune_amount = 0.1,
-    num_pruning = 10, 
-    num_epochs_per_pruning = 10,
-    grouped_pruning = False,
+    learning_rate,
+    num_epochs_per_pruning = 1,
     save_path='./',
     args=None,
     ):
     
     '''
-    num_pruning - number of pruning rounds
+    args.pruning_rounds - number of pruning rounds
     num_epochs_per_pruning - number of epochs per pruning round
     '''
 
-    for i in range(num_pruning):
+    for i in range(args.pruning_rounds):
         if dist.get_rank() == 0:
-            # print("\nPruning and Finetuning {}/{}".format(i + 1, num_pruning))
+            # print("\nPruning and Finetuning {}/{}".format(i + 1, args.pruning_rounds))
             print("Pruning...")
         
         dist.barrier() # Synchronize all processes
 
         # NOTE: For global pruning, linear/dense layer can also be pruned!
-        if grouped_pruning == True:
-            # grouped_pruning -> Global pruning
+        if args.global_prune == True:
+            # args.global_prune -> Global pruning
             parameters_to_prune = []
             for module_name, module in model.named_modules():
                 if isinstance(module, torch.nn.Conv2d):
@@ -81,34 +95,90 @@ def iterative_pruning_finetuning(
             prune.global_unstructured(
                 parameters_to_prune,
                 pruning_method = prune.L1Unstructured, # L1Unstructured or LnStructured
-                amount = conv2d_prune_amount,
+                amount = args.conv2d_prune_amount,
             )
+            # Compute global sparsity
+            _, _, sparsity = measure_global_sparsity(
+                model, 
+                weight = True,
+                bias = True, 
+                conv2d_use_mask = True,
+                linear_use_mask = False
+                )
+            if dist.get_rank() == 0:
+                print(f"\nPruning Iter: {i+1}, Global Sparsity: {sparsity * 100:.3f}%")
         # layer-wise pruning-
         else:
-            for module_name, module in model.named_modules():
-                if isinstance(module, torch.nn.Conv2d):
-                    prune.ln_structured(
-                        module, name = "weight",
-                        amount = conv2d_prune_amount)
-                elif isinstance(module, torch.nn.Linear):
-                    prune.ln_structured(
-                        module, name = "weight",
-                        amount = linear_prune_amount)
+            original_model = copy.deepcopy(model)  # Keep a copy of the original model to reset after each pruning
 
-        # Compute global sparsity
-        _, _, sparsity = measure_global_sparsity(
-            model, 
-            weight = True,
-            bias = False, 
-            conv2d_use_mask = True,
-            linear_use_mask = False
-            )
-        
-        if dist.get_rank() == 0:
-            print(f"\nPruning Round {i+1} Global Sparsity = {sparsity * 100:.3f}%")
+            # Gather all Conv2d layers
+            conv2d_layers = [(name, module) for name, module in original_model.named_modules() 
+                    if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
 
-        # if dist.get_rank() == 0:
-        #     print("\nFine-tuning...")
+            for layer_name, layer_module in conv2d_layers:
+                # Reset model to original state for each layer
+                model = copy.deepcopy(original_model)
+
+                # Access the same layer in the current model copy
+                current_layer = dict(model.named_modules())[layer_name]
+
+                # Before pruning
+                if dist.get_rank() == 0:
+                    print("Before pruning:")
+                    sparsity = calculate_model_sparsity(model)
+                    if sparsity != 0:
+                        raise ValueError(f"Error: Expected sparsity to be 0 before pruning, but got {sparsity:.4f}")
+
+                # Apply pruning only to the current Conv2d layer
+                prune.ln_structured(
+                    current_layer, 
+                    name="weight",
+                    amount=args.conv2d_prune_amount,
+                    n=2,
+                    dim=0
+                )
+
+                # After pruning
+                if dist.get_rank() == 0:
+                    print(f"After pruning {layer_name}:")
+                    calculate_model_sparsity(model)
+
+                # Evaluate the pruned model
+                model.eval()
+                data_loader = val_loader
+
+                total_samples = len(data_loader.dataset)
+                running_loss = 0.0
+                y_true, y_pred = [], []
+
+                for batch_data in tqdm(data_loader, f"Test after Pruning layer {layer_name}", disable=dist.get_rank() != 0):
+                    batch_inputs, batch_labels = batch_data
+                    batch_inputs = batch_inputs.to(device)
+                    batch_labels = batch_labels.float().to(device)
+
+                    outputs = model(batch_inputs).view(-1).unsqueeze(1)
+                    y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
+                    y_true.extend(batch_labels.cpu().numpy())
+
+                y_true, y_pred = np.array(y_true), np.array(y_pred)
+                acc = accuracy_score(y_true, y_pred > 0.5)
+                ap = average_precision_score(y_true, y_pred)
+
+                if dist.get_rank() == 0:
+                    print(f'Layer {layer_name} -> Acc: {acc:.4f} AP: {ap:.4f}')
+
+                ##################### Evaluate Model on Each Dataloader ####################
+                with open("pruning_results.txt", "a") as file:  # Open file in append mode
+                    if layer_name == 'module.conv1':
+                        # Write a header at the start of the file if this is the first index
+                        file.write("\n\n" + "-" * 28 + "\n")
+                        file.write(f"mAP of {args.band} band {args.mask_type} masking ({args.ratio}%) of {args.model_name} pruned at {args.conv2d_prune_amount * 100:.1f}% --> ImageNet weights?: {args.pretrained}\n")
+                        if args.pretrained == False:
+                            file.write(f"Weights loaded from: {args.checkpoint_path}\n")
+                    file.write(f"{ap:.4f}" + "\n")  # Write each result immediately to the file
+
+                print("##########################\n")
+
         dist.barrier() # Synchronize all processes
 
         if args.pruning_ft == True:
@@ -127,16 +197,16 @@ def iterative_pruning_finetuning(
                 args=args,
                 )
             model = copy.deepcopy(model)
-        
+
         model = remove_parameters(model)
 
         # Save the model after pruning/fine-tuning
-        if dist.get_rank() == 0:
+        if dist.get_rank() == 0 and args.pruning_test != True:
             state = {
                 'model_state_dict': model.state_dict(),
             }
 
-            if grouped_pruning == True:
+            if args.global_prune == True:
                 save_dir="./checkpoints/pruned_globall1unstructured"
             else:
                 save_dir="./checkpoints/pruned_layerwiselnstructured"
@@ -144,9 +214,9 @@ def iterative_pruning_finetuning(
             os.makedirs(save_dir, exist_ok=True)
 
             if args.pruning_ft == True:
-                model_save_path = os.path.join(save_dir, f"pruned+ft_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+                model_save_path = os.path.join(save_dir, f"pruned+ft_model_{i+1}_pruned:{args.args.conv2d_prune_amount}.pth")
             else:
-                model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}_pruned:{args.conv2d_prune_amount}.pth")
+                model_save_path = os.path.join(save_dir, f"pruned_model_{i+1}_pruned:{args.args.conv2d_prune_amount}.pth")
             
             torch.save(state, model_save_path)
             print(f"Pruned model saved to {model_save_path}")
@@ -233,7 +303,7 @@ def train_model(
                     loss = criterion(outputs.squeeze(1), batch_labels)
 
                     if phase == 'Training':
-                        if args.prune:
+                        if args.pruning_ft:
                             l1_reg = torch.tensor(0.).to(device)
                             for module in model.modules():
                                 mask = None
@@ -273,14 +343,14 @@ def train_model(
                 if dist.get_rank() == 0:
                     wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap}, step=epoch)
                 
-                if args.prune==False:
+                if args.pruning_ft==False:
                     early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
                     if early_stopping.early_stop:
                         if dist.get_rank() == 0:
                             print("Early stopping")
                         return model
             else:
-                if args.prune:
+                if args.pruning_ft:
                     scheduler.step()
 
                 if dist.get_rank() == 0:
