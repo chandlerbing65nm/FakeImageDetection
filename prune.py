@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
 import argparse
 import torchvision.models as vis_models
+from torchvision.datasets import CIFAR10, FashionMNIST
 import re
 
 import torch.distributed as dist
@@ -95,18 +96,19 @@ def main(
     train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
-    # Creating training dataset from images
-    train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
-    if args.smallset:
-        subset_size = int(0.02 * len(train_data))
+    if args.dataset == 'ForenSynths':
+        train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
+        val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    elif args.dataset == 'LSUNbinary':
+        train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=train_transform)
+        val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=val_transform)
+
+    if args.smallset and args.dataset == 'ForenSynths':
+        subset_size = int(0.2 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
-
-    # Creating validation dataset from images
-    val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
-    # val_sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
     # Creating and training the binary classifier
@@ -116,8 +118,11 @@ def main(
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('clip'):
+    elif model_name == 'clip_vitl14':
         clip_model_name = 'ViT-L/14'
+        model = CLIPModel(clip_model_name, num_classes=1)
+    elif model_name == 'clip_rn50':
+        clip_model_name = 'RN50'
         model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
@@ -133,7 +138,7 @@ def main(
         checkpoint_path = args.checkpoint_path
         checkpoint = torch.load(checkpoint_path)
 
-        if args.model_name == 'clip':
+        if 'clip' in args.model_name and args.clip_grad == False: # if the clip model is finetuned from the backbone
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -152,6 +157,17 @@ def main(
         
 if __name__ == "__main__":
 
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
     parser = argparse.ArgumentParser(description="Your model description here")
 
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
@@ -161,11 +177,17 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
+            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_vitl14', 'clip_rn50'
             # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
             # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
         help='Type of model to use; includes ResNet'
+        )
+    parser.add_argument(
+        '--clip_grad', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
+        help='For loading finetuned clip model'
         )
     parser.add_argument(
         '--band', 
@@ -177,12 +199,14 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--pretrained', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='if use ImageNet weights'
         )
     parser.add_argument(
         '--smallset', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='For using small subset of training set'
         )
     parser.add_argument(
@@ -215,19 +239,22 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--pruning_ft', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='For finetuning after pruning'
         )
     parser.add_argument(
         '--pruning_test', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='For test after pruning'
         )
     parser.add_argument(
-        '--global_prune', 
-        action='store_true', 
-        help='to apply global unstructured pruning or not'
-        )
+        '--conv2d_prune_amount_file', 
+        type=str, 
+        default='pruning_amounts.txt', 
+        help='File containing the amount to prune for each Conv2d layer'
+    )
     parser.add_argument(
         '--conv2d_prune_amount', 
         type=float, 
@@ -257,6 +284,12 @@ if __name__ == "__main__":
         default='./checkpoints/mask_0/rn50ft.pth',
         type=str,
         )
+    parser.add_argument(
+        '--dataset',
+        default='ForenSynths',
+        help='Dataset to use for training and validation'
+    )
+
 
     args = parser.parse_args()
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
@@ -281,13 +314,13 @@ if __name__ == "__main__":
     print(f"Mask Band: {args.band}")
     print(f"Model Arch: {args.model_name}")
     print(f"ImageNet Weights: {args.pretrained}")
-    if args.pretrained == False:
-        print(f"Checkpoint: {args.checkpoint_path}")
+    if not args.pretrained: print(f"Checkpoint: {args.checkpoint_path}")
+
     print(f"\n")
-    print(f"Global Pruning: {args.global_prune}")
     print(f"Pruning-Test: {args.pruning_test}")
     print(f"Pruning-Finetune: {args.pruning_ft}")
-    print(f"Pruning Ratio: {args.conv2d_prune_amount}")
+    if args.pruning_test: print(f"Pruning Ratio: {args.conv2d_prune_amount}")
+    if args.pruning_ft: print(f"Pruning Ratio: {args.conv2d_prune_amount_file}")
     print("-" * 30, "\n")
 
     main(

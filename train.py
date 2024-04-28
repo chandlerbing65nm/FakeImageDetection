@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
 import argparse
 import wandb
-import torchvision.models as vis_models
+import torchvision
 import re
 
 import torch.distributed as dist

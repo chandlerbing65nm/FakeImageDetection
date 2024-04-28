@@ -12,8 +12,6 @@ import timm
 import argparse
 import random
 
-import torchvision.models as vis_models
-
 from dataset import *
 from augment import ImageAugmentor
 from mask import *
@@ -94,6 +92,10 @@ if __name__ == "__main__":
         default=44, 
         help='seed'
         )
+    parser.add_argument(
+        '--checkpoint_path', 
+        type=str,
+        )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
     args = parser.parse_args()
@@ -115,12 +117,14 @@ if __name__ == "__main__":
     band = '' if args.band == 'all' else args.band
     convfeat = '_convfeats' if args.conv_features else ''
 
-    if args.mask_type != 'nomask':
-        ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
-    else:
-        ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
+    # if args.mask_type != 'nomask':
+    #     ratio = args.ratio
+    #     checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
+    # else:
+    #     ratio = 0
+    #     checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
+
+    checkpoint_path = args.checkpoint_path
 
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
