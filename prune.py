@@ -93,8 +93,8 @@ def main(
         else:
             mask_generator = None
 
-    train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
-    val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
+    train_transform = train_augment(ImageAugmentor(train_opt), None, args)
+    val_transform = val_augment(ImageAugmentor(val_opt), None, args)
 
     if args.dataset == 'ForenSynths':
         train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
@@ -103,13 +103,32 @@ def main(
         train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=train_transform)
         val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=val_transform)
 
+
     if args.smallset and args.dataset == 'ForenSynths':
-        subset_size = int(0.2 * len(train_data))
+        subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
+
+    if args.pruning_test_ft:
+        # subset_size = int(0.002 * len(val_data))
+        # subset_indices = random.sample(range(len(val_data)), subset_size)
+        # val_data = Subset(val_data, subset_indices)
+        # sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
+        # val_loader = DataLoader(val_data, batch_size=4, sampler=sampler, num_workers=4)
+
+        mask_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
+        mask_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=mask_transform)
+        subset_size = int(0.02 * len(mask_data))
+        subset_indices = random.sample(range(len(mask_data)), subset_size)
+        mask_data = Subset(mask_data, subset_indices)
+        sampler = DistributedSampler(mask_data, shuffle=False, seed=seed)
+        mask_loader = DataLoader(mask_data, batch_size=batch_size, sampler=sampler, num_workers=4)
+    else:
+        mask_loader = None
+        
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
@@ -150,6 +169,7 @@ def main(
         scheduler,
         train_loader, 
         val_loader, 
+        mask_loader,
         device,
         args.lr, 
         args=args
@@ -202,6 +222,12 @@ if __name__ == "__main__":
         type=str2bool,
         default=False,  # Optional: you can set a default value
         help='if use ImageNet weights'
+        )
+    parser.add_argument(
+        '--pruning_test_ft', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
+        help='if use adaptive layerwise pruning'
         )
     parser.add_argument(
         '--smallset', 

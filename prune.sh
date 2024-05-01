@@ -11,7 +11,7 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 MODEL_NAME="RN50" # RN50_mod, RN50, clip_vitl14, clip_rn50
-MASK_TYPE="nomask" # nomask, spectral, pixel, patch
+MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="low" # all, low, mid, high
 RATIO=70
 BATCH_SIZE=128
@@ -21,11 +21,12 @@ SMALL_DATA="True"
 
 # Define the arguments for pruning
 CHECKPOINT="./checkpoints/mask_0/rn50ft.pth"
-CONV_PRUNING_RATIO=0.0
-PRUNING_ITER=1
+CONV_PRUNING_RATIO=0.99
+PRUNING_RNDS=10
 DATASET="ForenSynths" # ForenSynths, LSUNbinary
 PRUNING_TEST="False" # for pruning in eval mode without finetuning
-PRUNING_FT="True"
+PRUNING_FT="False"
+PRUNING_TEST_FT="True"
 
 CLIP_GRAD="False" # for pruning finetuned clip model
 PRETRAINED="False" # if use ImageNet weights, setting pretrained=True
@@ -47,7 +48,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
   --lr ${learning_rate} \
   --batch_size $BATCH_SIZE \
   --conv2d_prune_amount ${CONV_PRUNING_RATIO} \
-  --pruning_rounds ${PRUNING_ITER} \
+  --pruning_rounds ${PRUNING_RNDS} \
   --checkpoint_path ${CHECKPOINT} \
   --pruning_test ${PRUNING_TEST} \
   --pruning_ft ${PRUNING_FT} \
@@ -56,3 +57,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
   --pretrained ${PRETRAINED} \
   --smallset ${SMALL_DATA} \
   --conv2d_prune_amount_file ${PRUNING_VALUES_FILE} \
+  --pruning_test_ft ${PRUNING_TEST_FT} \
