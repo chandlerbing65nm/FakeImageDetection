@@ -39,7 +39,7 @@ def main(
     num_epochs=10000,
     ratio=50,
     batch_size=64,
-    model_name='RN50',
+    model_name='rn50',
     band='all',
     mask_type=None,
     pretrained=False,
@@ -131,17 +131,17 @@ def main(
         
 
     # Creating and training the binary classifier
-    if model_name == 'RN50':
+    if model_name == 'rn50':
         model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
-    elif model_name == 'RN50_mod':
+    elif model_name == 'rn50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name == 'clip_vitl14':
-        clip_model_name = 'ViT-L/14'
+        clip_model_name = 'clip_vitl14'
         model = CLIPModel(clip_model_name, num_classes=1)
     elif model_name == 'clip_rn50':
-        clip_model_name = 'RN50'
+        clip_model_name = 'rn50'
         model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
@@ -194,10 +194,10 @@ if __name__ == "__main__":
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
     parser.add_argument(
         '--model_name',
-        default='RN50',
+        default='rn50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_vitl14', 'clip_rn50'
+            'rn50', 'rn50_mod', 'clip_vitl14', 'clip_rn50'
             # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
             # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -345,6 +345,7 @@ if __name__ == "__main__":
     print(f"\n")
     print(f"Pruning-Test: {args.pruning_test}")
     print(f"Pruning-Finetune: {args.pruning_ft}")
+    print(f"Pruning-Test+Finetune: {args.pruning_test_ft}")
     if args.pruning_test: print(f"Pruning Ratio: {args.conv2d_prune_amount}")
     if args.pruning_ft: print(f"Pruning Ratio: {args.conv2d_prune_amount_file}")
     print("-" * 30, "\n")

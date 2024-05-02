@@ -31,11 +31,8 @@ if __name__ == "__main__":
 
     parser.add_argument(
         '--model_name',
-        default='RN50',
+        default='rn50',
         type=str,
-        choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip',
-        ],
         help='Type of model to use; includes ResNet variants'
         )
     parser.add_argument(

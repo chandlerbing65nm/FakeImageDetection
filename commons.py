@@ -12,29 +12,58 @@ device = torch.device("cuda:0")
 PARAMETRIZED_MODULE_TYPES = (torch.nn.Linear, torch.nn.Conv2d,)
 NORM_MODULE_TYPES = (torch.nn.BatchNorm2d, torch.nn.LayerNorm)
 
+def normalize_scores(scores):
+    """
+    Normalizing scheme for LAMP.
+    """
+    # sort scores in an ascending order
+    sorted_scores, sorted_idx = scores.view(-1).sort(descending=False)
+    # compute cumulative sum
+    scores_cumsum_temp = sorted_scores.cumsum(dim=0)
+    scores_cumsum = torch.zeros(scores_cumsum_temp.shape, device=scores.device)
+    scores_cumsum[1:] = scores_cumsum_temp[: len(scores_cumsum_temp) - 1]
+    # normalize by cumulative sum
+    sorted_scores /= scores.sum() - scores_cumsum
+    # tidy up and output
+    new_scores = torch.zeros(scores_cumsum.shape, device=scores.device)
+    new_scores[sorted_idx] = sorted_scores
+
+    return new_scores.view(scores.shape)
+
+@torch.no_grad()
+def count_unmasked_weights(model):
+    """
+    Return a 1-dimensional tensor of #unmasked weights.
+    """
+    mlist = get_modules(model)
+    unmaskeds = []
+    for m in mlist:
+        unmaskeds.append(m.weight.count_nonzero())
+    return torch.FloatTensor(unmaskeds)
+    
 def get_model_sparsity(model):
     prunables = 0
     nnzs = 0
-    for m in model.modules():
-        if _is_prunable_module(m):
+    for name, m in model.named_modules():
+        if _is_prunable_module(m, name):
             prunables += m.weight.data.numel()
             nnzs += m.weight.data.nonzero().size(0)
     return 1 - nnzs/prunables
 
-def _is_prunable_module(m):
-    return (isinstance(m,nn.Linear) or isinstance(m,nn.Conv2d))
+def _is_prunable_module(m, name=None):
+    return isinstance(m, nn.Conv2d) and "downsample" not in name
 
 def get_modules(model):
     modules = []
-    for m in model.modules():
-        if _is_prunable_module(m):
+    for name, m in model.named_modules():
+        if _is_prunable_module(m, name):
             modules.append(m)
     return modules
 
 def get_weights(model):
     weights = []
-    for m in model.modules():
-        if _is_prunable_module(m):
+    for name, m in model.named_modules():
+        if _is_prunable_module(m, name):
             weights.append(m.weight)
     return weights
 

@@ -32,46 +32,14 @@ from torch.utils.data.distributed import DistributedSampler
 import torch.nn.utils.prune as prune
 import os
 
-from commons import get_model_flops, get_model_sparsity
+from commons import get_model_flops, get_model_sparsity, get_modules, get_weights, normalize_scores, count_unmasked_weights
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-
-def calculate_model_sparsity(model):
-    total_zeros = 0
-    total_elements = 0
-    for module in model.modules():
-        if hasattr(module, 'weight') and module.weight is not None:
-            weight = module.weight.data
-            total_zeros += torch.sum(weight == 0).item()
-            total_elements += weight.nelement()
-        if hasattr(module, 'bias') and module.bias is not None:
-            bias = module.bias.data
-            total_zeros += torch.sum(bias == 0).item()
-            total_elements += bias.nelement()
-
-    overall_sparsity = total_zeros / total_elements
-    print(f"model sparsity: {overall_sparsity:.4f} ({total_zeros}/{total_elements})")
-    return overall_sparsity
-
-def read_prune_amounts(filename):
-    with open(filename, 'r') as file:
-        for line in file:
-            # Skip commented lines
-            if line.strip().startswith('#'):
-                continue
-            # Process the first non-commented line
-            amounts = line.strip('[] \n').split(',')
-            return [float(amount.strip()) for amount in amounts]
-    raise ValueError("No valid pruning amounts found in the file.")
-
 def prune_layers(model, layer_name, layer_module, pruning_method, amount):
     current_layer = dict(model.named_modules())[layer_name]
     pruning_method(current_layer, name="weight", amount=amount)
-    # if torch.distributed.get_rank() == 0:
-    #     print(f"After pruning {layer_name}:")
-    #     calculate_model_sparsity(model)
 
 def evaluate_pruned_model(model, data_loader, device, args=None):
     model.eval()
@@ -96,6 +64,28 @@ def evaluate_pruned_model(model, data_loader, device, args=None):
     acc = accuracy_score(y_true, y_pred > 0.5)
     ap = average_precision_score(y_true, y_pred)
     return acc, ap
+
+def compute_lamp_amounts(model, amount):
+    """
+    Compute normalization schemes.
+    """
+    unmaskeds = count_unmasked_weights(model)
+    num_surv = int(np.round(unmaskeds.sum() * (1.0 - amount)))
+
+    flattened_scores = [normalize_scores(w**2).view(-1) for w in get_weights(model)]
+    concat_scores = torch.cat(flattened_scores, dim=0)
+    topks, _ = torch.topk(concat_scores, num_surv)
+    threshold = topks[-1]
+
+    # We don't care much about tiebreakers, for now.
+    final_survs = [
+        torch.ge(score, threshold * torch.ones(score.size()).to(score.device)).sum() for score in flattened_scores
+    ]
+    amounts = []
+    for idx, final_surv in enumerate(final_survs):
+        amounts.append(1.0 - (final_surv / unmaskeds[idx]))
+
+    return amounts
 
 def iterative_pruning_finetuning(
     model, 
@@ -135,24 +125,10 @@ def iterative_pruning_finetuning(
                 if torch.distributed.get_rank() == 0:
                     print(f'Layer {layer_name} -> Acc: {acc:.4f} AP: {ap:.4f}')
         
-        elif args.pruning_ft:
-            conv2d_layers = [(name, module) for name, module in model.named_modules() if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
-            prune_amounts = read_prune_amounts(args.conv2d_prune_amount_file)
-            assert len(conv2d_layers) == len(prune_amounts), "The number of layers and prune amounts must match"
-
-            for (layer_name, layer_module), amount in zip(conv2d_layers, prune_amounts):
-                prune_layers(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
-            
-            model = train_model(
-                model, criterion, optimizer, scheduler, 
-                train_loader, val_loader, num_epochs=num_epochs_per_pruning, 
-                resume_epoch=0, save_path=save_path, early_stopping=None, 
-                device=device, args=args, pruning_round=i
-                )
-        
         elif args.pruning_test_ft:
             current_ap_scores = []
             current_og_ap_scores = []
+            perf_amounts = []
             prune_amounts = [] 
 
             if i == 0:
@@ -163,7 +139,7 @@ def iterative_pruning_finetuning(
             amount = args.conv2d_prune_amount
 
             # computing the sensitivity with pruning
-            for (layer_name, layer_module) in tqdm(conv2d_layers, "ap for pruned"):
+            for (layer_name, layer_module) in tqdm(conv2d_layers, f"{args.mask_type} masked by {args.ratio}% in {args.band} band and pruned {amount*100:.2f}% layerwise"):
                 prune_model = copy.deepcopy(model) 
                 prune_layers(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
                 acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
@@ -177,7 +153,7 @@ def iterative_pruning_finetuning(
 
 
             # computing the sensitivity without pruning
-            for (layer_name, layer_module) in tqdm(conv2d_layers, "ap for unpruned"):
+            for (layer_name, layer_module) in tqdm(conv2d_layers, f"{args.mask_type} masked by {args.ratio}% in {args.band} band and pruned 0% layerwise"):
                 prune_model = copy.deepcopy(model) 
                 prune_layers(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, 0.0)
                 acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
@@ -189,19 +165,26 @@ def iterative_pruning_finetuning(
             else:
                 og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
 
-
+            pruned_layers = set()
+            
             assert len(og_ap_scores) == len(ap_scores)
             for score in range(len(og_ap_scores)):
                 delta_ap = og_ap_scores[score] - ap_scores[score]  # Change in AP
                 relative_delta_ap = max(0, delta_ap / og_ap_scores[score])
 
                 # Calculate pruning amount (with offset)
-                pruning_amount = 1 / (relative_delta_ap * 30 + 1.00001)  # Add a small offset like 1e-5
-                pruning_amount = min(pruning_amount, 1.0)  # Enforce maximum of 1
-                prune_amounts.append(pruning_amount)
+                perf_amount = 1 / (relative_delta_ap * 100 + 1.00001)  # Add a small offset like 1e-5
+                perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
+                perf_amounts.append(perf_amount)
 
+            tensor_lamp = compute_lamp_amounts(model, amount)
+            lamp_amounts = [t.item() for t in tensor_lamp]
+
+            assert len(lamp_amounts) == len(lamp_amounts)
+            prune_amounts = [a * b for a, b in zip(lamp_amounts, perf_amounts)]
             print(prune_amounts)
-            assert len(conv2d_layers) == len(prune_amounts), "The number of layers and prune amounts must match"
+
+            assert len(conv2d_layers) == len(prune_amounts)
 
             for (layer_name, layer_module), amount in zip(conv2d_layers, prune_amounts):
                 prune_layers(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
@@ -252,7 +235,7 @@ def train_model(
                 print('-' * 10)
 
         # For CLIP model, extract features only once
-        if 'clip' in args.model_name and not features_exist:
+        if 'clip' in args.model_name and not features_exist and args.clip_grad == False:
             # Process with rank 0 performs the extraction
             if dist.get_rank() == 0:
                 extract_and_save_features(model, train_loader, "./clip_train_" + features_path, device)
@@ -269,7 +252,7 @@ def train_model(
             features_exist = True  # Set this to True after extraction
 
         # Load the features for all processes if not done already
-        if 'clip' in args.model_name and features_exist and epoch == resume_epoch:
+        if 'clip' in args.model_name and features_exist and epoch == resume_epoch and args.clip_grad == False:
             train_loader = load_features("./clip_train_" + features_path, batch_size=args.batch_size, shuffle=False)
             val_loader = load_features("./clip_val_" + features_path, batch_size=args.batch_size, shuffle=False)
 
@@ -305,7 +288,10 @@ def train_model(
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'Training'):
-                    outputs = model(batch_inputs).view(-1).unsqueeze(1)
+                    if 'clip' in args.model_name and args.clip_grad == True:
+                        outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
+                    else:
+                        outputs = model(batch_inputs).view(-1).unsqueeze(1)
                     loss = criterion(outputs.squeeze(1), batch_labels)
 
                     if phase == 'Training':
@@ -327,22 +313,16 @@ def train_model(
                     print(f'{phase} Loss: {epoch_loss:.4f} Acc: {acc:.4f} AP: {ap:.4f}')
 
             # Early stopping
-            if phase == 'Validation':
-                # if dist.get_rank() == 0:
-                #     wandb.log({"Validation Loss": epoch_loss, "Validation Acc": acc, "Validation AP": ap}, step=epoch)
-                
-                if args.pruning_ft==False and args.pruning_test_ft==False:
+            if phase == 'Validation':             
+                if args.pruning_test_ft==False:
                     early_stopping(acc, model, optimizer, epoch)  # Pass the accuracy instead of loss
                     if early_stopping.early_stop:
                         if dist.get_rank() == 0:
                             print("Early stopping")
                         return model
             else:
-                if args.pruning_ft or args.pruning_test_ft:
+                if args.pruning_test_ft:
                     scheduler.step()
-
-                # if dist.get_rank() == 0:
-                #     wandb.log({"Training Loss": epoch_loss, "Training Acc": acc, "Training AP": ap}, step=epoch)
         
         if dist.get_rank() == 0:
             model_new = copy.deepcopy(model)
@@ -351,9 +331,9 @@ def train_model(
                 'epoch': epoch,
                 'model_state_dict': model_new.state_dict(),
             }
-            save_dir=f"./checkpoints/pruning/{args.model_name.lower()}"
+            save_dir=f"./checkpoints/pruning/{args.model_name.lower()}/ours"
             os.makedirs(save_dir, exist_ok=True)
-            model_save_path = os.path.join(save_dir, f"ln_strcd_ep{epoch}_rnd{pruning_round}.pth")
+            model_save_path = os.path.join(save_dir, f"ep{epoch}_rnd{pruning_round}.pth")
             torch.save(state, model_save_path)
 
     return model
@@ -402,12 +382,12 @@ def evaluate_model(
     test_sampler = DistributedSampler(test_dataset)
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
-    if model_name == 'RN50':
+    if model_name == 'rn50':
         # model = torchvision.models.resnet50(pretrained=pretrained)
         # model.fc = nn.Linear(model.fc.in_features, 1)
         model = resnet50(pretrained=False)
         model.fc = nn.Linear(model.fc.in_features, 1)
-    elif model_name == 'RN50_mod':
+    elif model_name == 'rn50_mod':
         model = _resnet50(pretrained=False, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name.startswith('ViT'):
@@ -417,7 +397,7 @@ def evaluate_model(
         clip_model_name = 'ViT-L/14'
         model = CLIPModel(clip_model_name, num_classes=1)
     elif model_name == 'clip_rn50':
-        clip_model_name = 'RN50'
+        clip_model_name = 'rn50'
         model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
@@ -427,9 +407,9 @@ def evaluate_model(
 
     checkpoint = torch.load(checkpoint_path)
 
-    if 'clip' in args.model_name and args.other_model != True and args.clip_ft == False:
-        model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    elif args.other_model:
+    # if 'clip' in args.model_name and args.other_model != True and args.clip_ft == False:
+    #     model.module.fc.load_state_dict(checkpoint['model_state_dict'])
+    if args.other_model:
         model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])

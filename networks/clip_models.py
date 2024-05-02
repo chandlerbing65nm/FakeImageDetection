@@ -4,16 +4,22 @@ import torch.nn as nn
 import torch
 
 CHANNELS = {
-    "RN50" : 1024,
-    "ViT-L/14" : 768
+    "rn50" : 1024,
+    "clip_vitl14" : 768
 }
+
+MODELS = {
+    "rn50" : 'RN50',
+    "clip_vitl14" : 'ViT-L/14'
+}
+
 
 class CLIPModel(nn.Module):
     def __init__(self, name, device="cpu", num_classes=1, clip_grad=False):
         super(CLIPModel, self).__init__()
 
-        self.model, self.preprocess = clip.load(name, device=device) # self.preprecess will not be used during training, which is handled in Dataset class 
-        self.fc = nn.Linear( CHANNELS[name], num_classes )
+        self.model, self.preprocess = clip.load(MODELS[name], device=device) # self.preprecess will not be used during training, which is handled in Dataset class 
+        self.fc = nn.Linear(CHANNELS[name], num_classes)
  
         for param in self.model.parameters():
             param.requires_grad = clip_grad

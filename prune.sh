@@ -10,7 +10,7 @@ echo "The current date is: $current_date"
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
-MODEL_NAME="RN50" # RN50_mod, RN50, clip_vitl14, clip_rn50
+MODEL_NAME="RN50" # clip_rn50, RN50, clip_vitl14, clip_rn50
 MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="low" # all, low, mid, high
 RATIO=70
@@ -28,13 +28,13 @@ PRUNING_TEST="False" # for pruning in eval mode without finetuning
 PRUNING_FT="False"
 PRUNING_TEST_FT="True"
 
-CLIP_GRAD="False" # for pruning finetuned clip model
+CLIP_GRAD=$( [[ "$CHECKPOINT" == *"clip"* ]] && echo "True" || echo "False" ) # for pruning finetuned clip model
 PRETRAINED="False" # if use ImageNet weights, setting pretrained=True
 PRUNING_VALUES_FILE="./pruning_amounts.txt"
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
-echo "Using $NUM_GPU GPUs with IDs: $GPUs"
+echo "Using $NUM_GPU GPU/s with ID/s: $GPUs"
 
 # Run the distributed training command
 python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
