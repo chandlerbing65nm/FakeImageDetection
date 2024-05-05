@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset, Subset
-from torchvision import transforms
+from torchvision import transforms, datasets
 from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
@@ -111,20 +111,30 @@ def main(
     train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
-    # Creating training dataset from images
-    train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
-    if args.debug:
-        subset_size = int(0.2 * len(train_data))
-        subset_indices = random.sample(range(len(train_data)), subset_size)
-        train_data = Subset(train_data, subset_indices)
+
+    # # Creating training dataset from images
+    # train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    # if args.debug:
+    #     subset_size = int(0.2 * len(train_data))
+    #     subset_indices = random.sample(range(len(train_data)), subset_size)
+    #     train_data = Subset(train_data, subset_indices)
+    # train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
+    # train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
+
+    # # Creating validation dataset from images
+    # val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    # # val_sampler = DistributedSampler(val_data, shuffle=False)
+    # # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
+    # val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
+
+
+    # Load the dataset from directories 
+    train_data = datasets.ImageFolder(root='/home/users/chandler_doloriel/scratch/Datasets/CIFAKE/train', transform=train_transform)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
-
-    # Creating validation dataset from images
-    val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
-    # val_sampler = DistributedSampler(val_data, shuffle=False)
-    # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
+    val_data = datasets.ImageFolder(root='/home/users/chandler_doloriel/scratch/Datasets/CIFAKE/test', transform=val_transform)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
+
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
@@ -145,7 +155,8 @@ def main(
         raise ValueError(f"Model {model_name} not recognized!")
 
     model = model.to(device)
-    model = DistributedDataParallel(model, find_unused_parameters=True)
+    model = DistributedDataParallel(model)
+    # model = DistributedDataParallel(model, find_unused_parameters=True)
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 

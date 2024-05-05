@@ -11,7 +11,7 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
-MODEL_NAME="clip_rn50" # RN50_mod, RN50, clip_vitl14, clip_rn50
+MODEL_NAME="RN50" # RN50_mod, RN50, clip_vitl14, clip_rn50
 MASK_TYPE="nomask" # nomask, spectral, pixel, patch
 BAND="all" # all, low, mid, high
 RATIO=15
@@ -39,8 +39,8 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --batch_size $BATCH_SIZE \
   --early_stop \
   --pretrained \
-  --clip_grad \
-  --debug \
+  # --clip_grad \
+  # --debug \
   # --resume_train $RESUME \
   # --debug \
   # --wandb_online \
