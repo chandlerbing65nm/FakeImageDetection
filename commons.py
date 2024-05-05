@@ -12,6 +12,16 @@ device = torch.device("cuda:0")
 PARAMETRIZED_MODULE_TYPES = (torch.nn.Linear, torch.nn.Conv2d,)
 NORM_MODULE_TYPES = (torch.nn.BatchNorm2d, torch.nn.LayerNorm)
 
+def compute_erks(model):
+    wlist = get_weights(model)
+    erks = torch.zeros(len(wlist))
+    for idx, w in enumerate(wlist):
+        if w.dim() == 4:
+            erks[idx] = w.size(0) + w.size(1) + w.size(2) + w.size(3)
+        else:
+            erks[idx] = w.size(0) + w.size(1)
+    return erks
+
 def normalize_scores(scores):
     """
     Normalizing scheme for LAMP.

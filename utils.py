@@ -32,7 +32,7 @@ from torch.utils.data.distributed import DistributedSampler
 import torch.nn.utils.prune as prune
 import os
 
-from commons import get_model_flops, get_model_sparsity, get_modules, get_weights, normalize_scores, count_unmasked_weights
+from commons import get_model_flops, get_model_sparsity, get_modules, get_weights, normalize_scores, count_unmasked_weights, compute_erks
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
@@ -87,6 +87,46 @@ def compute_lamp_amounts(model, amount):
 
     return amounts
 
+def compute_erk_amounts(model, amount):
+
+    unmaskeds = count_unmasked_weights(model)
+    ers = compute_erks(model)
+
+    num_layers = ers.size(0)
+    layers_to_keep_dense = torch.zeros(num_layers)
+    total_to_survive = (1.0 - amount) * unmaskeds.sum()  # Total to keep.
+
+    # Determine some layers to keep dense.
+    is_eps_invalid = True
+    while is_eps_invalid:
+        unmasked_among_prunables = (unmaskeds * (1 - layers_to_keep_dense)).sum()
+        to_survive_among_prunables = total_to_survive - (layers_to_keep_dense * unmaskeds).sum()
+
+        ers_of_prunables = ers * (1.0 - layers_to_keep_dense)
+        survs_of_prunables = torch.round(to_survive_among_prunables * ers_of_prunables / ers_of_prunables.sum())
+
+        layer_to_make_dense = -1
+        max_ratio = 1.0
+        for idx in range(num_layers):
+            if layers_to_keep_dense[idx] == 0:
+                if survs_of_prunables[idx] / unmaskeds[idx] > max_ratio:
+                    layer_to_make_dense = idx
+                    max_ratio = survs_of_prunables[idx] / unmaskeds[idx]
+
+        if layer_to_make_dense == -1:
+            is_eps_invalid = False
+        else:
+            layers_to_keep_dense[layer_to_make_dense] = 1
+
+    amounts = torch.zeros(num_layers)
+
+    for idx in range(num_layers):
+        if layers_to_keep_dense[idx] == 1:
+            amounts[idx] = 0.0
+        else:
+            amounts[idx] = 1.0 - (survs_of_prunables[idx] / unmaskeds[idx])
+    return amounts
+
 def iterative_pruning_finetuning(
     model, 
     criterion, 
@@ -108,6 +148,9 @@ def iterative_pruning_finetuning(
     '''
 
     for i in range(args.pruning_rounds):
+        if dist.get_rank() == 0:
+            print(f'\nPruninf Iteration #{i}\n')
+
         torch.distributed.barrier() # Synchronize all processes
 
         if args.pruning_test:
@@ -124,7 +167,19 @@ def iterative_pruning_finetuning(
 
                 if torch.distributed.get_rank() == 0:
                     print(f'Layer {layer_name} -> Acc: {acc:.4f} AP: {ap:.4f}')
-        
+
+                    ##################### Evaluate Model on Each Dataloader ####################
+                    with open("pruning_results.txt", "a") as file:  # Open file in append mode
+                        if layer_name == 'module.conv1' or layer_name == 'module.model.visual.conv1':
+                            # Write a header at the start of the file if this is the first index
+                            file.write("\n\n" + "-" * 28 + "\n")
+                            file.write(f"mAP of {args.band} band {args.mask_type} masking ({args.ratio}%) of {args.model_name} pruned at {args.conv2d_prune_amount * 100:.1f}% --> ImageNet weights?: {args.pretrained}\n")
+                            if args.pretrained == False: file.write(f"Weights loaded from: {args.checkpoint_path}\n")
+                            file.write(f"Dataset: {args.dataset}\n")
+                        file.write(f"{ap:.4f}" + "\n")  # Write each result immediately to the file
+
+                    print("##########################\n")
+
         elif args.pruning_test_ft:
             current_ap_scores = []
             current_og_ap_scores = []
@@ -164,8 +219,6 @@ def iterative_pruning_finetuning(
                 og_ap_scores = current_og_ap_scores
             else:
                 og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
-
-            pruned_layers = set()
             
             assert len(og_ap_scores) == len(ap_scores)
             for score in range(len(og_ap_scores)):
@@ -177,15 +230,22 @@ def iterative_pruning_finetuning(
                 perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
                 perf_amounts.append(perf_amount)
 
-            tensor_lamp = compute_lamp_amounts(model, amount)
-            lamp_amounts = [t.item() for t in tensor_lamp]
+            if args.pruning_method == 'ours_lamp':
+                tensor_amounts = compute_lamp_amounts(model, amount)
+                ours_method_amounts = [t.item() for t in tensor_amounts]
+            elif args.pruning_method == 'ours_erk':
+                tensor_amounts = compute_erk_amounts(model, amount)
+                ours_method_amounts = [t.item() for t in tensor_amounts]
+            elif args.pruning_method == 'ours' or args.pruning_method == 'ours_nomask':
+                ours_method_amounts = perf_amounts
+            else:
+                raise ValueError("invalid pruning method")
 
-            assert len(lamp_amounts) == len(lamp_amounts)
-            prune_amounts = [a * b for a, b in zip(lamp_amounts, perf_amounts)]
+            assert len(ours_method_amounts) == len(perf_amounts)
+            prune_amounts = [a * b for a, b in zip(ours_method_amounts, perf_amounts)] if args.pruning_method != 'ours' else perf_amounts
             print(prune_amounts)
 
             assert len(conv2d_layers) == len(prune_amounts)
-
             for (layer_name, layer_module), amount in zip(conv2d_layers, prune_amounts):
                 prune_layers(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
 
@@ -331,7 +391,7 @@ def train_model(
                 'epoch': epoch,
                 'model_state_dict': model_new.state_dict(),
             }
-            save_dir=f"./checkpoints/pruning/{args.model_name.lower()}/ours"
+            save_dir=f"./checkpoints/pruning/{args.model_name.lower()}/{args.pruning_method}"
             os.makedirs(save_dir, exist_ok=True)
             model_save_path = os.path.join(save_dir, f"ep{epoch}_rnd{pruning_round}.pth")
             torch.save(state, model_save_path)

@@ -10,7 +10,7 @@ echo "The current date is: $current_date"
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
-MODEL_NAME="RN50" # clip_rn50, RN50, clip_vitl14, clip_rn50
+MODEL_NAME="clip_rn50" # clip_rn50, rn50
 MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="low" # all, low, mid, high
 RATIO=70
@@ -20,13 +20,14 @@ SEED=44
 SMALL_DATA="True"
 
 # Define the arguments for pruning
-CHECKPOINT="./checkpoints/mask_0/rn50ft.pth"
+CHECKPOINT="./checkpoints/mask_0/clip_rn50ft.pth"
 CONV_PRUNING_RATIO=0.99
 PRUNING_RNDS=10
 DATASET="ForenSynths" # ForenSynths, LSUNbinary
 PRUNING_TEST="False" # for pruning in eval mode without finetuning
 PRUNING_FT="False"
 PRUNING_TEST_FT="True"
+PRUNING_METHOD="ours_nomask" # ours, ours_lamp, ours_erk, ours_nomask
 
 CLIP_GRAD=$( [[ "$CHECKPOINT" == *"clip"* ]] && echo "True" || echo "False" ) # for pruning finetuned clip model
 PRETRAINED="False" # if use ImageNet weights, setting pretrained=True
@@ -58,3 +59,4 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
   --smallset ${SMALL_DATA} \
   --conv2d_prune_amount_file ${PRUNING_VALUES_FILE} \
   --pruning_test_ft ${PRUNING_TEST_FT} \
+  --pruning_method ${PRUNING_METHOD} \

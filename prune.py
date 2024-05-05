@@ -119,7 +119,11 @@ def main(
         # sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
         # val_loader = DataLoader(val_data, batch_size=4, sampler=sampler, num_workers=4)
 
-        mask_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
+        if args.pruning_method == 'ours_nomask':
+            mask_transform = val_augment(ImageAugmentor(val_opt), None, args)
+        else:
+            mask_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
+            
         mask_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=mask_transform)
         subset_size = int(0.02 * len(mask_data))
         subset_indices = random.sample(range(len(mask_data)), subset_size)
@@ -282,6 +286,15 @@ if __name__ == "__main__":
         help='File containing the amount to prune for each Conv2d layer'
     )
     parser.add_argument(
+        '--pruning_method', 
+        default='ours',
+        type=str,
+        choices=[
+            'ours', 'ours_lamp', 'ours_erk', 'ours_nomask',
+        ],
+        help='if use ours, ours_lamp, ours_erk'
+    )
+    parser.add_argument(
         '--conv2d_prune_amount', 
         type=float, 
         default=0.2, 
@@ -343,6 +356,7 @@ if __name__ == "__main__":
     if not args.pretrained: print(f"Checkpoint: {args.checkpoint_path}")
 
     print(f"\n")
+    print(f"Pruning Method: {args.pruning_method}")
     print(f"Pruning-Test: {args.pruning_test}")
     print(f"Pruning-Finetune: {args.pruning_ft}")
     print(f"Pruning-Test+Finetune: {args.pruning_test_ft}")

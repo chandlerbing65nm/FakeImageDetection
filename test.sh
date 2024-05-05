@@ -3,7 +3,7 @@
 # Define the arguments for your test script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-MODEL_NAME="rn50" # clip_rn50, rn50
+MODEL_NAME="clip_rn50" # clip_rn50, rn50
 MASK_TYPE="nomask" # spectral, pixel, patch or nomask
 BAND="all" # all, low, mid, high
 RATIO=0
@@ -34,8 +34,11 @@ echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 for i in {0..9}
 do
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours/ep0_rnd${i}.pth"
+    # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_erk/ep0_rnd${i}.pth"
+    CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_nomask/ep0_rnd${i}.pth"
+    # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_lamp/ep0_rnd${i}.pth"
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/lamp/ep0_rnd${i}.pth"
-    CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/erk/ep0_rnd${i}.pth"
+    # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/erk/ep0_rnd${i}.pth"
     echo "Testing with checkpoint: $CHECKPOINT"
 
     # Run the test command
