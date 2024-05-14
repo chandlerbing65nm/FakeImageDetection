@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset, Subset
-from torchvision import transforms
+from torchvision import transforms, datasets
 from tqdm import tqdm
 import numpy as np
 from sklearn.metrics import average_precision_score, precision_score, recall_score, accuracy_score
@@ -24,6 +24,8 @@ from earlystop import EarlyStopping
 from utils import *
 from networks.resnet import resnet50
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
+from networks.resnet_cifar10 import resnet50_cifar10
+from networks.vgg_cifar10 import vgg19_bn_cifar10
 
 from networks.clip_models import CLIPModel
 import os
@@ -31,6 +33,10 @@ os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
 os.environ['LOCAL_RANK']
+
+import sys
+sys.path.append('./RD_PRUNE')
+from RD_PRUNE.tools import *
 
 def main(
     local_rank=0,
@@ -51,8 +57,8 @@ def main(
     torch.cuda.manual_seed_all(seed)
     np.random.seed(seed)
     random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
 
     device = torch.device(f'cuda:{local_rank}')
     torch.cuda.set_device(device)
@@ -96,13 +102,38 @@ def main(
     train_transform = train_augment(ImageAugmentor(train_opt), None, args)
     val_transform = val_augment(ImageAugmentor(val_opt), None, args)
 
+    def select_binary_classes(dataset, classes):
+        # Get the indices of samples belonging to the specified classes
+        indices = [i for i, (_, label) in enumerate(dataset) if label in classes]
+        return Subset(dataset, indices)
+
     if args.dataset == 'ForenSynths':
         train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
         val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
     elif args.dataset == 'LSUNbinary':
         train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=train_transform)
         val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=val_transform)
+    # elif args.dataset == 'CIFAR10':
+    #     train_transform = transforms.Compose(
+    #         [
+    #             transforms.RandomCrop(32, padding=4),
+    #             transforms.RandomHorizontalFlip(),
+    #             transforms.ToTensor(),
+    #             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
+    #         ]
+    #     )
+    #     val_transform = transforms.Compose(
+    #         [
+    #             transforms.ToTensor(),
+    #             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
+    #         ]
+    #     )
+    #     train_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=True, download=False, transform=train_transform)
+    #     val_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=val_transform)
 
+    #     # Filter the datasets to only include classes 0 and 1
+    #     train_data = select_binary_classes(train_data, [0, 1])
+    #     val_data = select_binary_classes(val_data, [0, 1])
 
     if args.smallset and args.dataset == 'ForenSynths':
         subset_size = int(0.02 * len(train_data))
@@ -112,24 +143,20 @@ def main(
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
-    if args.pruning_test_ft:
-        # subset_size = int(0.002 * len(val_data))
-        # subset_indices = random.sample(range(len(val_data)), subset_size)
-        # val_data = Subset(val_data, subset_indices)
-        # sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
-        # val_loader = DataLoader(val_data, batch_size=4, sampler=sampler, num_workers=4)
-
+    if args.pruning_test_ft or args.pruning_test:
         if args.pruning_method == 'ours_nomask':
             mask_transform = val_augment(ImageAugmentor(val_opt), None, args)
         else:
             mask_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
             
         mask_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=mask_transform)
+        # mask_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=mask_transform)
+        # mask_data = select_binary_classes(mask_data, [0, 1])
         subset_size = int(0.02 * len(mask_data))
         subset_indices = random.sample(range(len(mask_data)), subset_size)
         mask_data = Subset(mask_data, subset_indices)
         sampler = DistributedSampler(mask_data, shuffle=False, seed=seed)
-        mask_loader = DataLoader(mask_data, batch_size=batch_size, sampler=sampler, num_workers=4)
+        mask_loader = DataLoader(mask_data, batch_size=batch_size, sampler=sampler, num_workers=8)
     else:
         mask_loader = None
         
@@ -147,11 +174,20 @@ def main(
     elif model_name == 'clip_rn50':
         clip_model_name = 'rn50'
         model = CLIPModel(clip_model_name, num_classes=1)
+    elif model_name == 'rn50_cifar10':
+        model = resnet50_cifar10(pretrained=pretrained)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'vgg_cifar10':
+        model = vgg19_bn_cifar10(pretrained=pretrained)
+        num_features = model.classifier[6].in_features
+        model.classifier[6] = nn.Linear(num_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
+    container = model # for rd_prune method
     model = model.to(device)
     model = DistributedDataParallel(model)
+    calib_model = model
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
@@ -166,8 +202,19 @@ def main(
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
 
+    if 'rd' in args.pruning_method:
+        data_dir = '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation'
+        # calib_loader = get_calib_deepfake_dali_loader(args, data_dir, batch_size=args.batch_size, calib_size=256)
+        calib_loader = mask_loader
+        rd_dict = {
+            'container': container,
+            'calib_loader': calib_loader
+        }
+    else:
+        rd_dict = None
     pruned_model = iterative_pruning_finetuning(
         model, 
+        calib_model,
         criterion, 
         optimizer, 
         scheduler,
@@ -176,7 +223,8 @@ def main(
         mask_loader,
         device,
         args.lr, 
-        args=args
+        args=args,
+        rd_dict=rd_dict
         )
         
 if __name__ == "__main__":
@@ -201,7 +249,7 @@ if __name__ == "__main__":
         default='rn50',
         type=str,
         choices=[
-            'rn50', 'rn50_mod', 'clip_vitl14', 'clip_rn50'
+            'rn50', 'rn50_mod', 'clip_vitl14', 'clip_rn50', 'rn50_cifar10', 'vgg_cifar10'
             # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
             # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
         ],
@@ -280,22 +328,22 @@ if __name__ == "__main__":
         help='For test after pruning'
         )
     parser.add_argument(
-        '--conv2d_prune_amount_file', 
-        type=str, 
-        default='pruning_amounts.txt', 
-        help='File containing the amount to prune for each Conv2d layer'
-    )
-    parser.add_argument(
         '--pruning_method', 
         default='ours',
         type=str,
         choices=[
-            'ours', 'ours_lamp', 'ours_erk', 'ours_nomask',
+            'ours', 'ours_lamp', 'ours_erk', 'ours_nomask', 'lamp_erk', 'rd', 'ours_rd'
         ],
         help='if use ours, ours_lamp, ours_erk'
     )
     parser.add_argument(
-        '--conv2d_prune_amount', 
+        '--calib_sparsity', 
+        type=float, 
+        default=0.2, 
+        help='amount to prune'
+        )
+    parser.add_argument(
+        '--desired_sparsity', 
         type=float, 
         default=0.2, 
         help='amount to prune'
@@ -328,6 +376,24 @@ if __name__ == "__main__":
         default='ForenSynths',
         help='Dataset to use for training and validation'
     )
+    parser.add_argument(
+        '--Beta', 
+        type=float, 
+        default=100, 
+        help='hyperparameter of the sensitivity'
+        )
+
+    parser.add_argument("--calib_size", type=int, default=256)
+    parser.add_argument("--weight_rewind", action="store_true")
+    parser.add_argument("--worst_case_curve", "-wcc", action="store_true")
+    parser.add_argument("--synth_data", action="store_true")
+    parser.add_argument("--singlelayer", action="store_true")
+    parser.add_argument("--iter_start", type=int, default=1, help="start iteration for pruning (set >1 for resume)")
+    parser.add_argument("--iter_end", type=int, default=11, help="end iteration for pruning")
+    parser.add_argument("--maxsps", type=int, default=4)
+    parser.add_argument("--remask_per_iter", type=int, default=4000)
+    parser.add_argument("--prune_mode", "-pm", type=str, default="unstructured", choices=["unstructured", "structured"])
+    parser.add_argument("--ranking", type=str, default="l1")
 
 
     args = parser.parse_args()
@@ -356,12 +422,11 @@ if __name__ == "__main__":
     if not args.pretrained: print(f"Checkpoint: {args.checkpoint_path}")
 
     print(f"\n")
-    print(f"Pruning Method: {args.pruning_method}")
-    print(f"Pruning-Test: {args.pruning_test}")
-    print(f"Pruning-Finetune: {args.pruning_ft}")
-    print(f"Pruning-Test+Finetune: {args.pruning_test_ft}")
-    if args.pruning_test: print(f"Pruning Ratio: {args.conv2d_prune_amount}")
-    if args.pruning_ft: print(f"Pruning Ratio: {args.conv2d_prune_amount_file}")
+    if args.pruning_test_ft: print(f"Pruning Method: {args.pruning_method}")
+    print(f"Calibration: {args.pruning_test}")
+    print(f"Calibration with Finetuning: {args.pruning_test_ft}")
+    print(f"Calibration Sparsity: {args.calib_sparsity}")
+    print(f"Desired Sparsity: {args.desired_sparsity}")
     print("-" * 30, "\n")
 
     main(

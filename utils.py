@@ -32,103 +32,16 @@ from torch.utils.data.distributed import DistributedSampler
 import torch.nn.utils.prune as prune
 import os
 
-from commons import get_model_flops, get_model_sparsity, get_modules, get_weights, normalize_scores, count_unmasked_weights, compute_erks
+from commons import *
+from RD_PRUNE.tools import *
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-def prune_layers(model, layer_name, layer_module, pruning_method, amount):
-    current_layer = dict(model.named_modules())[layer_name]
-    pruning_method(current_layer, name="weight", amount=amount)
-
-def evaluate_pruned_model(model, data_loader, device, args=None):
-    model.eval()
-    total_samples = len(data_loader.dataset)
-    running_loss = 0.0
-    y_true, y_pred = [], []
-    
-    for batch_data in data_loader:
-        batch_inputs, batch_labels = batch_data
-        batch_inputs = batch_inputs.to(device)
-        batch_labels = batch_labels.float().to(device)
-
-        if 'clip' in args.model_name and args.clip_grad == True:
-            outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
-        else:
-            outputs = model(batch_inputs).view(-1).unsqueeze(1) # pass the input to the fc layer only
-
-        y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
-        y_true.extend(batch_labels.cpu().numpy())
-        
-    y_true, y_pred = np.array(y_true), np.array(y_pred)
-    acc = accuracy_score(y_true, y_pred > 0.5)
-    ap = average_precision_score(y_true, y_pred)
-    return acc, ap
-
-def compute_lamp_amounts(model, amount):
-    """
-    Compute normalization schemes.
-    """
-    unmaskeds = count_unmasked_weights(model)
-    num_surv = int(np.round(unmaskeds.sum() * (1.0 - amount)))
-
-    flattened_scores = [normalize_scores(w**2).view(-1) for w in get_weights(model)]
-    concat_scores = torch.cat(flattened_scores, dim=0)
-    topks, _ = torch.topk(concat_scores, num_surv)
-    threshold = topks[-1]
-
-    # We don't care much about tiebreakers, for now.
-    final_survs = [
-        torch.ge(score, threshold * torch.ones(score.size()).to(score.device)).sum() for score in flattened_scores
-    ]
-    amounts = []
-    for idx, final_surv in enumerate(final_survs):
-        amounts.append(1.0 - (final_surv / unmaskeds[idx]))
-
-    return amounts
-
-def compute_erk_amounts(model, amount):
-
-    unmaskeds = count_unmasked_weights(model)
-    ers = compute_erks(model)
-
-    num_layers = ers.size(0)
-    layers_to_keep_dense = torch.zeros(num_layers)
-    total_to_survive = (1.0 - amount) * unmaskeds.sum()  # Total to keep.
-
-    # Determine some layers to keep dense.
-    is_eps_invalid = True
-    while is_eps_invalid:
-        unmasked_among_prunables = (unmaskeds * (1 - layers_to_keep_dense)).sum()
-        to_survive_among_prunables = total_to_survive - (layers_to_keep_dense * unmaskeds).sum()
-
-        ers_of_prunables = ers * (1.0 - layers_to_keep_dense)
-        survs_of_prunables = torch.round(to_survive_among_prunables * ers_of_prunables / ers_of_prunables.sum())
-
-        layer_to_make_dense = -1
-        max_ratio = 1.0
-        for idx in range(num_layers):
-            if layers_to_keep_dense[idx] == 0:
-                if survs_of_prunables[idx] / unmaskeds[idx] > max_ratio:
-                    layer_to_make_dense = idx
-                    max_ratio = survs_of_prunables[idx] / unmaskeds[idx]
-
-        if layer_to_make_dense == -1:
-            is_eps_invalid = False
-        else:
-            layers_to_keep_dense[layer_to_make_dense] = 1
-
-    amounts = torch.zeros(num_layers)
-
-    for idx in range(num_layers):
-        if layers_to_keep_dense[idx] == 1:
-            amounts[idx] = 0.0
-        else:
-            amounts[idx] = 1.0 - (survs_of_prunables[idx] / unmaskeds[idx])
-    return amounts
 
 def iterative_pruning_finetuning(
     model, 
+    calib_model,
     criterion, 
     optimizer, 
     scheduler,
@@ -140,6 +53,7 @@ def iterative_pruning_finetuning(
     num_epochs_per_pruning = 1,
     save_path='./',
     args=None,
+    rd_dict=None,
     ):
     
     '''
@@ -147,22 +61,22 @@ def iterative_pruning_finetuning(
     num_epochs_per_pruning - number of epochs per pruning round
     '''
 
-    for i in range(args.pruning_rounds):
+    for i in range(1, args.pruning_rounds + 1):
         if dist.get_rank() == 0:
-            print(f'\nPruninf Iteration #{i}\n')
+            print(f'\nPruning Iteration #{i}\n')
 
         torch.distributed.barrier() # Synchronize all processes
 
         if args.pruning_test:
             original_model = copy.deepcopy(model)  
-            conv2d_layers = [(name, module) for name, module in original_model.named_modules() if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
+            prune_layers = [(name, module) for name, module in original_model.named_modules() if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
 
-            amount = args.conv2d_prune_amount
+            amount = args.calib_sparsity
 
-            for (layer_name, layer_module) in conv2d_layers:
+            for layer_loop, (layer_name, layer_module) in enumerate(prune_layers):
                 model = copy.deepcopy(original_model) 
-                prune_layers(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
-                acc, ap = evaluate_pruned_model(model, val_loader, device, args=args)
+                pruning_technique(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
+                acc, ap = evaluate_pruned_model(model, mask_loader, device, args=args)
                 del model
 
                 if torch.distributed.get_rank() == 0:
@@ -170,10 +84,10 @@ def iterative_pruning_finetuning(
 
                     ##################### Evaluate Model on Each Dataloader ####################
                     with open("pruning_results.txt", "a") as file:  # Open file in append mode
-                        if layer_name == 'module.conv1' or layer_name == 'module.model.visual.conv1':
+                        if layer_loop == 0:
                             # Write a header at the start of the file if this is the first index
                             file.write("\n\n" + "-" * 28 + "\n")
-                            file.write(f"mAP of {args.band} band {args.mask_type} masking ({args.ratio}%) of {args.model_name} pruned at {args.conv2d_prune_amount * 100:.1f}% --> ImageNet weights?: {args.pretrained}\n")
+                            file.write(f"mAP of {args.band} band {args.mask_type} masking ({args.ratio}%) of {args.model_name} pruned at {args.calib_sparsity * 100:.1f}% --> ImageNet weights?: {args.pretrained}\n")
                             if args.pretrained == False: file.write(f"Weights loaded from: {args.checkpoint_path}\n")
                             file.write(f"Dataset: {args.dataset}\n")
                         file.write(f"{ap:.4f}" + "\n")  # Write each result immediately to the file
@@ -186,68 +100,104 @@ def iterative_pruning_finetuning(
             perf_amounts = []
             prune_amounts = [] 
 
-            if i == 0:
+            if i == 1:
                 og_ap_scores = []
                 ap_scores = []
-                conv2d_layers = [(name, module) for name, module in model.named_modules() if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
+                prune_layers = [(name, module) for name, module in model.named_modules() if isinstance(module, torch.nn.Conv2d) and "downsample" not in name]
 
-            amount = args.conv2d_prune_amount
+            amount = args.calib_sparsity
 
-            # computing the sensitivity with pruning
-            for (layer_name, layer_module) in tqdm(conv2d_layers, f"{args.mask_type} masked by {args.ratio}% in {args.band} band and pruned {amount*100:.2f}% layerwise"):
-                prune_model = copy.deepcopy(model) 
-                prune_layers(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
-                acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
-                current_ap_scores.append(ap)
-                del prune_model
-            # Adding new AP scores to previous AP scores element-wise
-            if i == 0:
-                ap_scores = current_ap_scores
-            else:
-                ap_scores = [(ap_scores[j] * i + current_ap_scores[j]) / (i + 1) for j in range(len(ap_scores))]
+            if 'ours' in args.pruning_method:
+                # Initial sensitivity computation
+                for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned 0% layerwise"):
+                    prune_model = copy.deepcopy(model)
+                    pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, 0.0)
+                    acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
+                    current_og_ap_scores.append(ap)
+                    del prune_model
+                if i == 1:
+                    og_ap_scores = current_og_ap_scores
+                else:
+                    og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
 
+                # Sensitivity computation with pruning
+                for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned {amount*100:.2f}% layerwise"):
+                    prune_model = copy.deepcopy(model)
+                    pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
+                    acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
+                    current_ap_scores.append(ap)
+                    del prune_model
+                if i == 1:
+                    ap_scores = current_ap_scores
+                else:
+                    ap_scores = [(ap_scores[j] * i + current_ap_scores[j]) / (i + 1) for j in range(len(ap_scores))]
 
-            # computing the sensitivity without pruning
-            for (layer_name, layer_module) in tqdm(conv2d_layers, f"{args.mask_type} masked by {args.ratio}% in {args.band} band and pruned 0% layerwise"):
-                prune_model = copy.deepcopy(model) 
-                prune_layers(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, 0.0)
-                acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
-                current_og_ap_scores.append(ap)
-                del prune_model
-            # Adding new AP scores to previous AP scores element-wise
-            if i == 0:
-                og_ap_scores = current_og_ap_scores
-            else:
-                og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
-            
-            assert len(og_ap_scores) == len(ap_scores)
-            for score in range(len(og_ap_scores)):
-                delta_ap = og_ap_scores[score] - ap_scores[score]  # Change in AP
-                relative_delta_ap = max(0, delta_ap / og_ap_scores[score])
+                for score in range(len(og_ap_scores)):
+                    delta_ap = og_ap_scores[score] - ap_scores[score]  # Change in AP
+                    relative_delta_ap = max(0, delta_ap / og_ap_scores[score])
 
-                # Calculate pruning amount (with offset)
-                perf_amount = 1 / (relative_delta_ap * 100 + 1.00001)  # Add a small offset like 1e-5
-                perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
-                perf_amounts.append(perf_amount)
+                    # Calculate pruning amount (with offset)
+                    perf_amount = 1 / (relative_delta_ap * 100 + 1.00001)  # Add a small offset like 1e-5
+                    perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
+                    perf_amounts.append(perf_amount)
 
-            if args.pruning_method == 'ours_lamp':
-                tensor_amounts = compute_lamp_amounts(model, amount)
-                ours_method_amounts = [t.item() for t in tensor_amounts]
-            elif args.pruning_method == 'ours_erk':
-                tensor_amounts = compute_erk_amounts(model, amount)
-                ours_method_amounts = [t.item() for t in tensor_amounts]
-            elif args.pruning_method == 'ours' or args.pruning_method == 'ours_nomask':
-                ours_method_amounts = perf_amounts
+                if args.pruning_method == 'ours_lamp':
+                    tensor_amounts = compute_lamp_amounts(model, amount)
+                    prune_amounts = [t.item() for t in tensor_amounts]
+                elif args.pruning_method == 'ours_erk':
+                    tensor_amounts = compute_erk_amounts(model, amount)
+                    prune_amounts = [t.item() for t in tensor_amounts]
+                elif args.pruning_method == 'ours_rd':
+                    args.worst_case_curve = True
+                    args.synth_data = False
+                    container = rd_dict['container']
+                    calib_loader = rd_dict['calib_loader']
+                    rd_pruner = weight_pruner_loader('rd')
+                    tensor_amounts, target_sparsity = rd_pruner(model, amount, args, calib_loader, container)
+                    prune_amounts = [t.item() for t in tensor_amounts]
+                elif args.pruning_method == 'ours' or args.pruning_method == 'ours_nomask':
+                    prune_amounts = prune_amounts
+                else:
+                    raise ValueError("invalid pruning method")
+
+                assert len(prune_amounts) == len(perf_amounts)
+                final_prune_amounts = [a * b for a, b in zip(prune_amounts, perf_amounts)] if args.pruning_method != 'ours' else perf_amounts
+                print(prune_amounts)
+                print(perf_amounts)
+                print(final_prune_amounts)
+
+            elif args.pruning_method == 'lamp_erk':
+                tensor_amounts_1 = compute_erk_amounts(model, args.desired_sparsity)
+                tensor_amounts_2 = compute_lamp_amounts(model, args.calib_sparsity)
+                prune_amounts_1 = [t.item() for t in tensor_amounts_1]
+                prune_amounts_2 = [t.item() for t in tensor_amounts_2]
+                assert len(prune_amounts_1) == len(prune_layers)
+                assert len(prune_amounts_2) == len(prune_layers)
+                final_prune_amounts = [a * b for a, b in zip(prune_amounts_1, prune_amounts_2)]
+                print(final_prune_amounts)
+
+            elif args.pruning_method == 'rd':
+                args.worst_case_curve = True
+                args.synth_data = False
+                container = rd_dict['container']
+                calib_loader = rd_dict['calib_loader']
+                rd_pruner = weight_pruner_loader(args.pruning_method)
+                tensor_amounts, target_sparsity = rd_pruner(model, args.desired_sparsity, args, calib_loader, container)
+                final_prune_amounts = [t.item() for t in tensor_amounts]
+                print(final_prune_amounts)
             else:
                 raise ValueError("invalid pruning method")
 
-            assert len(ours_method_amounts) == len(perf_amounts)
-            prune_amounts = [a * b for a, b in zip(ours_method_amounts, perf_amounts)] if args.pruning_method != 'ours' else perf_amounts
-            print(prune_amounts)
+            assert len(prune_layers) == len(final_prune_amounts)
+            for (layer_name, layer_module), amount in zip(prune_layers, final_prune_amounts):
+                pruning_technique(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
 
-            assert len(conv2d_layers) == len(prune_amounts)
-            for (layer_name, layer_module), amount in zip(conv2d_layers, prune_amounts):
-                prune_layers(model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
+            if 'rd' in args.pruning_method:
+                os.makedirs(f"./output_files/masks/{args.model_name}/", exist_ok=True)
+                mask_save_path = f"./output_files/masks/{args.model_name}/maskratio{args.ratio}_sp{target_sparsity}_{args.model_name}_ndz_{args.maxsps:04d}_rdcurves_mask.pt"
+                to_save = {k: v for k, v in model.state_dict().items() if "weight_mask" in k}
+                torch.save(to_save, mask_save_path)
+                args.iter_start += 1
 
             model = train_model(
                 model, criterion, optimizer, scheduler, 
@@ -256,15 +206,14 @@ def iterative_pruning_finetuning(
                 device=device, args=args, pruning_round=i
                 )
 
-            # model = remove_parameters(model)
-
             if dist.get_rank() == 0:
                 print(f'\n\nSparsity: {get_model_sparsity(model) * 100:.2f} (%)')
                 print(f"Remaining FLOPs: {get_model_flops(model) * 100:.2f} (%)\n\n")
 
-        torch.distributed.barrier() # Synchronize all processes
+        torch.distributed.barrier()  # Synchronize all processes
 
     return model
+
 
 
 def train_model(
@@ -543,6 +492,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+        # transform_list.append(transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),)
     return transforms.Compose(transform_list)
 
 def test_augment(augmentor, mask_generator=None, args=None):

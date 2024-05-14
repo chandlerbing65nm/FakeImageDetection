@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn as nn
+import numpy as np
 from torch.nn import Linear, Conv2d, BatchNorm2d, LayerNorm
 import warnings
 
@@ -61,8 +62,14 @@ def get_model_sparsity(model):
     return 1 - nnzs/prunables
 
 def _is_prunable_module(m, name=None):
-    return isinstance(m, nn.Conv2d) and "downsample" not in name
+    if name is not None:
+        return isinstance(m, nn.Conv2d) and "downsample" not in name
+    else:
+        return isinstance(m, nn.Conv2d)
 
+# def _is_prunable_module(m, name=None):
+#     return (isinstance(m,nn.Linear) or isinstance(m,nn.Conv2d))
+    
 def get_modules(model):
     modules = []
     for name, m in model.named_modules():
@@ -188,6 +195,98 @@ def get_model_flops(net):
             nom_flops += surv + (0 if m.bias is None else o_dim.prod())
 
     return nom_flops / denom_flops
+
+
+def pruning_technique(model, layer_name, layer_module, pruning_method, amount):
+    current_layer = dict(model.named_modules())[layer_name]
+    pruning_method(current_layer, name="weight", amount=amount)
+
+def evaluate_pruned_model(model, data_loader, device, args=None):
+    model.eval()
+    # total_samples = len(data_loader.dataset)
+    running_loss = 0.0
+    y_true, y_pred = [], []
+    
+    for batch_data in data_loader:
+        batch_inputs, batch_labels = batch_data
+        # batch_inputs, batch_labels = batch_data[0]["data"], batch_data[0]["label"].squeeze().long()
+        batch_inputs = batch_inputs.to(device)
+        batch_labels = batch_labels.float().to(device)
+
+        if 'clip' in args.model_name and args.clip_grad == True:
+            outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
+        else:
+            outputs = model(batch_inputs).view(-1).unsqueeze(1) # pass the input to the fc layer only
+
+        y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
+        y_true.extend(batch_labels.cpu().numpy())
+        
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    acc = accuracy_score(y_true, y_pred > 0.5)
+    ap = average_precision_score(y_true, y_pred)
+    return acc, ap
+
+def compute_lamp_amounts(model, amount):
+    """
+    Compute normalization schemes.
+    """
+    unmaskeds = count_unmasked_weights(model)
+    num_surv = int(np.round(unmaskeds.sum() * (1.0 - amount)))
+
+    flattened_scores = [normalize_scores(w**2).view(-1) for w in get_weights(model)]
+    concat_scores = torch.cat(flattened_scores, dim=0)
+    topks, _ = torch.topk(concat_scores, num_surv)
+    threshold = topks[-1]
+
+    # We don't care much about tiebreakers, for now.
+    final_survs = [
+        torch.ge(score, threshold * torch.ones(score.size()).to(score.device)).sum() for score in flattened_scores
+    ]
+    amounts = []
+    for idx, final_surv in enumerate(final_survs):
+        amounts.append(1.0 - (final_surv / unmaskeds[idx]))
+
+    return amounts
+
+def compute_erk_amounts(model, amount):
+
+    unmaskeds = count_unmasked_weights(model)
+    ers = compute_erks(model)
+
+    num_layers = ers.size(0)
+    layers_to_keep_dense = torch.zeros(num_layers)
+    total_to_survive = (1.0 - amount) * unmaskeds.sum()  # Total to keep.
+
+    # Determine some layers to keep dense.
+    is_eps_invalid = True
+    while is_eps_invalid:
+        unmasked_among_prunables = (unmaskeds * (1 - layers_to_keep_dense)).sum()
+        to_survive_among_prunables = total_to_survive - (layers_to_keep_dense * unmaskeds).sum()
+
+        ers_of_prunables = ers * (1.0 - layers_to_keep_dense)
+        survs_of_prunables = torch.round(to_survive_among_prunables * ers_of_prunables / ers_of_prunables.sum())
+
+        layer_to_make_dense = -1
+        max_ratio = 1.0
+        for idx in range(num_layers):
+            if layers_to_keep_dense[idx] == 0:
+                if survs_of_prunables[idx] / unmaskeds[idx] > max_ratio:
+                    layer_to_make_dense = idx
+                    max_ratio = survs_of_prunables[idx] / unmaskeds[idx]
+
+        if layer_to_make_dense == -1:
+            is_eps_invalid = False
+        else:
+            layers_to_keep_dense[layer_to_make_dense] = 1
+
+    amounts = torch.zeros(num_layers)
+
+    for idx in range(num_layers):
+        if layers_to_keep_dense[idx] == 1:
+            amounts[idx] = 0.0
+        else:
+            amounts[idx] = 1.0 - (survs_of_prunables[idx] / unmaskeds[idx])
+    return amounts
 
 
 import argparse  # For handling command-line arguments

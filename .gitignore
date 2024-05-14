@@ -3,6 +3,7 @@ checkpoints/
 DiffusionImages/
 embeddings/
 data/
+output_files/
 samples/
 wandb/
 few-shot/

@@ -31,14 +31,16 @@ echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 #   --checkpoint_path ${CHECKPOINT} \
 
 # Loop to run tests for checkpoints ln_strcd_ep0_rnd0 to ln_strcd_ep0_rnd9
-for i in {0..9}
+for i in {1..10}
 do
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours/ep0_rnd${i}.pth"
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_erk/ep0_rnd${i}.pth"
-    CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_nomask/ep0_rnd${i}.pth"
+    # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_nomask/ep0_rnd${i}.pth"
+    # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/lamp_erk/ep0_rnd${i}.pth"
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/ours_lamp/ep0_rnd${i}.pth"
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/lamp/ep0_rnd${i}.pth"
     # CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/erk/ep0_rnd${i}.pth"
+    CHECKPOINT="./checkpoints/pruning/${MODEL_NAME}/rd/ep0_rnd${i}.pth"
     echo "Testing with checkpoint: $CHECKPOINT"
 
     # Run the test command

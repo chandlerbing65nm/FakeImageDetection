@@ -33,6 +33,7 @@ L_e = [
     0.000, 0.000, 0.003, 0.000, 0.003, 0.000, 0.000, 0.006, 0.008, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000
 ]
 
+
 L_f = [
     0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.015, 
     0.000, 0.000, 0.004, 0.000, 0.000, 0.012, 0.000, 0.000, 0.000, 0.000, 0.010, 0.008, 
@@ -46,6 +47,22 @@ L_g = [
     0.016, 0.013, 0.000, 0.020, 0.000, 0.015, 0.015, 0.032, 0.021, 0.012, 0.057, 0.010, 
     0.000, 0.012, 0.028, 0.000, 0.000, 0.040, 0.031, 0.020, 0.018, 0.000, 0.011, 0.000, 0.007, 0.068, 0.017
 ]
+
+
+# CIFAR10
+L_h = [
+    0.324, 0.000, 0.030, 0.050, 0.002, 0.008, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 
+    0.000, 0.000, 0.000, 0.000, 0.028, 0.015, 0.001, 0.014, 0.058, 0.099, 0.042, 0.080, 0.000, 
+    0.000, 0.034, 0.000, 0.000, 0.000, 0.010, 0.001, 0.003, 0.023, 0.000, 0.000, 0.101, 0.000, 
+    0.011, 0.022, 0.000, 0.011, 0.003, 0.000, 0.000, 0.009, 0.004, 0.000
+]
+
+L_i = [
+    0.093, 0.000, 0.000, 0.196, 0.000, 0.201, 0.000, 0.000, 0.000, 0.000, 0.004, 0.000, 0.000, 
+    0.000, 0.015, 0.008
+]
+
+
 # Function to calculate the exponential moving average
 def exponential_moving_average(data, alpha):
     ema = [data[0]]
@@ -64,9 +81,32 @@ ma_L_d = exponential_moving_average(L_d, alpha)
 ma_L_e = exponential_moving_average(L_e, alpha)
 ma_L_f = exponential_moving_average(L_f, alpha)
 ma_L_g = exponential_moving_average(L_g, alpha)
+ma_L_h = exponential_moving_average(L_h, alpha)
+ma_L_i = exponential_moving_average(L_i, alpha)
+
+# Normalized x values
+x_L_a = np.linspace(0, 1, len(ma_L_a))
+x_L_b = np.linspace(0, 1, len(ma_L_b))
+x_L_c = np.linspace(0, 1, len(ma_L_c))
+x_L_d = np.linspace(0, 1, len(ma_L_d))
+x_L_e = np.linspace(0, 1, len(ma_L_e))
+x_L_f = np.linspace(0, 1, len(ma_L_f))
+x_L_g = np.linspace(0, 1, len(ma_L_g))
+x_L_h = np.linspace(0, 1, len(ma_L_h))
+x_L_i = np.linspace(0, 1, len(ma_L_i))
 
 # Create a line plot
 plt.figure()
+# plt.plot(x_L_a, ma_L_a, label='DFweights-ProGAN-RN50')
+# plt.plot(x_L_b, ma_L_b, label='DFweights-ProGAN-modifiedRN50')
+# plt.plot(x_L_c, ma_L_c, label='DFweights-ProGAN-CLIPRN50')
+# plt.plot(x_L_d, ma_L_d, label='DFweights-LSUN(zebra-vs-apple)-RN50')
+# plt.plot(x_L_e, ma_L_e, label='DFweights-LSUN(zebra-vs-apple)-CLIPRN50')
+# plt.plot(x_L_f, ma_L_f, label='INweights-ProGAN-RN50')
+# plt.plot(x_L_g, ma_L_g, label='INweights-ProGAN-CLIPRN50')
+# plt.plot(x_L_h, ma_L_h, label='CFweights-CIFAR10-RN50')
+# plt.plot(x_L_i, ma_L_i, label='CFweights-CIFAR10-VGG')
+
 plt.plot(ma_L_a, label='DFweights-ProGAN-RN50')
 plt.plot(ma_L_b, label='DFweights-ProGAN-modifiedRN50')
 plt.plot(ma_L_c, label='DFweights-ProGAN-CLIPRN50')
@@ -74,12 +114,15 @@ plt.plot(ma_L_d, label='DFweights-LSUN(zebra-vs-apple)-RN50')
 plt.plot(ma_L_e, label='DFweights-LSUN(zebra-vs-apple)-CLIPRN50')
 plt.plot(ma_L_f, label='INweights-ProGAN-RN50')
 plt.plot(ma_L_g, label='INweights-ProGAN-CLIPRN50')
+# plt.plot(x_L_h, ma_L_h, label='CFweights-CIFAR10-RN50')
+# plt.plot(x_L_i, ma_L_i, label='CFweights-CIFAR10-VGG')
 
 plt.xlabel('Model Layers')
 plt.ylabel('Sensitivity')
-# plt.title('Comparison of Sensitivity Values')
+plt.title('Moving Average of Sensitivity')
 plt.legend()
 
 # Save the figure as a JPEG file
 plt.savefig('pruning_comparison.jpg', format='jpg')
 plt.show()
+
