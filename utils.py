@@ -107,76 +107,76 @@ def iterative_pruning_finetuning(
 
             amount = args.calib_sparsity
 
-            if 'ours' in args.pruning_method:
-                # Initial sensitivity computation
-                for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned 0% layerwise"):
-                    prune_model = copy.deepcopy(model)
-                    pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, 0.0)
-                    acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
-                    current_og_ap_scores.append(ap)
-                    del prune_model
-                if i == 1:
-                    og_ap_scores = current_og_ap_scores
-                else:
-                    og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
+            # if 'ours' in args.pruning_method:
+            #     # Initial sensitivity computation
+            #     for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned 0% layerwise"):
+            #         prune_model = copy.deepcopy(model)
+            #         pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, 0.0)
+            #         acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
+            #         current_og_ap_scores.append(ap)
+            #         del prune_model
+            #     if i == 1:
+            #         og_ap_scores = current_og_ap_scores
+            #     else:
+            #         og_ap_scores = [(og_ap_scores[j] * i + current_og_ap_scores[j]) / (i + 1) for j in range(len(og_ap_scores))]
 
-                # Sensitivity computation with pruning
-                for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned {amount*100:.2f}% layerwise"):
-                    prune_model = copy.deepcopy(model)
-                    pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
-                    acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
-                    current_ap_scores.append(ap)
-                    del prune_model
-                if i == 1:
-                    ap_scores = current_ap_scores
-                else:
-                    ap_scores = [(ap_scores[j] * i + current_ap_scores[j]) / (i + 1) for j in range(len(ap_scores))]
+            #     # Sensitivity computation with pruning
+            #     for (layer_name, layer_module) in tqdm(prune_layers, f"{args.ratio}% {args.mask_type} masking in {args.band} band and pruned {amount*100:.2f}% layerwise"):
+            #         prune_model = copy.deepcopy(model)
+            #         pruning_technique(prune_model, layer_name, layer_module, torch.nn.utils.prune.l1_unstructured, amount)
+            #         acc, ap = evaluate_pruned_model(prune_model, mask_loader, device, args=args)
+            #         current_ap_scores.append(ap)
+            #         del prune_model
+            #     if i == 1:
+            #         ap_scores = current_ap_scores
+            #     else:
+            #         ap_scores = [(ap_scores[j] * i + current_ap_scores[j]) / (i + 1) for j in range(len(ap_scores))]
 
-                for score in range(len(og_ap_scores)):
-                    delta_ap = og_ap_scores[score] - ap_scores[score]  # Change in AP
-                    relative_delta_ap = max(0, delta_ap / og_ap_scores[score])
+            #     for score in range(len(og_ap_scores)):
+            #         delta_ap = og_ap_scores[score] - ap_scores[score]  # Change in AP
+            #         relative_delta_ap = max(0, delta_ap / og_ap_scores[score])
 
-                    # Calculate pruning amount (with offset)
-                    perf_amount = 1 / (relative_delta_ap * 100 + 1.00001)  # Add a small offset like 1e-5
-                    perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
-                    perf_amounts.append(perf_amount)
+            #         # Calculate pruning amount (with offset)
+            #         perf_amount = 1 / (relative_delta_ap * 100 + 1.00001)  # Add a small offset like 1e-5
+            #         perf_amount = min(perf_amount, 1.0)  # Enforce maximum of 1
+            #         perf_amounts.append(perf_amount)
 
-                if args.pruning_method == 'ours_lamp':
-                    tensor_amounts = compute_lamp_amounts(model, amount)
-                    prune_amounts = [t.item() for t in tensor_amounts]
-                elif args.pruning_method == 'ours_erk':
-                    tensor_amounts = compute_erk_amounts(model, amount)
-                    prune_amounts = [t.item() for t in tensor_amounts]
-                elif args.pruning_method == 'ours_rd':
-                    args.worst_case_curve = True
-                    args.synth_data = False
-                    container = rd_dict['container']
-                    calib_loader = rd_dict['calib_loader']
-                    rd_pruner = weight_pruner_loader('rd')
-                    tensor_amounts, target_sparsity = rd_pruner(model, amount, args, calib_loader, container)
-                    prune_amounts = [t.item() for t in tensor_amounts]
-                elif args.pruning_method == 'ours' or args.pruning_method == 'ours_nomask':
-                    prune_amounts = prune_amounts
-                else:
-                    raise ValueError("invalid pruning method")
+            #     if args.pruning_method == 'ours_lamp':
+            #         tensor_amounts = compute_lamp_amounts(model, amount)
+            #         prune_amounts = [t.item() for t in tensor_amounts]
+            #     elif args.pruning_method == 'ours_erk':
+            #         tensor_amounts = compute_erk_amounts(model, amount)
+            #         prune_amounts = [t.item() for t in tensor_amounts]
+            #     elif args.pruning_method == 'ours_rd':
+            #         args.worst_case_curve = True
+            #         args.synth_data = False
+            #         container = rd_dict['container']
+            #         calib_loader = rd_dict['calib_loader']
+            #         rd_pruner = weight_pruner_loader('rd')
+            #         tensor_amounts, target_sparsity = rd_pruner(model, amount, args, calib_loader, container)
+            #         prune_amounts = [t.item() for t in tensor_amounts]
+            #     elif args.pruning_method == 'ours' or args.pruning_method == 'ours_nomask':
+            #         prune_amounts = prune_amounts
+            #     else:
+            #         raise ValueError("invalid pruning method")
 
-                assert len(prune_amounts) == len(perf_amounts)
-                final_prune_amounts = [a * b for a, b in zip(prune_amounts, perf_amounts)] if args.pruning_method != 'ours' else perf_amounts
-                print(prune_amounts)
-                print(perf_amounts)
-                print(final_prune_amounts)
+            #     assert len(prune_amounts) == len(perf_amounts)
+            #     final_prune_amounts = [a * b for a, b in zip(prune_amounts, perf_amounts)] if args.pruning_method != 'ours' else perf_amounts
+            #     print(prune_amounts)
+            #     print(perf_amounts)
+            #     print(final_prune_amounts)
 
-            elif args.pruning_method == 'lamp_erk':
-                tensor_amounts_1 = compute_erk_amounts(model, args.desired_sparsity)
-                tensor_amounts_2 = compute_lamp_amounts(model, args.calib_sparsity)
-                prune_amounts_1 = [t.item() for t in tensor_amounts_1]
-                prune_amounts_2 = [t.item() for t in tensor_amounts_2]
-                assert len(prune_amounts_1) == len(prune_layers)
-                assert len(prune_amounts_2) == len(prune_layers)
-                final_prune_amounts = [a * b for a, b in zip(prune_amounts_1, prune_amounts_2)]
-                print(final_prune_amounts)
+            # elif args.pruning_method == 'lamp_erk':
+            #     tensor_amounts_1 = compute_erk_amounts(model, args.desired_sparsity)
+            #     tensor_amounts_2 = compute_lamp_amounts(model, args.calib_sparsity)
+            #     prune_amounts_1 = [t.item() for t in tensor_amounts_1]
+            #     prune_amounts_2 = [t.item() for t in tensor_amounts_2]
+            #     assert len(prune_amounts_1) == len(prune_layers)
+            #     assert len(prune_amounts_2) == len(prune_layers)
+            #     final_prune_amounts = [a * b for a, b in zip(prune_amounts_1, prune_amounts_2)]
+            #     print(final_prune_amounts)
 
-            elif args.pruning_method == 'rd':
+            if args.pruning_method == 'rd':
                 args.worst_case_curve = True
                 args.synth_data = False
                 container = rd_dict['container']
@@ -203,7 +203,7 @@ def iterative_pruning_finetuning(
                 model, criterion, optimizer, scheduler, 
                 train_loader, val_loader, num_epochs=num_epochs_per_pruning, 
                 resume_epoch=0, save_path=save_path, early_stopping=None, 
-                device=device, args=args, pruning_round=i
+                device=device, pruning_round=i, args=args,
                 )
 
             if dist.get_rank() == 0:
@@ -229,8 +229,8 @@ def train_model(
     early_stopping=None,
     device='cpu',
     sampler=None,
+    pruning_round=None,
     args=None,
-    pruning_round=None
     ):
 
     features_path = f"features.pth"
@@ -244,7 +244,7 @@ def train_model(
                 print('-' * 10)
 
         # For CLIP model, extract features only once
-        if 'clip' in args.model_name and not features_exist and args.clip_grad == False:
+        if 'clip' in args.model_name and not features_exist and args.trainable_clip == False:
             # Process with rank 0 performs the extraction
             if dist.get_rank() == 0:
                 extract_and_save_features(model, train_loader, "./clip_train_" + features_path, device)
@@ -261,7 +261,7 @@ def train_model(
             features_exist = True  # Set this to True after extraction
 
         # Load the features for all processes if not done already
-        if 'clip' in args.model_name and features_exist and epoch == resume_epoch and args.clip_grad == False:
+        if 'clip' in args.model_name and features_exist and epoch == resume_epoch and args.trainable_clip == False:
             train_loader = load_features("./clip_train_" + features_path, batch_size=args.batch_size, shuffle=False)
             val_loader = load_features("./clip_val_" + features_path, batch_size=args.batch_size, shuffle=False)
 
@@ -286,9 +286,6 @@ def train_model(
             running_loss = 0.0
             y_true, y_pred = [], []
 
-            # disable_tqdm = dist.get_rank() != 0
-            # data_loader_with_tqdm = tqdm(data_loader, f"{phase}", disable=disable_tqdm)
-
             for batch_data in tqdm(data_loader, f"{phase}", disable=dist.get_rank() != 0):
                 batch_inputs, batch_labels = batch_data
                 batch_inputs = batch_inputs.to(device)
@@ -297,7 +294,7 @@ def train_model(
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'Training'):
-                    if 'clip' in args.model_name and args.clip_grad == True:
+                    if 'clip' in args.model_name and args.trainable_clip == True:
                         outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
                     else:
                         outputs = model(batch_inputs).view(-1).unsqueeze(1)
@@ -331,9 +328,9 @@ def train_model(
                         return model
             else:
                 if args.pruning_test_ft:
-                    scheduler.step()
+                    scheduler.step()  # early stopping don't need scheduler
         
-        if dist.get_rank() == 0:
+        if dist.get_rank() == 0 and pruning_round is not None:
             model_new = copy.deepcopy(model)
             model_new = remove_parameters(model_new)
             state = {
@@ -350,9 +347,6 @@ def train_model(
 
 def evaluate_model(
     model_name,
-    data_type,
-    mask_type, 
-    ratio,
     dataset_path, 
     batch_size,
     checkpoint_path, 
@@ -370,16 +364,11 @@ def evaluate_model(
         'jpg_qual': [int((30 + 100) / 2)]
     }
 
-    test_transform = test_augment(ImageAugmentor(test_opt), None, args)
-
-    # if data_type == 'GenImage':
-    #     test_dataset = GenImage(dataset_path, transform=test_transform)
-    # elif data_type == 'Wang_CVPR20' :
-    #     test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
-    # elif data_type == 'Ojha_CVPR23' :
-    #     test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
-    # else:
-    #     raise ValueError("wrong dataset input")
+    # mask_generator = FrequencyMaskGenerator(ratio=0.30, band='low')
+    # mask_generator = PatchMaskGenerator(ratio=0.50)
+    # mask_generator = PixelMaskGenerator(ratio=0.50)
+    mask_generator = None
+    test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
 
     if 'Ojha_CVPR2023' in dataset_path:
         test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
@@ -436,8 +425,81 @@ def evaluate_model(
     disable_tqdm = dist.get_rank() != 0
     data_loader_with_tqdm = tqdm(test_dataloader, f"testing: {dataset_path}", disable=disable_tqdm)
 
+    # if dist.get_rank() == 0:
+    #     for name, module in model.named_modules():
+    #         print(f"Module Name: {name}")
+    # raise False
+
+    
+    class RunningStats:
+        def __init__(self):
+            self.n = 0
+            self.mean = 0.0
+            self.sq_diff = 0.0
+
+        def update(self, x):
+            batch_mean = np.mean(x, axis=0)
+            batch_size = x.shape[0]
+            
+            self.n += batch_size
+            delta = batch_mean - self.mean
+            self.mean += delta * batch_size / self.n
+            delta2 = batch_mean - self.mean
+            self.sq_diff += delta * delta2 * batch_size
+
+        @property
+        def variance(self):
+            return self.sq_diff / self.n if self.n > 1 else 0.0
+
+        @property
+        def std_dev(self):
+            return np.sqrt(self.variance)
+
+    class ActivationExtractor:
+        def __init__(self):
+            self.stats = RunningStats()
+            self.accumulated_activations = []
+
+        def hook(self, module, input, output):
+            self.accumulated_activations.append(output.cpu().detach().numpy())
+
+        def update_stats(self):
+            if self.accumulated_activations:
+                activations = np.concatenate(self.accumulated_activations)
+                self.stats.update(activations)
+                self.accumulated_activations = []
+
+    # Function to recursively find the layer by name
+    def _get_module_by_name(module, access_string):
+        names = access_string.split('.')
+        for name in names:
+            module = getattr(module, name)
+        return module
+
+    # Identify the first few Conv2D layers to extract activations from
+    layer_names = [
+        'module.conv1',
+        'module.layer1.0.conv1',
+        'module.layer1.0.conv2',
+        'module.layer1.0.conv3',
+    ]
+
+    # layer_names = [
+    #     'module.layer4.1.conv3',
+    #     'module.layer4.2.conv1',
+    #     'module.layer4.2.conv2',
+    #     'module.layer4.2.conv3',
+    # ]
+
+    # Create activation extractors for each Conv2D layer
+    extractors = [ActivationExtractor() for _ in layer_names]
+
+    # Register hooks for each Conv2D layer
+    hooks = [_get_module_by_name(model, name).register_forward_hook(extractor.hook) for name, extractor in zip(layer_names, extractors)]
+
+    accumulation_steps = 10
     with torch.no_grad():
-        for inputs, labels in data_loader_with_tqdm:
+        for i, (inputs, labels) in enumerate(data_loader_with_tqdm):
             inputs = inputs.to(device)
 
             labels = labels.float().to(device)
@@ -447,6 +509,15 @@ def evaluate_model(
                 outputs = model(inputs).view(-1).unsqueeze(1)
             y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
             y_true.extend(labels.cpu().numpy())
+
+            # Periodically update the running statistics
+            if (i + 1) % accumulation_steps == 0:
+                for extractor in extractors:
+                    extractor.update_stats()
+
+    # Update the running statistics one last time for any remaining activations
+    for extractor in extractors:
+        extractor.update_stats()
 
     y_true, y_pred = np.array(y_true), np.array(y_pred)
 
@@ -459,7 +530,19 @@ def evaluate_model(
         print(f'Accuracy: {acc}')
         print(f'ROC AUC Score: {auc}')
 
-    return ap, acc, auc, model
+    # Collect final statistics for each layer
+    average_activations = [extractor.stats.mean for extractor in extractors]
+
+    # Clean up hooks
+    for hook in hooks:
+        hook.remove()
+
+    # # Print average activations for each layer
+    # for i, avg_act in enumerate(average_activations):
+    #     print(f'Layer {layer_names[i]}: Mean activation value: {np.mean(avg_act)}')
+
+    return average_activations, ap, acc, auc, model
+    # return ap, acc, auc, model
 
 def train_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
@@ -496,17 +579,22 @@ def val_augment(augmentor, mask_generator=None, args=None):
     return transforms.Compose(transform_list)
 
 def test_augment(augmentor, mask_generator=None, args=None):
-    transform_list = [
+    transform_list = []
+    if mask_generator is not None:
+        transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
+    transform_list.extend([
+        # transforms.RandomRotation(degrees=50),  # Add random rotation
+        # transforms.RandomAffine(degrees=0, translate=(0.50, 0.50)),  # Add random translation
         # transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-    ]
+    ])
+
     if args is not None and 'clip' in args.model_name:
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
     return transforms.Compose(transform_list)
-
 
 def remove_parameters(model):
 

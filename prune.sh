@@ -10,27 +10,27 @@ echo "The current date is: $current_date"
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
-MODEL_NAME="clip_rn50" # clip_rn50, rn50, rn50_cifar10, vgg_cifar10
+MODEL_NAME="rn50" # clip_rn50, rn50, rn50_cifar10, vgg_cifar10
 MASK_TYPE="spectral" # nomask, spectral, pixel, patch
 BAND="low" # all, low, mid, high
 RATIO=70
-BATCH_SIZE=128
+BATCH_SIZE=32
 learning_rate=0.0002
 SEED=44
 SMALL_DATA="True"
 
 # Define the arguments for pruning
-CHECKPOINT="./checkpoints/mask_0/clip_rn50ft.pth"
+CHECKPOINT="./checkpoints/mask_0/rn50ft.pth"
 CALIB_SPARSITY=0.99 # for testing
 DESIRED_SPARSITY=0.6 # for finetuning
 PRUNING_RNDS=10
-DATASET="ForenSynths" # ForenSynths, LSUNbinary, CIFAR10
+DATASET="CIFAR10" # ForenSynths, LSUNbinary, CIFAR10
 PRUNING_TEST="False" # for pruning in eval mode without finetuning
 PRUNING_TEST_FT="True"
 PRUNING_METHOD="rd" # ours, ours_lamp, ours_erk, ours_nomask, lamp_erk, rd, ours_rd
 
-CLIP_GRAD=$( [[ "$CHECKPOINT" == *"clip"* ]] && echo "True" || echo "False" ) # for pruning finetuned clip model
-PRETRAINED="False" # if use ImageNet weights, setting pretrained=True
+TRAIN_CLIP=$( [[ "$CHECKPOINT" == *"clip"* ]] && echo "True" || echo "False" ) # for pruning finetuned clip model
+PRETRAINED="False" # if use ImageNet/CIFAR10 weights, setting pretrained=True
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
@@ -52,7 +52,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU prune.py \
   --pruning_rounds ${PRUNING_RNDS} \
   --checkpoint_path ${CHECKPOINT} \
   --pruning_test ${PRUNING_TEST} \
-  --clip_grad ${CLIP_GRAD} \
+  --trainable_clip ${TRAIN_CLIP} \
   --dataset ${DATASET} \
   --pretrained ${PRETRAINED} \
   --smallset ${SMALL_DATA} \

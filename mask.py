@@ -94,10 +94,66 @@ class PixelMaskGenerator:
 
         return masked_pil_image
 
+# class FrequencyMaskGenerator:
+#     def __init__(self, ratio: float = 0.3, band: str = 'low+high') -> None:
+#         self.ratio = ratio
+#         self.band = band  # 'low', 'mid', 'high', 'all', 'low+high', 'low+mid', 'mid+high'
+
+#     def transform(self, image: Image.Image) -> Image.Image:
+#         image_array = np.array(image).astype(np.complex64)
+#         freq_image = np.fft.fftn(image_array, axes=(0, 1))
+
+#         height, width, _ = image_array.shape
+
+#         mask = self._create_balanced_mask(height, width)
+#         self.masked_freq_image = freq_image * mask
+#         masked_image_array = np.fft.ifftn(self.masked_freq_image, axes=(0, 1)).real
+#         masked_image = Image.fromarray(masked_image_array.astype(np.uint8))
+#         return masked_image
+
+#     def _create_balanced_mask(self, height, width):
+#         mask = np.ones((height, width, 3), dtype=np.complex64)
+
+#         y_indices_all = []
+#         x_indices_all = []
+
+#         bands = self.band.split('+')
+
+#         for band in bands:
+#             if band == 'low':
+#                 y_start, y_end = 0, height // 4
+#                 x_start, x_end = 0, width // 4
+#             elif band == 'mid':
+#                 y_start, y_end = height // 4, 3 * height // 4
+#                 x_start, x_end = width // 4, 3 * width // 4
+#             elif band == 'high':
+#                 y_start, y_end = 3 * height // 4, height
+#                 x_start, x_end = 3 * width // 4, width
+#             elif band == 'all':
+#                 y_start, y_end = 0, height
+#                 x_start, x_end = 0, width
+#             else:
+#                 raise ValueError(f"Invalid band: {band}")
+
+#             region_area = (y_end - y_start) * (x_end - x_start)
+#             num_frequencies = int(np.ceil(region_area * self.ratio))
+
+#             mask_frequencies_indices = np.random.permutation(region_area)[:num_frequencies]
+
+#             y_indices = mask_frequencies_indices // (x_end - x_start) + y_start
+#             x_indices = mask_frequencies_indices % (x_end - x_start) + x_start
+
+#             y_indices_all.extend(y_indices)
+#             x_indices_all.extend(x_indices)
+
+#         mask[y_indices_all, x_indices_all, :] = 0
+#         return mask
+
 class FrequencyMaskGenerator:
-    def __init__(self, ratio: float = 0.3, band: str = 'all') -> None:
+    def __init__(self, ratio: float = 0.3, band: str = 'low+high') -> None:
         self.ratio = ratio
-        self.band = band  # 'low', 'mid', 'high', 'all'
+        self.band = band  # 'low', 'mid', 'high', 'all', 'low+high', 'low+mid', 'mid+high', 'prog'
+        self.alpha = 2
 
     def transform(self, image: Image.Image) -> Image.Image:
         image_array = np.array(image).astype(np.complex64)
@@ -114,29 +170,62 @@ class FrequencyMaskGenerator:
     def _create_balanced_mask(self, height, width):
         mask = np.ones((height, width, 3), dtype=np.complex64)
 
-        # Determine the region of the frequency domain to mask
-        if self.band == 'low':
-            y_start, y_end = 0, height // 4
-            x_start, x_end = 0, width // 4
-        elif self.band == 'mid':
-            y_start, y_end = height // 4, 3 * height // 4
-            x_start, x_end = width // 4, 3 * width // 4
-        elif self.band == 'high':
-            y_start, y_end = 3 * height // 4, height
-            x_start, x_end = 3 * width // 4, width
-        elif self.band == 'all':
-            y_start, y_end = 0, height
-            x_start, x_end = 0, width
-        else:
-            raise ValueError(f"Invalid band: {self.band}")
+        y_indices_all = []
+        x_indices_all = []
 
-        num_frequencies = int(np.ceil((y_end - y_start) * (x_end - x_start) * self.ratio))
-        mask_frequencies_indices = np.random.permutation((y_end - y_start) * (x_end - x_start))[:num_frequencies]
-        y_indices = mask_frequencies_indices // (x_end - x_start) + y_start
-        x_indices = mask_frequencies_indices % (x_end - x_start) + x_start
+        bands = self.band.split('+')
+        use_progressive_masking = 'prog' in bands
 
-        mask[y_indices, x_indices, :] = 0
+        for band in bands:
+            if 'prog' in band:
+                continue  # skip the 'prog' part of the band
+
+            if band == 'low':
+                y_start, y_end = 0, height // 4
+                x_start, x_end = 0, width // 4
+            elif band == 'mid':
+                y_start, y_end = height // 4, 3 * height // 4
+                x_start, x_end = width // 4, 3 * width // 4
+            elif band == 'high':
+                y_start, y_end = 3 * height // 4, height
+                x_start, x_end = 3 * width // 4, width
+            elif band == 'all':
+                y_start, y_end = 0, height
+                x_start, x_end = 0, width
+            else:
+                raise ValueError(f"Invalid band: {band}")
+
+            region_area = (y_end - y_start) * (x_end - x_start)
+            num_frequencies = int(np.ceil(region_area * self.ratio))
+
+            if use_progressive_masking:
+                distances = np.sqrt((np.arange(y_start, y_end)[:, None] ** 2) + (np.arange(x_start, x_end)[None, :] ** 2))
+                max_distance = distances.max()
+                progressive_ratio = self.alpha * self.ratio * (1 - distances / max_distance)
+                progressive_ratio = np.clip(progressive_ratio, 0, 1)
+
+                flattened_distances = distances.flatten()
+                flattened_ratio = progressive_ratio.flatten()
+
+                mask_frequencies_indices = np.random.choice(
+                    flattened_distances.size, 
+                    size=num_frequencies, 
+                    replace=False, 
+                    p=flattened_ratio/flattened_ratio.sum()
+                    )
+                y_indices = mask_frequencies_indices // (x_end - x_start) + y_start
+                x_indices = mask_frequencies_indices % (x_end - x_start) + x_start
+            else:
+                mask_frequencies_indices = np.random.permutation(region_area)[:num_frequencies]
+                y_indices = mask_frequencies_indices // (x_end - x_start) + y_start
+                x_indices = mask_frequencies_indices % (x_end - x_start) + x_start
+
+            y_indices_all.extend(y_indices)
+            x_indices_all.extend(x_indices)
+
+        mask[y_indices_all, x_indices_all, :] = 0
         return mask
+
 
 def test_mask_generator(
     image_path, 

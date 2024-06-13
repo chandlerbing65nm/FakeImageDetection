@@ -27,12 +27,10 @@ from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 from networks.clip_models import CLIPModel
 import os
+
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
-os.environ['WANDB_CONFIG_DIR'] = './wandb'
-os.environ['WANDB_DIR'] = './wandb'
-os.environ['WANDB_CACHE_DIR'] = './wandb'
 
 def main(
     local_rank=0,
@@ -41,38 +39,15 @@ def main(
     num_epochs=10000,
     ratio=50,
     batch_size=64,
-    wandb_run_id=None,
     model_name='RN50',
     band='all',
-    wandb_name=None,
-    project_name=None,
     save_path=None,
     mask_type=None,
     pretrained=False,
-    resume_train=None,
+    resume_pth=None,
     early_stop=True,
-    wandb_online=False,
     args=None,
     ):
-
-    seed = args.seed
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    device = torch.device(f'cuda:{local_rank}')
-    torch.cuda.set_device(device)
-    dist.init_process_group(backend='nccl')
-
-    wandb_resume = "allow" if resume_train else None
-
-    if dist.get_rank() == 0:
-        status = "online" if wandb_online else "offline"
-        wandb.init(id=wandb_run_id, resume=wandb_resume, project=project_name, name=wandb_name, mode=status)
-        wandb.config.update(args, allow_val_change=True)
 
     # Set options for augmentation
     train_opt = {
@@ -112,16 +87,22 @@ def main(
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
     # Creating training dataset from images
-    train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    train_data = ForenSynths(
+        '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', 
+        transform=train_transform, 
+        )
     if args.smallset:
-        subset_size = int(0.02 * len(train_data))
+        subset_size = int(0.2 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    val_data = ForenSynths(
+        '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', 
+        transform=val_transform, 
+        )
     val_sampler = DistributedSampler(val_data, shuffle=False, seed=seed)
     val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
 
@@ -143,49 +124,44 @@ def main(
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3], gamma=0.1, last_epoch=-1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[3], gamma=0.1, last_epoch=-1) # not used
 
     # Load checkpoint if resuming
-    if resume_train:
-        resume_prefix = f'{save_path}_last_ep' if resume_train == 'from_last' else f'{save_path}_best_ep'
-        
-        # Separate the directory and base filename
-        folder_path = os.path.dirname(save_path)
-        base_filename = os.path.basename(save_path)
-        
-        checkpoint_files = os.listdir(folder_path)
-        if checkpoint_files or args.pruning_test == True:
-            if args.prune==False:
-                resume_prefix_base = f'{base_filename}_last_ep' if resume_train == 'from_last' else f'{base_filename}_best_ep'
-                ep_numbers = [int(re.search(f'{re.escape(resume_prefix_base)}(\d+)', f).group(1)) for f in checkpoint_files if f.startswith(resume_prefix_base) and f.endswith('.pth')]
-                max_ep = max(ep_numbers)
-                checkpoint_path = f'{resume_prefix}{max_ep}.pth'
-            else:
-                checkpoint_path = f'./checkpoints/mask_0/rn50ft.pth'
-        else:
-            raise ValueError("No matching checkpoint files found.")
-
+    if resume_pth is not None:
+        checkpoint_path = resume_pth
         checkpoint = torch.load(checkpoint_path)
+
         if args.model_name == 'clip':
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
 
-        if args.prune == False: #load previous states if not pruning
-            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-            # Extract val_accuracy, counter and epoch from the checkpoint
-            counter = checkpoint['counter']
-            last_epoch = checkpoint['epoch']
-            best_score = checkpoint['best_score'] # val_accuracy or best_score
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        # Extract val_accuracy, counter and epoch from the checkpoint
+        counter = checkpoint['counter']
+        last_epoch = checkpoint['epoch']
+        best_score = checkpoint['best_score'] # val_accuracy or best_score
 
-            if dist.get_rank() == 0:
-                print(f"\nResuming training from epoch {last_epoch} using {checkpoint_path}")
-                print(f"Best validation accuracy: {best_score}")
-                for i, param_group in enumerate(optimizer.param_groups):
-                    print(f"Resume learning rate: {param_group['lr']}")
+        if dist.get_rank() == 0:
+            print(f"\nResuming training from epoch {last_epoch} using {checkpoint_path}")
+            print(f"Resumed validation accuracy: {best_score}")
+            for i, param_group in enumerate(optimizer.param_groups):
+                print(f"Resume learning rate: {param_group['lr']}")
+    # Load checkpoint if resuming
+    elif args.finetune_pth is not None:
+        checkpoint_path = args.finetune_pth
+        checkpoint = torch.load(checkpoint_path)
+
+        if args.model_name == 'clip':
+            model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
-            best_score = None
-            counter=0
+            model.load_state_dict(checkpoint['model_state_dict'])
+
+        if dist.get_rank() == 0:
+            print(f"\nFinetune training using {checkpoint_path}")
+        
+        best_score = None
+        counter=0
     else:
         best_score = None
         counter=0
@@ -201,44 +177,38 @@ def main(
         args=args
         )
 
-    resume_epoch = last_epoch + 1 if resume_train and args.prune==False else 0
+    resume_epoch = last_epoch + 1 if resume_pth else 0
 
-    if args.prune==False:
-        trained_model = train_model(
-            model, 
-            criterion, 
-            optimizer, 
-            scheduler,
-            train_loader, 
-            val_loader, 
-            num_epochs=num_epochs, 
-            resume_epoch=resume_epoch,
-            save_path=save_path,
-            early_stopping=early_stopping,
-            device=device,
-            sampler=train_sampler,
-            args=args,
-            )
-    else:
-        pruned_model = iterative_pruning_finetuning(
-            model, 
-            criterion, 
-            optimizer, 
-            scheduler,
-            train_loader, 
-            val_loader, 
-            device,
-            args.lr, 
-            args=args
-            )
+    trained_model = train_model(
+        model, 
+        criterion, 
+        optimizer, 
+        scheduler,
+        train_loader, 
+        val_loader, 
+        num_epochs=num_epochs, 
+        resume_epoch=resume_epoch,
+        save_path=save_path,
+        early_stopping=early_stopping,
+        device=device,
+        sampler=train_sampler,
+        args=args,
+        )
         
-    if dist.get_rank() == 0:
-        wandb.finish()
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Your model description here")
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
 
+    parser = argparse.ArgumentParser(description="Your model description here")
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
     parser.add_argument('--num_epochs', type=int, default=2, help='Number of epochs training')
     parser.add_argument(
@@ -253,52 +223,41 @@ if __name__ == "__main__":
         help='Type of model to use; includes ResNet'
         )
     parser.add_argument(
-        '--wandb_online', 
-        action='store_true', 
-        help='Run wandb in offline mode'
-        )
-    parser.add_argument(
-        '--project_name', 
-        type=str, 
-        default="Masked-ResNet",
-        help='wandb project name'
-        )
-    parser.add_argument(
-        '--wandb_run_id', 
-        type=str, 
-        default=None,
-        help='wandb run id'
-        )
-    parser.add_argument(
-        '--resume_train', 
+        '--resume_pth', 
         default=None,
         type=str,
-        choices=[
-            'from_last', 'from_best'
-        ],
         help='what epoch to resume training'
+        )
+    parser.add_argument(
+        '--finetune_pth', 
+        default=None,
+        type=str,
+        help='finetune training'
         )
     parser.add_argument(
         '--band', 
         default='all',
         type=str,
-        choices=[
-            'all', 'low', 'mid', 'high',
-        ]
+        # choices=[
+        #     'all', 'low', 'mid', 'high',
+        # ]
         )
     parser.add_argument(
         '--pretrained', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value 
         help='For pretraining'
         )
     parser.add_argument(
         '--early_stop', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='For early stopping'
         )
     parser.add_argument(
         '--smallset', 
-        action='store_true', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
         help='For using small subset of training set'
         )
     parser.add_argument(
@@ -330,42 +289,10 @@ if __name__ == "__main__":
         help='learning rate'
         )
     parser.add_argument(
-        '--prune', 
-        action='store_true', 
-        help='For pruning'
-        )
-    parser.add_argument(
-        '--pruning_ft', 
-        action='store_true', 
-        help='For finetuning after pruning'
-        )
-    parser.add_argument(
-        '--pruning_test', 
-        action='store_true', 
-        help='For test after pruning'
-        )
-    parser.add_argument(
-        '--global_prune', 
-        action='store_true', 
-        help='to apply global unstructured pruning or not'
-        )
-    parser.add_argument(
-        '--conv2d_prune_amount', 
-        type=float, 
-        default=0.2, 
-        help='amount to prune'
-        )
-    parser.add_argument(
-        '--linear_prune_amount', 
-        type=float, 
-        default=0.1, 
-        help='amount to prune'
-        )
-    parser.add_argument(
-        '--pruning_rounds', 
-        type=int, 
-        default=1, 
-        help='pruning iteration'
+        '--trainable_clip', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
+        help='For training the clip model'
         )
     parser.add_argument(
         '--seed', 
@@ -373,29 +300,52 @@ if __name__ == "__main__":
         default=44, 
         help='seed number'
         )
-
+    parser.add_argument(
+        '--pruning_test_ft', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
+        help='if use adaptive layerwise pruning'
+        )
     args = parser.parse_args()
+
+    seed = args.seed
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
+
+    device = torch.device(f'cuda:{args.local_rank}')
+    torch.cuda.set_device(device)
+    dist.init_process_group(backend='nccl')
+
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
     finetune = 'ft' if args.pretrained else ''
-    band = '' if args.band == 'all' else args.band
+    if 'prog' in args.band:
+        band = 'prog' if args.band == 'all+prog' else args.band
+    else:
+        band = '' if args.band == 'all' else args.band
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
         ckpt_folder = f'./checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
-        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}{args.mask_type}mask'
-        wandb_name = f"mask_{ratio}_{model_name}{finetune}_{band}{args.mask_type}"
+        # translearn_suffix = 'translearn' if args.finetune_pth is not None else ''
+        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}_{args.mask_type}mask'
     else:
         ratio = 0
         ckpt_folder = f'./checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
+        # translearn_suffix = 'translearn' if args.finetune_pth is not None else ''
         save_path = f'{ckpt_folder}/{model_name}{finetune}'
-        wandb_name = f"mask_{ratio}_{model_name}{finetune}"
 
     num_epochs = 100 if args.early_stop else args.num_epochs
 
     # # Retrieve resume path and epoch
-    # resume_train = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
+    # resume_pth = f"{save_path}_epoch{args.resume_epoch}.pth" if args.resume_epoch > 0 else None
+    
+    torch.distributed.barrier()
     
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -406,31 +356,26 @@ if __name__ == "__main__":
     print(f"Mask Generator Type: {args.mask_type}")
     print(f"Mask Ratio: {ratio}")
     print(f"Batch Size: {args.batch_size}")
-    print(f"WandB run ID: {args.wandb_run_id}")
-    print(f"WandB Project Name: {args.project_name}")
-    print(f"WandB Instance Name: {wandb_name}")
-    print(f"WandB Online: {args.wandb_online}")
-    print(f"model type: {args.model_name}")
+    print(f"Model Arch: {args.model_name}")
     print(f"Save path: {save_path}.pth")
-    print(f"Resume training: {args.resume_train}")
+    print(f"Resume training path: {args.resume_pth}")
+    print(f"Finetune path: {args.finetune_pth}")
     print("-" * 30, "\n")
+    
+    torch.distributed.barrier()
 
     main(
         local_rank=args.local_rank,
         num_epochs=num_epochs,
         ratio=ratio/100,
         batch_size=args.batch_size,
-        wandb_run_id=args.wandb_run_id,
         model_name=args.model_name,
         band=args.band,
-        wandb_name=wandb_name,
-        project_name=args.project_name,
         save_path=save_path, 
         mask_type=args.mask_type,
         pretrained=args.pretrained,
-        resume_train=args.resume_train,
+        resume_pth=args.resume_pth,
         early_stop=args.early_stop,
-        wandb_online=args.wandb_online,
         args=args
     )
 

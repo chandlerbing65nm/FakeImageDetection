@@ -113,29 +113,29 @@ def main(
     elif args.dataset == 'LSUNbinary':
         train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=train_transform)
         val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/binary', transform=val_transform)
-    # elif args.dataset == 'CIFAR10':
-    #     train_transform = transforms.Compose(
-    #         [
-    #             transforms.RandomCrop(32, padding=4),
-    #             transforms.RandomHorizontalFlip(),
-    #             transforms.ToTensor(),
-    #             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
-    #         ]
-    #     )
-    #     val_transform = transforms.Compose(
-    #         [
-    #             transforms.ToTensor(),
-    #             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
-    #         ]
-    #     )
-    #     train_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=True, download=False, transform=train_transform)
-    #     val_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=val_transform)
+    elif args.dataset == 'CIFAR10':
+        # train_transform = transforms.Compose(
+        #     [
+        #         transforms.RandomCrop(32, padding=4),
+        #         transforms.RandomHorizontalFlip(),
+        #         transforms.ToTensor(),
+        #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
+        #     ]
+        # )
+        # val_transform = transforms.Compose(
+        #     [
+        #         transforms.ToTensor(),
+        #         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2471, 0.2435, 0.2616)),
+        #     ]
+        # )
+        train_data = torchvision.datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=True, download=False, transform=train_transform)
+        val_data = torchvision.datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=val_transform)
 
-    #     # Filter the datasets to only include classes 0 and 1
-    #     train_data = select_binary_classes(train_data, [0, 1])
-    #     val_data = select_binary_classes(val_data, [0, 1])
+        # Filter the datasets to only include classes 0 and 1
+        train_data = select_binary_classes(train_data, [0, 1])
+        val_data = select_binary_classes(val_data, [0, 1])
 
-    if args.smallset and args.dataset == 'ForenSynths':
+    if args.smallset:
         subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
@@ -149,9 +149,9 @@ def main(
         else:
             mask_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
             
-        mask_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=mask_transform)
-        # mask_data = datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=mask_transform)
-        # mask_data = select_binary_classes(mask_data, [0, 1])
+        # mask_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=mask_transform)
+        mask_data = torchvision.datasets.CIFAR10(root='/home/users/chandler_doloriel/scratch/Datasets/cifar10', train=False, download=False, transform=mask_transform)
+        mask_data = select_binary_classes(mask_data, [0, 1])
         subset_size = int(0.02 * len(mask_data))
         subset_indices = random.sample(range(len(mask_data)), subset_size)
         mask_data = Subset(mask_data, subset_indices)
@@ -197,7 +197,7 @@ def main(
         checkpoint_path = args.checkpoint_path
         checkpoint = torch.load(checkpoint_path)
 
-        if 'clip' in args.model_name and args.clip_grad == False: # if the clip model is finetuned from the backbone
+        if 'clip' in args.model_name and args.trainable_clip == False: # if the clip model is finetuned from the backbone
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -256,7 +256,7 @@ if __name__ == "__main__":
         help='Type of model to use; includes ResNet'
         )
     parser.add_argument(
-        '--clip_grad', 
+        '--trainable_clip', 
         type=str2bool,
         default=False,  # Optional: you can set a default value
         help='For loading finetuned clip model'

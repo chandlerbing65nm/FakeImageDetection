@@ -36,32 +36,9 @@ if __name__ == "__main__":
         help='Type of model to use; includes ResNet variants'
         )
     parser.add_argument(
-        '--mask_type', 
-        default='spectral', 
-        choices=[
-            'patch', 
-            'spectral',
-            'pixel', 
-            'nomask'], 
-        help='Type of mask generator'
-        )
-    parser.add_argument(
-        '--band', 
-        default='all',
-        type=str,
-        choices=[
-            'all', 'low', 'mid', 'high',]
-        )
-    parser.add_argument(
         '--pretrained', 
         action='store_true', 
         help='For pretraining'
-        )
-    parser.add_argument(
-        '--ratio', 
-        type=int, 
-        default=50,
-        help='Ratio of mask to apply'
         )
     parser.add_argument(
         '--batch_size', 
@@ -70,20 +47,9 @@ if __name__ == "__main__":
         help='Batch Size'
         )
     parser.add_argument(
-        '--data_type', 
-        default="Wang_CVPR20", 
-        type=str, 
-        help="Dataset Type"
-        )
-    parser.add_argument(
         '--other_model', 
         action='store_true', 
         help='if the model is from my own code'
-        )
-    parser.add_argument(
-        '--conv_features', 
-        action='store_true', 
-        help='get the conv blocks features'
         )
     parser.add_argument(
         '--seed', 
@@ -93,6 +59,10 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--checkpoint_path', 
+        type=str,
+        )
+    parser.add_argument(
+        '--result_folder', 
         type=str,
         )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
@@ -112,35 +82,19 @@ if __name__ == "__main__":
     dist.init_process_group(backend='nccl')
 
     model_name = args.model_name.lower()
-    finetune = 'ft' if args.pretrained else ''
-    band = '' if args.band == 'all' else args.band
-    convfeat = '_convfeats' if args.conv_features else ''
-
-    if args.mask_type != 'nomask':
-        ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
-    else:
-        ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
-
     checkpoint_path = args.checkpoint_path
 
     # Define the path to the results file
-    results_path = f'results/pruning'
-    os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}.txt'
+    os.makedirs(args.result_folder, exist_ok=True)
+    filename = checkpoint_path.split('/')[-1].split('.')[0] + '.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
     print("-" * 30)
     print(f"Device: {args.local_rank}")
-    print(f"Dataset Type: {args.data_type}")
     print(f"Model type: {args.model_name}")
-    print(f"Ratio of mask: {ratio}")
-    print(f"Batch Size: {args.batch_size}")
-    print(f"Mask Type: {args.mask_type}")
     print(f"Checkpoint Type: {checkpoint_path}")
-    print(f"Results saved to: {results_path}/{filename}")
+    print(f"Results saved to: {args.result_folder}/{filename}")
     print("-" * 30, "\n")
 
     datasets = {
@@ -165,26 +119,27 @@ if __name__ == "__main__":
         'DALL-E': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/dalle',  
     }
 
-    # datasets = {
-    #     'ImageNet-mini': '/home/users/chandler_doloriel/scratch/Datasets/imagenet-mini/val',
-    #     'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
-    #     'ProGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/progan',
-    #     }
-
     # Initialize a counter
     dataset_count = len(datasets)
     total_ap = 0
     total_acc = 0
     total_auc = 0
 
+    # Identify the first few Conv2D layers to extract activations from
+    layer_names = [
+        'module.conv1',
+        'module.layer1.0.conv1',
+        'module.layer1.0.conv2',
+        'module.layer1.0.conv3',
+    ]
+
+    # Initialize storage for moving averages
+    moving_avg_activations = {layer: 0 for layer in layer_names}
+    moving_avg_count = 0
+
     for dataset_name, dataset_path in datasets.items():
-        # if dist.get_rank() == 0:
-            # print(f"\nEvaluating {dataset_name}")
-        avg_ap, avg_acc, auc, model = evaluate_model(
+        average_activations, avg_ap, avg_acc, auc, model = evaluate_model(
             args.model_name,
-            args.data_type,
-            args.mask_type,
-            ratio/100,
             dataset_path,
             args.batch_size,
             checkpoint_path,
@@ -195,18 +150,21 @@ if __name__ == "__main__":
         total_acc += avg_acc
         total_auc += auc
 
+        # Update moving average for activations
+        for i, layer in enumerate(layer_names):
+            moving_avg_activations[layer] = (moving_avg_activations[layer] * moving_avg_count + np.mean(average_activations[i])) / (moving_avg_count + 1)
+        moving_avg_count += 1
+
         if dist.get_rank() == 0:
             # Write the results to the file
-            with open(f'{results_path}/{filename}', 'a') as file:
+            with open(f'{args.result_folder}/{filename}', 'a') as file:
                 if file.tell() == 0: # Check if the file is empty
                     file.write("Selected Configuration:\n")
                     file.write("-" * 28 + "\n")
                     file.write(f"Cuda: {args.local_rank}\n")
                     file.write(f"Model type: {args.model_name}\n")
-                    file.write(f"Ratio of mask: {ratio}\n")
                     file.write(f"Batch Size: {args.batch_size}\n")
-                    file.write(f"Mask Type: {args.mask_type}\n")
-                    file.write(f"Results saved to: {results_path}/{filename}\n")
+                    file.write(f"Results saved to: {args.result_folder}/{filename}\n")
                     file.write("-" * 28 + "\n\n")
                 if 'progan' in dataset_path:
                     file.write(f"\nCheckpoint Path: {checkpoint_path}\n")
@@ -229,3 +187,7 @@ if __name__ == "__main__":
                     file.write(f"Remaining FLOPs: {get_model_flops(model) * 100:.2f} (%)\n")
                     file.write("\n")
         del model
+
+    # Print moving average activations for each layer
+    for i, layer in enumerate(layer_names):
+        print(f'Layer {layer}: Mean Activation Value: {moving_avg_activations[layer]}')
