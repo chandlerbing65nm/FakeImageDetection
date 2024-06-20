@@ -74,8 +74,12 @@ def main(
         raise valueError(f"Invalid mask ratio {ratio}")
     else:
         # Create a MaskGenerator
-        if mask_type == 'spectral':
-            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
+        if mask_type == 'fourier':
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
+        if mask_type == 'wavelet':
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
+        if mask_type == 'cosine':
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
         elif mask_type == 'pixel':
             mask_generator = PixelMaskGenerator(ratio=ratio)
         elif mask_type == 'patch':
@@ -265,7 +269,9 @@ if __name__ == "__main__":
         default='spectral', 
         choices=[
             'pixel', 
-            'spectral', 
+            'fourier',
+            'wavelet',
+            'cosine', 
             'patch',
             'nomask'], 
         help='Type of mask generator'
@@ -323,7 +329,7 @@ if __name__ == "__main__":
     model_name = args.model_name.lower().replace('/', '').replace('-', '')
     finetune = 'ft' if args.pretrained else ''
     if 'prog' in args.band:
-        band = 'prog' if args.band == 'all+prog' else args.band
+        band = 'prog_' if args.band == 'all+prog' else args.band
     else:
         band = '' if args.band == 'all' else args.band
 
@@ -332,7 +338,7 @@ if __name__ == "__main__":
         ckpt_folder = f'./checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
         # translearn_suffix = 'translearn' if args.finetune_pth is not None else ''
-        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}_{args.mask_type}mask'
+        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}{args.mask_type}mask'
     else:
         ratio = 0
         ckpt_folder = f'./checkpoints/mask_{ratio}'

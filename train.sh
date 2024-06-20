@@ -9,14 +9,14 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 
-MODEL_NAME="RN50_mod" # RN50_mod, RN50, clip
-MASK_TYPE="spectral" # nomask, spectral, pixel, patch
-BAND="all+prog" # all, low, mid, high, low+mid, low+high, mid+high ##### add +prog if using progressive masking
+MODEL_NAME="RN50" # RN50_mod, RN50, clip
+MASK_TYPE="cosine" # nomask, fourier, pixel, patch, cosine, wavelet
+BAND="all" # all, low, mid, high, low+mid, low+high, mid+high ##### add +prog if using progressive masking
 RATIO=15
 
-BATCH_SIZE=16
+BATCH_SIZE=124
 RESUME_PTH="./checkpoints/mask_15/rn50_modft_prog_spectralmask_last_ep48.pth" # always use from_last
-LEARNING_RATE=0.0001
+LEARNING_RATE=0.0002
 SEED=44
 
 EARLY_STOP="True"
@@ -44,6 +44,6 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --batch_size $BATCH_SIZE \
   --early_stop $EARLY_STOP \
   --trainable_clip $TRAIN_CLIP \
-  --resume_pth $RESUME_PTH \
+#   --resume_pth $RESUME_PTH \
   # --smallset $USE_SMALL_DATA \
   # --finetune_pth $FINETUNE_PTH \

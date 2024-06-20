@@ -33,6 +33,7 @@ import torch.nn.utils.prune as prune
 import os
 
 from commons import *
+from activations import RunningStats, ActivationExtractor, _get_module_by_name
 from RD_PRUNE.tools import *
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
@@ -364,14 +365,14 @@ def evaluate_model(
         'jpg_qual': [int((30 + 100) / 2)]
     }
 
-    # mask_generator = FrequencyMaskGenerator(ratio=0.30, band='low')
+    # mask_generator = FrequencyMaskGenerator(ratio=0.15, band='all', transform_type='fourier')
     # mask_generator = PatchMaskGenerator(ratio=0.50)
     # mask_generator = PixelMaskGenerator(ratio=0.50)
     mask_generator = None
     test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
 
     if 'Ojha_CVPR2023' in dataset_path:
-        test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
+        test_dataset = Ojha_CVPR23(dataset_path, transform=test_transform)
     elif 'Wang_CVPR2020' in dataset_path:
         test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
     else:
@@ -425,83 +426,35 @@ def evaluate_model(
     disable_tqdm = dist.get_rank() != 0
     data_loader_with_tqdm = tqdm(test_dataloader, f"testing: {dataset_path}", disable=disable_tqdm)
 
-    # if dist.get_rank() == 0:
-    #     for name, module in model.named_modules():
-    #         print(f"Module Name: {name}")
-    # raise False
+    if args.get_activations:
+        # Identify the first/last four Conv2D layers to extract activations from
+        # layer_names = [
+        #     'module.conv1',
+        #     'module.layer1.0.conv1',
+        #     'module.layer1.0.conv2',
+        #     'module.layer1.0.conv3',
+        # ]
 
-    
-    class RunningStats:
-        def __init__(self):
-            self.n = 0
-            self.mean = 0.0
-            self.sq_diff = 0.0
+        layer_names = [
+            'module.layer4.1.conv3',
+            'module.layer4.2.conv1',
+            'module.layer4.2.conv2',
+            'module.layer4.2.conv3',
+        ]
 
-        def update(self, x):
-            batch_mean = np.mean(x, axis=0)
-            batch_size = x.shape[0]
-            
-            self.n += batch_size
-            delta = batch_mean - self.mean
-            self.mean += delta * batch_size / self.n
-            delta2 = batch_mean - self.mean
-            self.sq_diff += delta * delta2 * batch_size
+        # Create activation extractors for each Conv2D layer
+        extractors = [ActivationExtractor() for _ in layer_names]
 
-        @property
-        def variance(self):
-            return self.sq_diff / self.n if self.n > 1 else 0.0
-
-        @property
-        def std_dev(self):
-            return np.sqrt(self.variance)
-
-    class ActivationExtractor:
-        def __init__(self):
-            self.stats = RunningStats()
-            self.accumulated_activations = []
-
-        def hook(self, module, input, output):
-            self.accumulated_activations.append(output.cpu().detach().numpy())
-
-        def update_stats(self):
-            if self.accumulated_activations:
-                activations = np.concatenate(self.accumulated_activations)
-                self.stats.update(activations)
-                self.accumulated_activations = []
-
-    # Function to recursively find the layer by name
-    def _get_module_by_name(module, access_string):
-        names = access_string.split('.')
-        for name in names:
-            module = getattr(module, name)
-        return module
-
-    # Identify the first few Conv2D layers to extract activations from
-    layer_names = [
-        'module.conv1',
-        'module.layer1.0.conv1',
-        'module.layer1.0.conv2',
-        'module.layer1.0.conv3',
-    ]
-
-    # layer_names = [
-    #     'module.layer4.1.conv3',
-    #     'module.layer4.2.conv1',
-    #     'module.layer4.2.conv2',
-    #     'module.layer4.2.conv3',
-    # ]
-
-    # Create activation extractors for each Conv2D layer
-    extractors = [ActivationExtractor() for _ in layer_names]
-
-    # Register hooks for each Conv2D layer
-    hooks = [_get_module_by_name(model, name).register_forward_hook(extractor.hook) for name, extractor in zip(layer_names, extractors)]
+        # Register hooks for each Conv2D layer
+        hooks = [_get_module_by_name(model, name).register_forward_hook(extractor.hook) for name, extractor in zip(layer_names, extractors)]
 
     accumulation_steps = 10
+    y_true = []
+    y_pred = []
+
     with torch.no_grad():
         for i, (inputs, labels) in enumerate(data_loader_with_tqdm):
             inputs = inputs.to(device)
-
             labels = labels.float().to(device)
             if 'clip' in args.model_name:
                 outputs = model(inputs, return_all=True).view(-1).unsqueeze(1)
@@ -510,14 +463,16 @@ def evaluate_model(
             y_pred.extend(outputs.sigmoid().detach().cpu().numpy())
             y_true.extend(labels.cpu().numpy())
 
-            # Periodically update the running statistics
-            if (i + 1) % accumulation_steps == 0:
-                for extractor in extractors:
-                    extractor.update_stats()
+            if args.get_activations:
+                # Periodically update the running statistics
+                if (i + 1) % accumulation_steps == 0:
+                    for extractor in extractors:
+                        extractor.update_stats()
 
-    # Update the running statistics one last time for any remaining activations
-    for extractor in extractors:
-        extractor.update_stats()
+    if args.get_activations:
+        # Update the running statistics one last time for any remaining activations
+        for extractor in extractors:
+            extractor.update_stats()
 
     y_true, y_pred = np.array(y_true), np.array(y_pred)
 
@@ -530,19 +485,17 @@ def evaluate_model(
         print(f'Accuracy: {acc}')
         print(f'ROC AUC Score: {auc}')
 
-    # Collect final statistics for each layer
-    average_activations = [extractor.stats.mean for extractor in extractors]
+    if args.get_activations:
+        # Collect final statistics for each layer
+        average_activations = [extractor.stats.mean for extractor in extractors]
 
-    # Clean up hooks
-    for hook in hooks:
-        hook.remove()
+        # Clean up hooks
+        for hook in hooks:
+            hook.remove()
 
-    # # Print average activations for each layer
-    # for i, avg_act in enumerate(average_activations):
-    #     print(f'Layer {layer_names[i]}: Mean activation value: {np.mean(avg_act)}')
-
-    return average_activations, ap, acc, auc, model
-    # return ap, acc, auc, model
+        return average_activations, ap, acc, auc, model
+    else:
+        return ap, acc, auc, model
 
 def train_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
@@ -583,8 +536,8 @@ def test_augment(augmentor, mask_generator=None, args=None):
     if mask_generator is not None:
         transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
     transform_list.extend([
-        # transforms.RandomRotation(degrees=50),  # Add random rotation
-        # transforms.RandomAffine(degrees=0, translate=(0.50, 0.50)),  # Add random translation
+        # transforms.Lambda(lambda img: img.rotate(27)), # Add rotation - 9, 18, 27,
+        transforms.RandomAffine(degrees=0, translate=(0.15, 0.15)),  # Add random translation
         # transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.CenterCrop(224),
         transforms.ToTensor(),

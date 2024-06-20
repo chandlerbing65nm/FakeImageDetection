@@ -3,8 +3,8 @@
 # Define the arguments for your test script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-MODEL_NAME="rn50_mod" # clip_rn50, rn50, rn50_mod
-BATCH_SIZE=16
+MODEL_NAME="rn50" # clip_rn50, rn50, rn50_mod
+BATCH_SIZE=64
 SEED=44
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
@@ -12,8 +12,9 @@ export CUDA_VISIBLE_DEVICES=$GPUs
 echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
 # CHECKPOINT="./checkpoints/mask_15/rn50_modft_prog_spectralmask.pth"
-CHECKPOINT="./checkpoints/mask_15/rn50_modft_prog_spectralmask.pth"
+CHECKPOINT="./checkpoints/mask_0/rn50ft.pth"
 RESULTS_FOLDER="./results/masking"
+GET_ACTIVATIONS="True"
 
 # Run the test command
 python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
@@ -24,6 +25,7 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
   --batch_size $BATCH_SIZE \
   --checkpoint_path ${CHECKPOINT} \
   --result_folder ${RESULTS_FOLDER} \
+  --get_activations ${GET_ACTIVATIONS} \
 
 # # Loop to run tests for checkpoints ln_strcd_ep0_rnd0 to ln_strcd_ep0_rnd9
 # for i in {1..10}

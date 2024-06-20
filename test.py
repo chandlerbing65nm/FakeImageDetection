@@ -27,8 +27,25 @@ os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
 if __name__ == "__main__":
+
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ('yes', 'true', 't', 'y', '1'):
+            return True
+        elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError('Boolean value expected.')
+
     parser = argparse.ArgumentParser(description="Settings for your script")
 
+    parser.add_argument(
+        '--get_activations', 
+        type=str2bool,
+        default=False,  # Optional: you can set a default value
+        help='For computing activation values'
+        )
     parser.add_argument(
         '--model_name',
         default='rn50',
@@ -94,6 +111,7 @@ if __name__ == "__main__":
     print(f"Device: {args.local_rank}")
     print(f"Model type: {args.model_name}")
     print(f"Checkpoint Type: {checkpoint_path}")
+    print(f"Get Activatio Values: {args.get_activations}")
     print(f"Results saved to: {args.result_folder}/{filename}")
     print("-" * 30, "\n")
 
@@ -138,22 +156,33 @@ if __name__ == "__main__":
     moving_avg_count = 0
 
     for dataset_name, dataset_path in datasets.items():
-        average_activations, avg_ap, avg_acc, auc, model = evaluate_model(
-            args.model_name,
-            dataset_path,
-            args.batch_size,
-            checkpoint_path,
-            device,
-            args,
-        )
+        if args.get_activations:
+            average_activations, avg_ap, avg_acc, auc, model = evaluate_model(
+                args.model_name,
+                dataset_path,
+                args.batch_size,
+                checkpoint_path,
+                device,
+                args,
+            )
+        else:
+            avg_ap, avg_acc, auc, model = evaluate_model(
+                args.model_name,
+                dataset_path,
+                args.batch_size,
+                checkpoint_path,
+                device,
+                args,
+            )
         total_ap += avg_ap
         total_acc += avg_acc
         total_auc += auc
 
-        # Update moving average for activations
-        for i, layer in enumerate(layer_names):
-            moving_avg_activations[layer] = (moving_avg_activations[layer] * moving_avg_count + np.mean(average_activations[i])) / (moving_avg_count + 1)
-        moving_avg_count += 1
+        if args.get_activations:
+            # Update moving average for activations
+            for i, layer in enumerate(layer_names):
+                moving_avg_activations[layer] = (moving_avg_activations[layer] * moving_avg_count + np.mean(average_activations[i])) / (moving_avg_count + 1)
+            moving_avg_count += 1
 
         if dist.get_rank() == 0:
             # Write the results to the file
@@ -188,6 +217,7 @@ if __name__ == "__main__":
                     file.write("\n")
         del model
 
-    # Print moving average activations for each layer
-    for i, layer in enumerate(layer_names):
-        print(f'Layer {layer}: Mean Activation Value: {moving_avg_activations[layer]}')
+    if args.get_activations:
+        # Print moving average activations for each layer
+        for i, layer in enumerate(layer_names):
+            print(f'Layer {layer}: Mean Activation: {moving_avg_activations[layer]}')
