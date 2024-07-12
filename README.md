@@ -15,6 +15,7 @@
 >Based on empirical analysis, we propose a novel deepfake detector via frequency masking.
 >Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods. 
 
+## PLEASE READ DOCUMENTATION BELOW
 
 ## &#9733; Datasets
 Follow strictly the naming and structure of folders below:
