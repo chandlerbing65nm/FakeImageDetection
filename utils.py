@@ -104,7 +104,7 @@ def train_model(
                 print('-' * 10)
 
         # For CLIP model, extract features only once
-        if 'clip' in args.model_name and not features_exist and args.clip_grad == False:
+        if 'CLIP' in args.model_name and not features_exist and args.clip_grad == False:
             # Process with rank 0 performs the extraction
             if dist.get_rank() == 0:
                 extract_and_save_features(model, train_loader, "./clip_train_" + features_path, device)
@@ -121,7 +121,7 @@ def train_model(
             features_exist = True  # Set this to True after extraction
 
         # Load the features for all processes if not done already
-        if 'clip' in args.model_name and features_exist and epoch == resume_epoch and args.clip_grad == False:
+        if 'CLIP' in args.model_name and features_exist and epoch == resume_epoch and args.clip_grad == False:
             train_loader = load_features("./clip_train_" + features_path, batch_size=args.batch_size, shuffle=False)
             val_loader = load_features("./clip_val_" + features_path, batch_size=args.batch_size, shuffle=False)
 
@@ -155,7 +155,7 @@ def train_model(
                 optimizer.zero_grad()
 
                 with torch.set_grad_enabled(phase == 'Training'):
-                    if 'clip' in args.model_name and args.clip_grad == True:
+                    if 'CLIP' in args.model_name and args.clip_grad == True:
                         outputs = model(batch_inputs, return_all=True).view(-1).unsqueeze(1)
                     else:
                         outputs = model(batch_inputs).view(-1).unsqueeze(1) # pass the input to the fc layer only
@@ -208,15 +208,6 @@ def evaluate_model(
     args
     ):
 
-    # Depending on the mask_type, create the appropriate mask generator
-    if mask_type == 'spectral':
-        mask_generator = FrequencyMaskGenerator(ratio=ratio)
-    elif mask_type == 'pixel':
-        mask_generator = PixelMaskGenerator(ratio=ratio)
-    else:
-        mask_generator = None
-
-
     test_opt = {
         'rz_interp': ['bilinear'],
         'loadSize': 256,
@@ -226,15 +217,13 @@ def evaluate_model(
         'jpg_method': ['pil'],
         'jpg_qual': [int((30 + 100) / 2)]
     }
-
+    mask_generator = None
     test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
 
-    if data_type == 'GenImage':
-        test_dataset = GenImage(dataset_path, transform=test_transform)
-    elif data_type == 'Wang_CVPR20' :
+    if data_type == 'Wang_CVPR20' :
         test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
     elif data_type == 'Ojha_CVPR23' :
-        test_dataset = OjhaCVPR23(dataset_path, transform=test_transform)
+        test_dataset = Ojha_CVPR23(dataset_path, transform=test_transform)
     else:
         raise ValueError("wrong dataset input")
 
@@ -242,21 +231,13 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
     if model_name == 'RN50':
-        # model = vis_models.resnet50(pretrained=pretrained)
-        # model.fc = nn.Linear(model.fc.in_features, 1)
         model = resnet50(pretrained=False)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=False, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('ViT'):
-        model_variant = model_name.split('_')[1] # Assuming the model name is like 'ViT_base_patch16_224'
-        model = timm.create_model(model_variant, pretrained=pretrained)
-    elif model_name == 'clip_vitl14':
+    elif model_name == 'CLIP_vitl14':
         clip_model_name = 'ViT-L/14'
-        model = CLIPModel(clip_model_name, num_classes=1)
-    elif model_name == 'clip_rn50':
-        clip_model_name = 'RN50'
         model = CLIPModel(clip_model_name, num_classes=1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
@@ -266,10 +247,8 @@ def evaluate_model(
 
     checkpoint = torch.load(checkpoint_path)
 
-    if 'clip' in args.model_name and args.other_model != True and args.clip_ft == False:
+    if 'CLIP' in args.model_name and args.pretrained:
         model.module.fc.load_state_dict(checkpoint['model_state_dict'])
-    elif args.other_model:
-        model.module.fc.load_state_dict(checkpoint)
     else:
         model.load_state_dict(checkpoint['model_state_dict'])
 
@@ -285,7 +264,7 @@ def evaluate_model(
         for inputs, labels in data_loader_with_tqdm:
             inputs = inputs.to(device)
             labels = labels.float().to(device)
-            if 'clip' in args.model_name:
+            if 'CLIP' in args.model_name:
                 outputs = model(inputs, return_all=True).view(-1).unsqueeze(1)
             else:
                 outputs = model(inputs).view(-1).unsqueeze(1)

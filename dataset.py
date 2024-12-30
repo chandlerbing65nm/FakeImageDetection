@@ -46,7 +46,7 @@ class ForenSynths(Dataset):
 
         return image, label
 
-class OjhaCVPR23(Dataset):
+class Ojha_CVPR23(Dataset):
     def __init__(self, root_dir, transform=None):
         self.transform = transform
         self.data = []

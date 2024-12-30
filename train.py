@@ -112,43 +112,30 @@ def main(
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
 
-    # # Creating training dataset from images
-    # train_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/training', transform=train_transform)
-    # if args.debug:
-    #     subset_size = int(0.2 * len(train_data))
-    #     subset_indices = random.sample(range(len(train_data)), subset_size)
-    #     train_data = Subset(train_data, subset_indices)
-    # train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
-    # train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
-
-    # # Creating validation dataset from images
-    # val_data = ForenSynths('/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/validation', transform=val_transform)
-    # # val_sampler = DistributedSampler(val_data, shuffle=False)
-    # # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
-    # val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
-
-
-    # Load the dataset from directories 
-    train_data = datasets.ImageFolder(root='/home/users/chandler_doloriel/scratch/Datasets/CIFAKE/train', transform=train_transform)
+    # Creating training dataset from images
+    train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    if args.debug:
+        subset_size = int(0.2 * len(train_data))
+        subset_indices = random.sample(range(len(train_data)), subset_size)
+        train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
-    val_data = datasets.ImageFolder(root='/home/users/chandler_doloriel/scratch/Datasets/CIFAKE/test', transform=val_transform)
+
+    # Creating validation dataset from images
+    val_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    # val_sampler = DistributedSampler(val_data, shuffle=False)
+    # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
 
 
     # Creating and training the binary classifier
     if model_name == 'RN50':
-        # model = vis_models.resnet50(pretrained=pretrained)
-        # model.fc = nn.Linear(model.fc.in_features, 1)
         model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('clip_vitl14'):
-        clip_model_name = 'ViT-L/14'
-        model = CLIPModel(clip_model_name, num_classes=1, clip_grad=args.clip_grad)
-    elif model_name.startswith('clip_rn50'):
+    elif model_name.startswith('CLIP_rn50'):
         clip_model_name = 'RN50'
         model = CLIPModel(clip_model_name, num_classes=1, clip_grad=args.clip_grad)
     else:
@@ -241,9 +228,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_vitl14', 'clip_rn50'
-            # 'ViT_base_patch16_224', 'ViT_base_patch32_224',
-            # 'ViT_large_patch16_224', 'ViT_large_patch32_224'
+            'RN50', 'RN50_mod', 'CLIP_vitl14'
         ],
         help='Type of model to use; includes ResNet'
         )

@@ -34,14 +34,9 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN18', 'RN34', 'RN50', 'RN50_mod', 'clip_rn50', 'clip_vitl14',
+            'RN50', 'RN50_mod', 'CLIP_vitl14',
         ],
         help='Type of model to use; includes ResNet variants'
-        )
-    parser.add_argument(
-        '--clip_ft', 
-        action='store_true', 
-        help='For loading a finetuned clip model'
         )
     parser.add_argument(
         '--mask_type', 
@@ -83,11 +78,6 @@ if __name__ == "__main__":
         type=str, 
         choices=['Wang_CVPR20', 'Ojha_CVPR23'], 
         help="Dataset Type"
-        )
-    parser.add_argument(
-        '--other_model', 
-        action='store_true', 
-        help='if the model is from my own code'
         )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
@@ -136,33 +126,28 @@ if __name__ == "__main__":
 
     if args.data_type == 'Wang_CVPR20':
         datasets = {
-            'ProGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/progan',
-            'CycleGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/cyclegan',
-            'BigGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/biggan',
-            'StyleGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/stylegan',
-            'GauGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/gaugan',
-            'StarGAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/stargan',
-            'DeepFake': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/deepfake',
-            'SITD': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/seeingdark',
-            'SAN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/san',
-            'CRN': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/crn',
-            'IMLE': '/home/users/chandler_doloriel/scratch/Datasets/Wang_CVPR2020/testing/imle',
+            'ProGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/progan',
+            'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/cyclegan',
+            'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/biggan',
+            'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stylegan',
+            'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/gaugan',
+            'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stargan',
+            'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/deepfake',
+            'SITD': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/seeingdark',
+            'SAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/san',
+            'CRN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/crn',
+            'IMLE': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/imle',
         }
-    # elif args.data_type == 'GenImage':
-    #     datasets = {
-    #         'VQDM': '/home/users/chandler_doloriel/scratch/Datasets/GenImage/imagenet_vqdm/imagenet_vqdm/val',
-    #         'Glide': '/home/users/chandler_doloriel/scratch/Datasets/GenImage/imagenet_glide/imagenet_glide/val',
-    #     }
     elif args.data_type == 'Ojha_CVPR23':
         datasets = {
-            'Guided': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/guided',
-            'LDM_200': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200',
-            'LDM_200_cfg': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_200_cfg',
-            'LDM_100': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/ldm_100',
-            'Glide_100_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_27',
-            'Glide_50_27': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_50_27',
-            'Glide_100_10': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/glide_100_10',
-            'DALL-E': '/home/users/chandler_doloriel/scratch/Datasets/Ojha_CVPR2023/dalle',       
+            'Guided': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/guided',
+            'LDM_200': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200',
+            'LDM_200_cfg': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200_cfg',
+            'LDM_100': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_100',
+            'Glide_100_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_27',
+            'Glide_50_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_50_27',
+            'Glide_100_10': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_10',
+            'DALL-E': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/dalle',       
         }
     else:
         raise ValueError("wrong dataset type")
@@ -200,7 +185,7 @@ if __name__ == "__main__":
                     file.write(f"Checkpoint Type: {checkpoint_path}\n")
                     file.write(f"Results saved to: {results_path}/{filename}\n")
                     file.write("-" * 28 + "\n\n")
-                    file.write("Dataset, Precision, Accuracy, AUC\n")
+                    file.write("Dataset, Avg.Prec., Acc., AUC\n")
                     file.write("-" * 28)
                     file.write("\n")
                 file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
