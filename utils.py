@@ -23,30 +23,49 @@ from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 from networks.clip_models import CLIPModel
 import time
+import random
 
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
+import torchvision.transforms.functional as F
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
 
 def train_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
+    
     if mask_generator is not None:
         transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
+    
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),
-        # transforms.RandomRotation(degrees=45),
+    ])
+
+    if args is not None and args.mask_type:
+        if args.mask_type == 'rotate':
+            transform_list.append(transforms.RandomRotation(degrees=(0, args.ratio)))
+        elif args.mask_type == 'translate':
+            transform_list.append(transforms.RandomAffine(degrees=0, translate=(args.ratio, args.ratio)))
+        elif args.mask_type == 'shear':
+            transform_list.append(transforms.RandomAffine(degrees=0, shear=args.ratio))
+        elif args.mask_type == 'scale':
+            transform_list.append(transforms.RandomAffine(degrees=0, scale=(1 - args.ratio, 1 + args.ratio)))
+
+    transform_list.extend([
         transforms.RandomCrop(224),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
     ])
-    if args is not None and args.model_name == 'clip':
+
+    if args is not None and args.model_name == 'CLIP':
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+    
     return transforms.Compose(transform_list)
+
 
 def val_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
@@ -59,7 +78,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ])
-    if args is not None and args.model_name == 'clip':
+    if args is not None and args.model_name == 'CLIP':
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
@@ -71,7 +90,7 @@ def test_augment(augmentor, mask_generator=None, args=None):
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ]
-    if args is not None and args.model_name == 'clip':
+    if args is not None and args.model_name == 'CLIP':
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))

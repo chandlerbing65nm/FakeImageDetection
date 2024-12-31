@@ -15,15 +15,15 @@ from utils import train_augment
 from mask import FrequencyMaskGenerator, PatchMaskGenerator, PixelMaskGenerator
 
 # ------------------------
-# 1. JS Divergence Helpers
+# 1. JS Divergence and Wasserstein Helpers
 # ------------------------
 def kl_divergence(p, q, eps=1e-12):
     """
     Computes the Kullback–Leibler divergence KL(p || q) for each row in p, q.
     Both p and q must be > 0 and sum to 1 across features.
     """
-    p = torch.clamp(p, eps, 1.0)  
-    q = torch.clamp(q, eps, 1.0)  
+    p = torch.clamp(p, eps, 1.0)
+    q = torch.clamp(q, eps, 1.0)
     return torch.sum(p * torch.log(p / q), dim=1)
 
 def js_divergence(p, q):
@@ -34,19 +34,115 @@ def js_divergence(p, q):
     m = 0.5 * (p + q)
     return 0.5 * kl_divergence(p, m) + 0.5 * kl_divergence(q, m)
 
+def wasserstein_distance(p, q):
+    """
+    Computes the Wasserstein distance between two distributions p and q.
+    p and q should be probability distributions (sum to 1).
+    """
+    return torch.sum(torch.abs(torch.cumsum(p, dim=1) - torch.cumsum(q, dim=1)), dim=1)
+
+def apply_mixup_cutmix_cutout_batch(images, mask_type, ratio=0.5):
+    """
+    Applies Mixup, CutMix, or Cutout on a batch of images using a grid-based approach
+    for CutMix and Cutout.
+
+    Args:
+        images (Tensor): A batch of images of shape (B, C, H, W).
+        mask_type (str): One of ['mixup', 'cutmix', 'cutout'].
+        ratio (float): A value in [0, 1] * max_value_possible.
+                       - Mixup: how much to blend between original and permuted images.
+                       - CutMix/Cutout: ratio * (# of 16x16 grid boxes) to replace.
+    
+    Returns:
+        Tensor: Transformed batch of shape (B, C, H, W).
+    """
+    # Safety clamp
+    ratio = max(0.0, min(1.0, ratio))
+
+    B, C, H, W = images.shape
+
+    # -----------------------------------------------------------
+    # MIXUP (Batch version)
+    # -----------------------------------------------------------
+    if mask_type == 'mixup':
+        # Shuffle the batch to create a "partner" for each image
+        perm = torch.randperm(B)
+        # Weighted sum between each image and its shuffled partner
+        images = ratio * images + (1 - ratio) * images[perm]
+
+    # -----------------------------------------------------------
+    # CUTMIX (Batch version, grid-based)
+    # -----------------------------------------------------------
+    elif mask_type == 'cutmix':
+        # Shuffle the batch to know which other image we'll copy from
+        perm = torch.randperm(B)
+        images2 = images[perm]  # partner batch to copy patches from
+
+        patch_size = 16
+        num_x_boxes = W // patch_size
+        num_y_boxes = H // patch_size
+        total_boxes = num_x_boxes * num_y_boxes
+        n_to_select = int(ratio * total_boxes)
+
+        # For each image in the batch, randomly pick boxes from images2
+        for i in range(B):
+            all_boxes = list(range(total_boxes))
+            random.shuffle(all_boxes)
+            selected_boxes = all_boxes[:n_to_select]
+
+            for box_idx in selected_boxes:
+                row = box_idx // num_x_boxes
+                col = box_idx % num_x_boxes
+
+                x_start = col * patch_size
+                y_start = row * patch_size
+                x_end = x_start + patch_size
+                y_end = y_start + patch_size
+
+                # Replace region i with region from images2
+                images[i, :, y_start:y_end, x_start:x_end] = \
+                    images2[i, :, y_start:y_end, x_start:x_end]
+
+    # -----------------------------------------------------------
+    # CUTOUT (Batch version, grid-based)
+    # -----------------------------------------------------------
+    elif mask_type == 'cutout':
+        patch_size = 16
+        num_x_boxes = W // patch_size
+        num_y_boxes = H // patch_size
+        total_boxes = num_x_boxes * num_y_boxes
+        n_to_select = int(ratio * total_boxes)
+
+        # For each image in the batch, zero out random boxes
+        for i in range(B):
+            all_boxes = list(range(total_boxes))
+            random.shuffle(all_boxes)
+            selected_boxes = all_boxes[:n_to_select]
+
+            for box_idx in selected_boxes:
+                row = box_idx // num_x_boxes
+                col = box_idx % num_x_boxes
+
+                x_start = col * patch_size
+                y_start = row * patch_size
+                x_end = x_start + patch_size
+                y_end = y_start + patch_size
+
+                images[i, :, y_start:y_end, x_start:x_end] = 0.0
+
+    return images
+
 # -------------------------------------------------------
-# 2. Main function to compute JS divergence across a set
+# 2. Main function to compute JS Divergence or Wasserstein Distance
 # -------------------------------------------------------
-def compute_js_divergence_resnet50(unmasked_loader, masked_loader, device='cuda'):
+def compute_distance_resnet50(unmasked_loader, masked_loader, metric='js', device='cuda', args=None):
     """
     Given two DataLoaders:
       - unmasked_loader: DataLoader returning unmasked images
       - masked_loader:   DataLoader returning masked images
-    Both should yield the same images in the same order, except one is masked.
-    
-    1) Extract features from each (via pretrained ResNet-50).
-    2) Normalize the features along dim=1 to treat them as distributions.
-    3) Compute the average JS divergence across the entire dataset.
+    Computes either:
+      - JS Divergence (if metric == 'js')
+      - Wasserstein Distance (if metric == 'wasserstein')
     """
 
     # ------------------------------
@@ -58,7 +154,7 @@ def compute_js_divergence_resnet50(unmasked_loader, masked_loader, device='cuda'
     feature_extractor.eval()
     feature_extractor.to(device)
 
-    js_values = []
+    distance_values = []
 
     # ---------------------------------------------
     # Evaluate both DataLoaders in parallel (zip)
@@ -71,6 +167,9 @@ def compute_js_divergence_resnet50(unmasked_loader, masked_loader, device='cuda'
 
         # import ipdb; ipdb.set_trace() 
         # print(masked_imgs.shape)
+
+        if args.mask_type in ['mixup', 'cutmix', 'cutout']:
+            masked_imgs = apply_mixup_cutmix_cutout_batch(masked_imgs, args.mask_type, args.ratio)
 
         # -----------------------------------
         # Extract features (no grad needed)
@@ -91,25 +190,33 @@ def compute_js_divergence_resnet50(unmasked_loader, masked_loader, device='cuda'
         masked_feats   = F.normalize(masked_feats,   p=1, dim=1)
 
         # ------------------------------
-        # Compute per-sample JS Divergence
+        # Compute per-sample distance (JS or Wasserstein)
         # ------------------------------
-        batch_js = js_divergence(unmasked_feats, masked_feats)  # shape [B]
-        js_values.append(batch_js.mean().item())
+        if metric == 'js':
+            batch_distance = js_divergence(unmasked_feats, masked_feats)  # shape [B]
+        elif metric == 'wasserstein':
+            batch_distance = wasserstein_distance(unmasked_feats, masked_feats)  # shape [B]
+        else:
+            raise ValueError(f"Unsupported metric: {metric}")
+
+        distance_values.append(batch_distance.mean().item())
 
     # Final average across all batches
-    return float(np.mean(js_values))
+    return float(np.mean(distance_values))
 
 
 # -----------------------------
 # 3. Example usage in main code
 # -----------------------------
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compute JS Divergence example")
+    parser = argparse.ArgumentParser(description="Compute Distance Metrics Example")
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--band', default='low+mid', type=str, 
                         choices=['all', 'low', 'mid', 'high'])
-    parser.add_argument('--mask_type', default='patch', 
-                        choices=['fourier', 'cosine', 'wavelet', 'pixel', 'patch'])
+    parser.add_argument('--mask_type', default='fourier', 
+                        choices=[
+                            'fourier', 'cosine', 'wavelet', 'pixel', 'patch', 'rotate', 'translate', 'shear', 'scale',
+                            'mixup', 'cutmix', 'cutout'])
     parser.add_argument(
         '--model_name',
         default='RN50',
@@ -121,6 +228,9 @@ if __name__ == "__main__":
     )
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--ratio', type=int, default=15)
+    parser.add_argument('--metric', type=str, default='js', 
+                        choices=['js', 'wasserstein'],
+                        help="Metric to compute: 'js' for JS Divergence, 'wasserstein' for Wasserstein Distance")
     args = parser.parse_args()
 
     # --------------
@@ -136,23 +246,37 @@ if __name__ == "__main__":
     # ------------------------------------
     # Define your mask generator
     # ------------------------------------
-    if args.mask_type in ['fourier', 'cosine', 'wavelet']:
-        mask_generator = FrequencyMaskGenerator(
-            ratio=args.ratio / 100.0,
-            band=args.band,
-            transform_type=args.mask_type
-        )
-    elif args.mask_type == 'pixel':
-        mask_generator = PixelMaskGenerator(
-            ratio=args.ratio / 100.0,
-        )
-    elif args.mask_type == 'patch':
-        mask_generator = PatchMaskGenerator(
-            ratio=args.ratio / 100.0,
-        )
+    if args.mask_type in ['rotate', 'translate', 'shear', 'scale']:
+        mask_generator = None
+        if args.mask_type == 'rotate':
+            args.ratio = (args.ratio / 100) * 180
+        elif args.mask_type == 'translate':
+            args.ratio = args.ratio / 100
+        elif args.mask_type == 'shear':
+            args.ratio =  (args.ratio / 100) * 45
+        elif args.mask_type == 'scale':
+            args.ratio = args.ratio / 100
+    elif args.mask_type in ['mixup', 'cutmix', 'cutout']:
+        mask_generator = None
+        args.ratio = args.ratio / 100
     else:
-        raise ValueError(f"Unsupported mask type: {args.mask_type}")
-    
+        if args.mask_type in ['fourier', 'cosine', 'wavelet']:
+            mask_generator = FrequencyMaskGenerator(
+                ratio=args.ratio / 100.0,
+                band=args.band,
+                transform_type=args.mask_type
+            )
+        elif args.mask_type == 'pixel':
+            mask_generator = PixelMaskGenerator(
+                ratio=args.ratio / 100.0,
+            )
+        elif args.mask_type == 'patch':
+            mask_generator = PatchMaskGenerator(
+                ratio=args.ratio / 100.0,
+            )
+        else:
+            raise ValueError(f"Unsupported mask type: {args.mask_type}")
+
     # ------------------------------------
     # Example train options & transform
     # ------------------------------------
@@ -209,13 +333,15 @@ if __name__ == "__main__":
     )
 
     # -----------------------------------------
-    # Finally compute JS divergence
+    # Compute selected metric (JS or Wasserstein)
     # -----------------------------------------
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    js_value = compute_js_divergence_resnet50(
+    distance_value = compute_distance_resnet50(
         unmasked_loader=train_loader_unmasked,
         masked_loader=train_loader_masked,
-        device=device
+        metric=args.metric,
+        device=device,
+        args=args
     )
 
-    print(f"Average JS Divergence (masked vs. unmasked) = {js_value:.4f}")
+    print(f"Average {args.metric.capitalize()} Distance (masked vs. unmasked) = {distance_value:.4f}")
