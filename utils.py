@@ -45,7 +45,7 @@ def train_augment(augmentor, mask_generator=None, args=None):
 
     if args is not None and args.mask_type:
         if args.mask_type == 'rotate':
-            transform_list.append(transforms.RandomRotation(degrees=(0, args.ratio)))
+            transform_list.append(transforms.RandomRotation(degrees=args.ratio))
         elif args.mask_type == 'translate':
             transform_list.append(transforms.RandomAffine(degrees=0, translate=(args.ratio, args.ratio)))
         elif args.mask_type == 'shear':
@@ -250,7 +250,7 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
     if model_name == 'RN50':
-        model = resnet50(pretrained=False)
+        model = resnet50(pretrained=True)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=False, stride0=1)
@@ -293,8 +293,8 @@ def evaluate_model(
     y_true, y_pred = np.array(y_true), np.array(y_pred)
 
     acc = accuracy_score(y_true, y_pred > 0.5)
-    ap = average_precision_score(y_true, y_pred)
-    auc = roc_auc_score(y_true, y_pred)
+    ap = average_precision_score(y_true, y_pred, average='macro')
+    auc = roc_auc_score(y_true, y_pred, average='macro')
 
     if dist.get_rank() == 0:
         print(f'Average Precision: {ap}')

@@ -146,11 +146,16 @@ def compute_distance_resnet50(unmasked_loader, masked_loader, metric='js', devic
     """
 
     # ------------------------------
-    # Load a pretrained ResNet-50
+    # Choose Feature Extractor
     # ------------------------------
-    resnet = models.resnet50(pretrained=True)
-    # Remove the final FC layer, keep up to (and including) global average pool
-    feature_extractor = nn.Sequential(*list(resnet.children())[:-1])
+    if args.use_linear:
+        # Simple linear layer as feature extractor
+        feature_extractor = nn.Linear(args.input_dim, 2048).to(device)
+    else:
+        # Pretrained ResNet-50 as feature extractor
+        resnet = models.resnet50(pretrained=False)
+        feature_extractor = nn.Sequential(*list(resnet.children())[:-1]).to(device)  # Remove the final FC layer
+
     feature_extractor.eval()
     feature_extractor.to(device)
 
@@ -175,8 +180,18 @@ def compute_distance_resnet50(unmasked_loader, masked_loader, metric='js', devic
         # Extract features (no grad needed)
         # -----------------------------------
         with torch.no_grad():
-            unmasked_feats = feature_extractor(unmasked_imgs)  # shape [B, 2048, 1, 1]
-            masked_feats   = feature_extractor(masked_imgs)
+            if args.use_linear:
+                # Flatten the images for linear layer input
+                unmasked_feats = feature_extractor(unmasked_imgs.view(unmasked_imgs.size(0), -1))  # [B, C*H*W]
+                masked_feats = feature_extractor(masked_imgs.view(masked_imgs.size(0), -1))
+            else:
+                # ResNet feature extraction
+                unmasked_feats = feature_extractor(unmasked_imgs)  # shape [B, 2048, 1, 1]
+                masked_feats = feature_extractor(masked_imgs)
+
+                # Flatten to [B, 2048]
+                unmasked_feats = unmasked_feats.view(unmasked_feats.size(0), -1)
+                masked_feats = masked_feats.view(masked_feats.size(0), -1)
 
         # Flatten to [B, 2048]
         unmasked_feats = unmasked_feats.view(unmasked_feats.size(0), -1)
@@ -213,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument('--local_rank', type=int, default=0)
     parser.add_argument('--band', default='low+mid', type=str, 
                         choices=['all', 'low', 'mid', 'high'])
-    parser.add_argument('--mask_type', default='fourier', 
+    parser.add_argument('--mask_type', default='mixup', 
                         choices=[
                             'fourier', 'cosine', 'wavelet', 'pixel', 'patch', 'rotate', 'translate', 'shear', 'scale',
                             'mixup', 'cutmix', 'cutout'])
@@ -231,6 +246,10 @@ if __name__ == "__main__":
     parser.add_argument('--metric', type=str, default='js', 
                         choices=['js', 'wasserstein'],
                         help="Metric to compute: 'js' for JS Divergence, 'wasserstein' for Wasserstein Distance")
+    parser.add_argument('--use_linear', action='store_true', 
+                        help="Use a linear layer instead of ResNet50 for feature extraction")
+    parser.add_argument('--input_dim', type=int, default=3*224*224,
+                        help="Input dimension for linear layer (only used if --use_linear is set)")
     args = parser.parse_args()
 
     # --------------

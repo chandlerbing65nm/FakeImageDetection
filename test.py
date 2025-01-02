@@ -40,11 +40,15 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--mask_type', 
-        default='spectral', 
+        default='fourier', 
         choices=[
-            'patch', 
-            'spectral',
+            'fourier',
+            'cosine',
+            'wavelet',
             'pixel', 
+            'patch',
+            'translate',
+            'rotate',
             'nomask'], 
         help='Type of mask generator'
         )
@@ -53,7 +57,7 @@ if __name__ == "__main__":
         default='all',
         type=str,
         choices=[
-            'all', 'low', 'mid', 'high',]
+            'all', 'low', 'mid', 'high', 'low+mid', 'low+high', 'mid+high',]
         )
     parser.add_argument(
         '--pretrained', 

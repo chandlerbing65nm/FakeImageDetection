@@ -12,9 +12,17 @@ import wandb
 import torchvision.models as vis_models
 import re
 
+from torchvision.models import (
+    mobilenet_v2, 
+    MobileNet_V2_Weights,
+    swin_t,
+    Swin_T_Weights,
+)
+
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
+from datetime import timedelta
 
 from dataset import ForenSynths
 # from extract_features import *
@@ -65,7 +73,7 @@ def main(
 
     device = torch.device(f'cuda:{local_rank}')
     torch.cuda.set_device(device)
-    dist.init_process_group(backend='nccl')
+    dist.init_process_group(backend='nccl', timeout=timedelta(seconds=3600))
 
     wandb_resume = "allow" if resume_train else None
 
@@ -99,14 +107,22 @@ def main(
         raise valueError(f"Invalid mask ratio {ratio}")
     else:
         # Create a MaskGenerator
-        if mask_type == 'spectral':
-            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band)
+        if mask_type in ['fourier', 'cosine', 'wavelet']:
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
         elif mask_type == 'pixel':
             mask_generator = PixelMaskGenerator(ratio=ratio)
         elif mask_type == 'patch':
             mask_generator = PatchMaskGenerator(ratio=ratio)
-        else:
+        elif mask_type == 'rotate':
             mask_generator = None
+            args.ratio = (args.ratio / 100) * 180
+        elif mask_type == 'translate':
+            mask_generator = None
+            args.ratio = args.ratio / 100
+        elif mask_type == 'nomask':
+            mask_generator = None
+        else:
+            raise ValueError(f"Unsupported mask type: {mask_type}")
 
     train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
@@ -115,7 +131,7 @@ def main(
     # Creating training dataset from images
     train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
-        subset_size = int(0.2 * len(train_data))
+        subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
         train_data = Subset(train_data, subset_indices)
     train_sampler = DistributedSampler(train_data, shuffle=True, seed=seed)
@@ -135,9 +151,15 @@ def main(
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
-    elif model_name.startswith('CLIP_rn50'):
-        clip_model_name = 'RN50'
-        model = CLIPModel(clip_model_name, num_classes=1, clip_grad=args.clip_grad)
+    elif model_name == 'CLIP_vitl14':
+        clip_model_name = 'ViT-L/14'
+        model = CLIPModel(clip_model_name, num_classes=1)
+    elif model_name == 'MNv2':
+        model = mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)
+        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
+    elif model_name == 'SWIN_t':
+        model = swin_t(weights=Swin_T_Weights.IMAGENET1K_V1)
+        model.head = nn.Linear(model.head.in_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
@@ -166,7 +188,7 @@ def main(
             raise ValueError("No matching checkpoint files found.")
 
         checkpoint = torch.load(checkpoint_path)
-        if 'clip' in args.model_name:
+        if 'CLIP' in args.model_name:
             model.module.fc.load_state_dict(checkpoint['model_state_dict'])
         else:
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -228,7 +250,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN50', 'RN50_mod', 'CLIP_vitl14'
+            'RN50', 'RN50_mod', 'CLIP_vitl14', 'MNv2', 'SWIN_t'
         ],
         help='Type of model to use; includes ResNet'
         )
@@ -288,11 +310,15 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--mask_type', 
-        default='spectral', 
+        default='fourier', 
         choices=[
+            'fourier',
+            'cosine',
+            'wavelet',
             'pixel', 
-            'spectral', 
             'patch',
+            'translate',
+            'rotate',
             'nomask'], 
         help='Type of mask generator'
         )
