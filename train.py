@@ -17,6 +17,8 @@ from torchvision.models import (
     MobileNet_V2_Weights,
     swin_t,
     Swin_T_Weights,
+    vgg11,
+    VGG11_Weights,
 )
 
 import torch.distributed as dist
@@ -31,6 +33,7 @@ from mask import *
 from earlystop import EarlyStopping
 from utils import *
 from networks.resnet import resnet50
+from networks.resnet_npr import resnet50 as resnet50_npr
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 from networks.clip_models import CLIPModel
@@ -148,6 +151,9 @@ def main(
     if model_name == 'RN50':
         model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_npr':
+        model = resnet50_npr(pretrained=pretrained) # always don't use pretrained weight here as per author mentioned https://github.com/chuangchuangtan/NPR-DeepfakeDetection/issues/1
+        model.fc = nn.Linear(model.fc1.in_features, 1)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
@@ -157,6 +163,9 @@ def main(
     elif model_name == 'MNv2':
         model = mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)
         model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
+    elif model_name == 'VGG11':
+        model = vgg11(weights=VGG11_Weights.IMAGENET1K_V1)
+        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 1)
     elif model_name == 'SWIN_t':
         model = swin_t(weights=Swin_T_Weights.IMAGENET1K_V1)
         model.head = nn.Linear(model.head.in_features, 1)
@@ -164,8 +173,8 @@ def main(
         raise ValueError(f"Model {model_name} not recognized!")
 
     model = model.to(device)
-    model = DistributedDataParallel(model)
-    # model = DistributedDataParallel(model, find_unused_parameters=True)
+    # model = DistributedDataParallel(model)
+    model = DistributedDataParallel(model, find_unused_parameters=True)
 
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4) 
@@ -250,7 +259,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN50', 'RN50_mod', 'CLIP_vitl14', 'MNv2', 'SWIN_t'
+            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t', 'VGG11'
         ],
         help='Type of model to use; includes ResNet'
         )
@@ -285,8 +294,7 @@ if __name__ == "__main__":
         default='all',
         type=str,
         choices=[
-            'all', 'low', 'mid', 'high',
-        ]
+            'all', 'low', 'mid', 'high', 'low+mid', 'low+high', 'mid+high',]
         )
     parser.add_argument(
         '--pretrained', 

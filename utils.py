@@ -19,6 +19,7 @@ from augment import ImageAugmentor
 from mask import *
 from utils import *
 from networks.resnet import resnet50
+from networks.resnet_npr import resnet50 as resnet50_npr
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
 
 from networks.clip_models import CLIPModel
@@ -28,6 +29,15 @@ import random
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 import torchvision.transforms.functional as F
+
+from torchvision.models import (
+    mobilenet_v2, 
+    MobileNet_V2_Weights,
+    swin_t,
+    Swin_T_Weights,
+    vgg11,
+    VGG11_Weights,
+)
 
 os.environ['NCCL_BLOCKING_WAIT'] = '1'
 os.environ['NCCL_DEBUG'] = 'WARN'
@@ -250,14 +260,26 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
     if model_name == 'RN50':
-        model = resnet50(pretrained=True)
+        model = resnet50(pretrained=pretrained)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_npr':
+        model = resnet50_npr(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=False, stride0=1)
+        model = _resnet50(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name == 'CLIP_vitl14':
         clip_model_name = 'ViT-L/14'
         model = CLIPModel(clip_model_name, num_classes=1)
+    elif model_name == 'MNv2':
+        model = mobilenet_v2(weights=MobileNet_V2_Weights.IMAGENET1K_V1)
+        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
+    elif model_name == 'VGG11':
+        model = vgg11(weights=VGG11_Weights.IMAGENET1K_V1)
+        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 1)
+    elif model_name == 'SWIN_t':
+        model = swin_t(weights=Swin_T_Weights.IMAGENET1K_V1)
+        model.head = nn.Linear(model.head.in_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 

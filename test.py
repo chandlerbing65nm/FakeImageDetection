@@ -34,9 +34,9 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN50', 'RN50_mod', 'CLIP_vitl14',
+            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t'
         ],
-        help='Type of model to use; includes ResNet variants'
+        help='Type of model to use; includes ResNet'
         )
     parser.add_argument(
         '--mask_type', 
