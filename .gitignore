@@ -8,6 +8,7 @@ wandb/
 few-shot/
 evaluation/
 results/
+logs/
 clip_features/
 *.pkl
 *.pth
