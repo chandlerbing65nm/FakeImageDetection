@@ -10,6 +10,7 @@ evaluation/
 results/
 logs/
 clip_features/
+weights/
 *.pkl
 *.pth
 *.done

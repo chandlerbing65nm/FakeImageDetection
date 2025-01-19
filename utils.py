@@ -260,13 +260,13 @@ def evaluate_model(
     test_dataloader = DataLoader(test_dataset, batch_size=batch_size, sampler=test_sampler, shuffle=False, num_workers=4)
 
     if model_name == 'RN50':
-        model = resnet50(pretrained=pretrained)
+        model = resnet50(pretrained=args.pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_npr':
-        model = resnet50_npr(pretrained=pretrained)
-        model.fc = nn.Linear(model.fc.in_features, 1)
+        model = resnet50_npr(pretrained=args.pretrained)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
     elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=pretrained, stride0=1)
+        model = _resnet50(pretrained=args.pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name == 'CLIP_vitl14':
         clip_model_name = 'ViT-L/14'

@@ -34,7 +34,7 @@ if __name__ == "__main__":
         default='RN50',
         type=str,
         choices=[
-            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t'
+            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t', 'VGG11'
         ],
         help='Type of model to use; includes ResNet'
         )

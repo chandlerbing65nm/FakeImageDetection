@@ -4,8 +4,8 @@
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 DATA_TYPE="Ojha_CVPR23"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="MNv2" # RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
-MASK_TYPE="rotate" # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate
+MODEL_NAME="RN50" # RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
+MASK_TYPE="translate" # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate
 BAND="all" # all, low, mid, high, low+mid, low+high, mid+high
 RATIO=15 # automatically becomes RATIO=0 if MASK_TYPE="nomask"
 BATCH_SIZE=64

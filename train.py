@@ -152,7 +152,7 @@ def main(
         model = resnet50(pretrained=pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_npr':
-        model = resnet50_npr(pretrained=pretrained) # always don't use pretrained weight here as per author mentioned https://github.com/chuangchuangtan/NPR-DeepfakeDetection/issues/1
+        model = resnet50_npr(pretrained=False)
         model.fc = nn.Linear(model.fc1.in_features, 1)
     elif model_name == 'RN50_mod':
         model = _resnet50(pretrained=pretrained, stride0=1)
