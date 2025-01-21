@@ -8,7 +8,7 @@
 #SBATCH --partition=gpu            # Partition to submit to
 #SBATCH --gres=gpu:1               # Number of GPUs
 #SBATCH --time=72:00:00            # Time limit (hh:mm:ss)
-#SBATCH --output=logs/rn50_nprft_nomask.out
+#SBATCH --output=logs/rn50_nprft_fouriermask.out
 
 # Load necessary modules (if required)
 conda init

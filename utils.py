@@ -249,9 +249,9 @@ def evaluate_model(
     mask_generator = None
     test_transform = test_augment(ImageAugmentor(test_opt), mask_generator, args)
 
-    if data_type == 'Wang_CVPR20' :
+    if 'Wang_CVPR2020' in dataset_path:
         test_dataset = Wang_CVPR20(dataset_path, transform=test_transform)
-    elif data_type == 'Ojha_CVPR23' :
+    elif 'Ojha_CVPR2023' in dataset_path:
         test_dataset = Ojha_CVPR23(dataset_path, transform=test_transform)
     else:
         raise ValueError("wrong dataset input")
