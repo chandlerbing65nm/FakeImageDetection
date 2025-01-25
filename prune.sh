@@ -10,10 +10,10 @@
 ###########################################
 PRUNE_MODE="pruneonly"   # Either "pruneonly" or "prunefinetune"
 PRUNE_TYPE="localprune"     # Either "localprune" or "globalprune"
-PRUNE_AMOUNT=0.8            # Fraction of weights to prune (e.g., 0.4 = 40%)
+PRUNE_AMOUNT=0.5
 
-CHECKPOINT_PATH="/mnt/users/chadolor/work/Repositories/FakeImageDetection/checkpoints/mask_0/rn50ft.pth"
-SAVE_FOLDER="./checkpoints/ablation/mask_0"
+CHECKPOINT_PATH="/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_15/rn50ft_translatemask.pth"
+SAVE_FOLDER="/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/ablation/mask_15_translate"
 MODEL_NAME="RN50"           # E.g. "RN50"
 BATCH_SIZE=64
 LR=0.0001
@@ -23,8 +23,8 @@ MASK_TYPE="fourier"         # e.g., "nomask", "fourier", "pixel", "patch", etc.
 BAND="all"                  # e.g., "all", "low", "mid", "high" ...
 RATIO=15                    # Mask ratio / augmentation ratio
 
-TRAIN_DATA_PATH="/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/training"
-VAL_DATA_PATH="/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/validation"
+TRAIN_DATA_PATH="/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/training"
+VAL_DATA_PATH="/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/validation"
 
 ###########################################
 # Run prune.py under single-GPU DDP

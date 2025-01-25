@@ -8,7 +8,7 @@
 ###########################################
 MODEL_NAME="RN50"             # Model type (e.g., RN50, RN50_mod, etc.)
 BATCH_SIZE=64                 # Batch size for validation
-CHECKPOINT_PATH="checkpoints/ablation/mask_0/RN50_pruneonly_globalprune_amount80.pth"  # Path to the checkpoint to evaluate
+CHECKPOINT_PATH="/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/ablation/mask_15_translate/RN50_pruneonly_localprune_amount80.pth"  # Path to the checkpoint to evaluate
 LOCAL_RANK=0                  # Local rank for distributed training (set to 0 for single GPU)
 
 ###########################################

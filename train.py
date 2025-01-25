@@ -110,7 +110,7 @@ def main(
         raise valueError(f"Invalid mask ratio {ratio}")
     else:
         # Create a MaskGenerator
-        if mask_type in ['fourier', 'cosine', 'wavelet']:
+        if mask_type in ['fourier', 'cosine', 'wavelet', 'phase']:
             mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
         elif mask_type == 'pixel':
             mask_generator = PixelMaskGenerator(ratio=ratio)
@@ -132,7 +132,7 @@ def main(
 
 
     # Creating training dataset from images
-    train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
         subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
@@ -141,7 +141,7 @@ def main(
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    val_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/validation', transform=val_transform)
     # val_sampler = DistributedSampler(val_data, shuffle=False)
     # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -320,6 +320,7 @@ if __name__ == "__main__":
         '--mask_type', 
         default='fourier', 
         choices=[
+            'phase',
             'fourier',
             'cosine',
             'wavelet',

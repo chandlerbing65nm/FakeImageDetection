@@ -57,7 +57,7 @@ if __name__ == "__main__":
         default='all',
         type=str,
         choices=[
-            'all', 'low', 'mid', 'high', 'low+mid', 'low+high', 'mid+high',]
+            'all', 'low', 'mid', 'high', 'low+mid', 'low+high', 'mid+high', 'prog']
         )
     parser.add_argument(
         '--pretrained', 
@@ -105,10 +105,10 @@ if __name__ == "__main__":
 
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
+        checkpoint_path = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
     else:
         ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
+        checkpoint_path = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
 
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
@@ -130,28 +130,28 @@ if __name__ == "__main__":
 
     if args.data_type == 'Wang_CVPR20':
         datasets = {
-            'ProGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/progan',
-            'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/cyclegan',
-            'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/biggan',
-            'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stylegan',
-            'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/gaugan',
-            'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stargan',
-            'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/deepfake',
-            'SITD': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/seeingdark',
-            'SAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/san',
-            'CRN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/crn',
-            'IMLE': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/imle',
+            'ProGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/progan',
+            'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/cyclegan',
+            'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/biggan',
+            'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stylegan',
+            'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/gaugan',
+            'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stargan',
+            'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/deepfake',
+            'SITD': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/seeingdark',
+            'SAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/san',
+            'CRN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/crn',
+            'IMLE': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/imle',
         }
     elif args.data_type == 'Ojha_CVPR23':
         datasets = {
-            'Guided': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/guided',
-            'LDM_200': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200',
-            'LDM_200_cfg': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200_cfg',
-            'LDM_100': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_100',
-            'Glide_100_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_27',
-            'Glide_50_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_50_27',
-            'Glide_100_10': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_10',
-            'DALL-E': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/dalle',       
+            'Guided': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/guided',
+            'LDM_200': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_200',
+            'LDM_200_cfg': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_200_cfg',
+            'LDM_100': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_100',
+            'Glide_100_27': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_100_27',
+            'Glide_50_27': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_50_27',
+            'Glide_100_10': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_100_10',
+            'DALL-E': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/dalle',       
         }
     else:
         raise ValueError("wrong dataset type")
