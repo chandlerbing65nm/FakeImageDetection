@@ -25,16 +25,26 @@ import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
 from torch.utils.data.distributed import DistributedSampler
 from datetime import timedelta
+import random
 
 from dataset import ForenSynths
 # from extract_features import *
 from augment import ImageAugmentor
-from mask import *
+from mask import PatchMaskGenerator, PixelMaskGenerator, FrequencyMaskGenerator
 from earlystop import EarlyStopping
-from utils import *
+from utils import train_model, val_augment, train_augment
+
 from networks.resnet import resnet50
-from networks.resnet_npr import resnet50 as resnet50_npr
-from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
+from networks.resnet_npr import resnet50 as resnet50_npr, resnet101 as resnet101_npr
+from networks.resnet_nd import resnet50 as  resnet50_nd, ChannelLinear
+
+# phase models
+from networks.resnet_npr_phase import resnet50 as resnet50_npr_phase, resnet101 as resnet101_npr_phase
+from networks.resnet_phase import resnet50 as resnet50_phase
+from networks.mobilenet_phase import mobilenet_v2_phase, MobileNet_V2_Weights as CustomMobileNet_V2_Weights
+from networks.vgg_phase import vgg11_phase, VGG11_Weights as CustomVGG11_Weights
+from networks.resnet_nd_phase import resnet50_nd_phase
+
 
 from networks.clip_models import CLIPModel
 import os
@@ -107,7 +117,7 @@ def main(
     }
 
     if ratio > 1.0 or ratio < 0.0:
-        raise valueError(f"Invalid mask ratio {ratio}")
+        raise ValueError(f"Invalid mask ratio {ratio}")
     else:
         # Create a MaskGenerator
         if mask_type in ['fourier', 'cosine', 'wavelet', 'phase']:
@@ -154,8 +164,11 @@ def main(
     elif model_name == 'RN50_npr':
         model = resnet50_npr(pretrained=False)
         model.fc = nn.Linear(model.fc1.in_features, 1)
-    elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=pretrained, stride0=1)
+    elif model_name == 'RN101_npr':
+        model = resnet101_npr(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'RN50_nd':
+        model =  resnet50_nd(pretrained=pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name == 'CLIP_vitl14':
         clip_model_name = 'ViT-L/14'
@@ -169,6 +182,25 @@ def main(
     elif model_name == 'SWIN_t':
         model = swin_t(weights=Swin_T_Weights.IMAGENET1K_V1)
         model.head = nn.Linear(model.head.in_features, 1)
+    # phase models
+    elif model_name == 'RN50_phase':
+        model = resnet50_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_npr_phase':
+        model = resnet50_npr_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'RN101_npr_phase':
+        model = resnet101_npr_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'MNv2_phase':
+        model = mobilenet_v2_phase(weights=CustomMobileNet_V2_Weights)
+        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
+    elif model_name == 'VGG11_phase':
+        model = vgg11_phase(weights=CustomVGG11_Weights)
+        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 1)
+    elif model_name == 'RN50_nd_phase':
+        model = resnet50_nd_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 
@@ -258,9 +290,6 @@ if __name__ == "__main__":
         '--model_name',
         default='RN50',
         type=str,
-        choices=[
-            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t', 'VGG11'
-        ],
         help='Type of model to use; includes ResNet'
         )
     parser.add_argument(

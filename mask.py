@@ -150,8 +150,6 @@ class FrequencyMaskGenerator:
             freq_image = self._dct2(image_array)
         elif self.transform_type == 'wavelet':
             freq_image, self.coeff_slices = self._wavelet_transform(image_array)
-        elif self.transform_type == 'phase':
-            return self._inv_mag(image_array)
         else:
             raise ValueError(f"Invalid transform type: {self.transform_type}")
 
@@ -169,15 +167,6 @@ class FrequencyMaskGenerator:
 
         masked_image = Image.fromarray(masked_image_array.astype(np.uint8))
         return masked_image
-
-    def _inv_mag(self, image_array):
-        """
-        Perform phase reconstruction using inv_mag idea.
-        """
-        fft_ = np.fft.fft2(image_array, axes=(0, 1))
-        phase = np.exp(1j * np.angle(fft_))
-        reconstructed = np.fft.ifft2(phase, axes=(0, 1)).real
-        return Image.fromarray(reconstructed.astype(np.uint8))
 
     def _create_balanced_mask(self, height, width):
         mask = np.ones((height, width, 3), dtype=np.complex64)

@@ -14,13 +14,20 @@ import timm
 
 import torchvision.models as vis_models
 
-from dataset import *
+from dataset import Wang_CVPR20, Ojha_CVPR23
 from augment import ImageAugmentor
 from mask import *
-from utils import *
+
 from networks.resnet import resnet50
-from networks.resnet_npr import resnet50 as resnet50_npr
-from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
+from networks.resnet_npr import resnet50 as resnet50_npr, resnet101 as resnet101_npr
+from networks.resnet_nd import resnet50 as  resnet50_nd, ChannelLinear
+
+# phase models
+from networks.resnet_npr_phase import resnet50 as resnet50_npr_phase, resnet101 as resnet101_npr_phase
+from networks.resnet_phase import resnet50 as resnet50_phase
+from networks.mobilenet_phase import mobilenet_v2_phase, MobileNet_V2_Weights as CustomMobileNet_V2_Weights
+from networks.vgg_phase import vgg11_phase, VGG11_Weights as CustomVGG11_Weights
+from networks.resnet_nd_phase import resnet50_nd_phase
 
 from networks.clip_models import CLIPModel
 import time
@@ -73,14 +80,16 @@ def train_augment(augmentor, mask_generator=None, args=None):
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
-    
+
     return transforms.Compose(transform_list)
 
 
 def val_augment(augmentor, mask_generator=None, args=None):
     transform_list = []
+
     if mask_generator is not None:
         transform_list.append(transforms.Lambda(lambda img: mask_generator.transform(img)))
+
     transform_list.extend([
         transforms.Lambda(lambda img: augmentor.custom_resize(img)),
         transforms.Lambda(lambda img: augmentor.data_augment(img)),
@@ -88,10 +97,12 @@ def val_augment(augmentor, mask_generator=None, args=None):
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ])
+
     if args is not None and args.model_name == 'CLIP':
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
+
     return transforms.Compose(transform_list)
 
 def test_augment(augmentor, mask_generator=None, args=None):
@@ -263,10 +274,13 @@ def evaluate_model(
         model = resnet50(pretrained=args.pretrained)
         model.fc = nn.Linear(model.fc.in_features, 1)
     elif model_name == 'RN50_npr':
-        model = resnet50_npr(pretrained=args.pretrained)
+        model = resnet50_npr(pretrained=False)
         model.fc = nn.Linear(model.fc1.in_features, 1)
-    elif model_name == 'RN50_mod':
-        model = _resnet50(pretrained=args.pretrained, stride0=1)
+    elif model_name == 'RN101_npr':
+        model = resnet101_npr(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'RN50_nd':
+        model =  resnet50_nd(pretrained=args.pretrained, stride0=1)
         model.fc = ChannelLinear(model.fc.in_features, 1)
     elif model_name == 'CLIP_vitl14':
         clip_model_name = 'ViT-L/14'
@@ -280,6 +294,25 @@ def evaluate_model(
     elif model_name == 'SWIN_t':
         model = swin_t(weights=Swin_T_Weights.IMAGENET1K_V1)
         model.head = nn.Linear(model.head.in_features, 1)
+    # phase models
+    elif model_name == 'RN50_phase':
+        model = resnet50_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc.in_features, 1)
+    elif model_name == 'RN50_npr_phase':
+        model = resnet50_npr_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'RN101_npr_phase':
+        model = resnet101_npr_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
+    elif model_name == 'MNv2_phase':
+        model = mobilenet_v2_phase(weights=None)
+        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
+    elif model_name == 'VGG11_phase':
+        model = vgg11_phase(weights=None)
+        model.classifier[6] = nn.Linear(model.classifier[6].in_features, 1)
+    elif model_name == 'RN50_nd_phase':
+        model = resnet50_nd_phase(pretrained=False)
+        model.fc = nn.Linear(model.fc1.in_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 

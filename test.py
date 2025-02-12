@@ -17,7 +17,7 @@ import torchvision.models as vis_models
 from dataset import *
 from augment import ImageAugmentor
 from mask import *
-from utils import *
+from utils import evaluate_model
 
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
@@ -33,9 +33,6 @@ if __name__ == "__main__":
         '--model_name',
         default='RN50',
         type=str,
-        choices=[
-            'RN50', 'RN50_mod', 'RN50_npr', 'CLIP_vitl14', 'MNv2', 'SWIN_t', 'VGG11'
-        ],
         help='Type of model to use; includes ResNet'
         )
     parser.add_argument(

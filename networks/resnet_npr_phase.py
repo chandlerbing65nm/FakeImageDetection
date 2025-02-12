@@ -176,11 +176,8 @@ class ResNet(nn.Module):
 
     def forward(self, x):
 
-        NPR  = x - self.interpolate(x, 0.5)
-        x = self.conv1(NPR*2.0/3.0)
-
-        # x = self._inv_mag(x)
-        # x = self.conv1(x*2.0/3.0)
+        x = self._inv_mag(x)
+        x = self.conv1(x*2.0/3.0)
 
         x = self.bn1(x)
         x = self.relu(x)
@@ -203,32 +200,32 @@ def resnet50(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     
-    if pretrained:
-        # 1. Load ImageNet-pretrained weights (via model_zoo) and filter mismatched keys
-        # print("Loading ImageNet weights (model_zoo) ...")
-        pretrained_dict = model_zoo.load_url(model_urls['resnet50'])
-        model_dict = model.state_dict()
+    # if pretrained:
+    #     # 1. Load ImageNet-pretrained weights (via model_zoo) and filter mismatched keys
+    #     # print("Loading ImageNet weights (model_zoo) ...")
+    #     pretrained_dict = model_zoo.load_url(model_urls['resnet50'])
+    #     model_dict = model.state_dict()
 
-        # Filter out keys that don't match in size or name
-        filtered_dict = {
-            k: v
-            for k, v in pretrained_dict.items()
-            if k in model_dict and v.size() == model_dict[k].size()
-        }
+    #     # Filter out keys that don't match in size or name
+    #     filtered_dict = {
+    #         k: v
+    #         for k, v in pretrained_dict.items()
+    #         if k in model_dict and v.size() == model_dict[k].size()
+    #     }
 
-        # (Optional) print any ignored keys from the official checkpoint
-        ignored_keys = [k for k in pretrained_dict.keys() if k not in filtered_dict]
-        # print(f"Ignored keys from ImageNet weights: {ignored_keys}")
+    #     # (Optional) print any ignored keys from the official checkpoint
+    #     ignored_keys = [k for k in pretrained_dict.keys() if k not in filtered_dict]
+    #     # print(f"Ignored keys from ImageNet weights: {ignored_keys}")
 
-        # Update the model’s state_dict with the matched weights
-        model_dict.update(filtered_dict)
-        model.load_state_dict(model_dict)
+    #     # Update the model’s state_dict with the matched weights
+    #     model_dict.update(filtered_dict)
+    #     model.load_state_dict(model_dict)
 
-        # 2. Load additional/updated weights from a local checkpoint
-        checkpoint_path = '/mnt/users/chadolor/work/Repositories/FakeImageDetection/weights/rn50_nprft.pth'
-        # print(f"Loading local checkpoint from {checkpoint_path} ...")
-        checkpoint = torch.load(checkpoint_path)
-        model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+    #     # 2. Load additional/updated weights from a local checkpoint
+    #     checkpoint_path = '/mnt/users/chadolor/work/Repositories/FakeImageDetection/weights/rn50_nprft.pth'
+    #     # print(f"Loading local checkpoint from {checkpoint_path} ...")
+    #     checkpoint = torch.load(checkpoint_path)
+    #     model.load_state_dict(checkpoint['model_state_dict'], strict=False)
     
     return model
 
