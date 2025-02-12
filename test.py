@@ -131,6 +131,7 @@ if __name__ == "__main__":
             'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/cyclegan',
             'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/biggan',
             'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stylegan',
+            'StyleGAN2': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stylegan2',
             'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/gaugan',
             'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stargan',
             'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/deepfake',

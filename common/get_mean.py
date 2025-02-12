@@ -1,53 +1,58 @@
 def calculate_averages(input_data):
-    # Split the input data into lines
+    # Split the input data into lines and remove the header
     lines = input_data.strip().split("\n")
-    
-    # Skip the header lines
     data_lines = lines[1:]
     
-    # Initialize lists to store the values
-    avg_prec_values = []
-    acc_values = []
-    auc_values = []
-    
-    # Function to compute the average for given rows
-    def compute_average(rows):
-        return [sum(column) / len(column) for column in zip(*rows)]
-    
-    # Parse the input data into structured format
-    data = []
+    # Parse the data into a dictionary: model name -> [Avg.Prec., Acc., AUC]
+    data = {}
     for line in data_lines:
         parts = line.split(", ")
-        data.append([parts[0]] + list(map(float, parts[1:])))
+        model_name = parts[0]
+        # Convert the metrics to float
+        values = list(map(float, parts[1:]))
+        data[model_name] = values
+
+    # Define the two groups.
+    # Group 1: GAN-based models
+    group1_models = [
+        "ProGAN", "StyleGAN", "StyleGAN2", "BigGAN",
+        "CycleGAN", "StarGAN", "GauGAN", "DeepFake"
+    ]
+    # Group 2: Diffusion/Guided models
+    group2_models = [
+        "Guided", "LDM_200", "LDM_200_cfg", "LDM_100",
+        "Glide_100_27", "Glide_50_27", "Glide_100_10", "DALL-E"
+    ]
     
-    # Define row ranges for specific categories
-    categories = {
-        "GANs": range(0, 6),
-        "DeepFake": [6],
-        "Low-level vision": range(7, 9),
-        "Perceptual loss": range(9, 11),
-        "Guided diffusion": [11],
-        "Latent diffusion": range(12, 15),
-        "Glide": range(15, 18),
-        "DALL-E": [18]
-    }
-    
-    # Extract and calculate averages for each category
-    results = {}
-    for category, rows in categories.items():
-        selected_rows = [data[i][1:] for i in rows]  # Extract relevant rows (skip the name)
-        if len(selected_rows) > 1:
-            results[category] = compute_average(selected_rows)
+    # Collect the rows for each group
+    group1_values = []
+    for model in group1_models:
+        if model in data:
+            group1_values.append(data[model])
         else:
-            results[category] = selected_rows[0]
+            print(f"Warning: {model} not found in the input data.")
     
-    # Calculate overall averages for columns 2, 3, 4
-    all_values = [row[1:] for row in data]  # Skip the name column
-    overall_avg = compute_average(all_values)
+    group2_values = []
+    for model in group2_models:
+        if model in data:
+            group2_values.append(data[model])
+        else:
+            print(f"Warning: {model} not found in the input data.")
     
-    # Format and return results
-    results["Overall"] = overall_avg
+    # Function to compute averages for each column from a list of rows
+    def compute_average(rows):
+        n = len(rows)
+        return [sum(col) / n for col in zip(*rows)]
+    
+    avg_group1 = compute_average(group1_values) if group1_values else [0, 0, 0]
+    avg_group2 = compute_average(group2_values) if group2_values else [0, 0, 0]
+    
+    results = {
+        "Group 1 (GAN Models)": avg_group1,
+        "Group 2 (Diffusion/Guided Models)": avg_group2
+    }
     return results
+
 
 # Example input
 input_data = """Dataset, Avg.Prec., Acc., AUC
@@ -55,6 +60,7 @@ ProGAN, 100.00, 99.94, 1.000
 CycleGAN, 90.49, 74.75, 0.918
 BigGAN, 84.55, 78.10, 0.867
 StyleGAN, 99.61, 96.39, 0.995
+StyleGAN2, 99.61, 96.39, 0.995
 GauGAN, 77.76, 70.90, 0.826
 StarGAN, 100.00, 98.10, 1.000
 DeepFake, 90.15, 50.25, 0.921
@@ -72,8 +78,10 @@ Glide_100_10, 91.22, 82.70, 0.886
 DALL-E, 93.58, 85.45, 0.918
 """
 
-
-# Calculate and print results
+# Calculate and print the results
 averages = calculate_averages(input_data)
-for category, values in averages.items():
-    print(f"{category} Averages:\nAvg.Prec.: {values[0]:.2f}\nAcc.: {values[1]:.2f}\nAUC: {values[2]:.3f}")
+for group, values in averages.items():
+    print(f"{group} Averages:")
+    print(f"  Avg.Prec.: {values[0]:.2f}")
+    print(f"  Acc.: {values[1]:.2f}")
+    print(f"  AUC: {values[2]:.3f}\n")

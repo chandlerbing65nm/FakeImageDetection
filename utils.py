@@ -27,7 +27,6 @@ from networks.resnet_npr_phase import resnet50 as resnet50_npr_phase, resnet101 
 from networks.resnet_phase import resnet50 as resnet50_phase
 from networks.mobilenet_phase import mobilenet_v2_phase, MobileNet_V2_Weights as CustomMobileNet_V2_Weights
 from networks.vgg_phase import vgg11_phase, VGG11_Weights as CustomVGG11_Weights
-from networks.resnet_nd_phase import resnet50_nd_phase
 
 from networks.clip_models import CLIPModel
 import time
@@ -304,15 +303,9 @@ def evaluate_model(
     elif model_name == 'RN101_npr_phase':
         model = resnet101_npr_phase(pretrained=False)
         model.fc = nn.Linear(model.fc1.in_features, 1)
-    elif model_name == 'MNv2_phase':
-        model = mobilenet_v2_phase(weights=None)
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, 1)
     elif model_name == 'VGG11_phase':
         model = vgg11_phase(weights=None)
         model.classifier[6] = nn.Linear(model.classifier[6].in_features, 1)
-    elif model_name == 'RN50_nd_phase':
-        model = resnet50_nd_phase(pretrained=False)
-        model.fc = nn.Linear(model.fc1.in_features, 1)
     else:
         raise ValueError(f"Model {model_name} not recognized!")
 

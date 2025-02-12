@@ -14,38 +14,42 @@ class ForenSynths(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.classes = ['0_real', '1_fake']
+        # Only these category folders are allowed
+        self.allowed_categories = ['car', 'cat', 'chair', 'horse']
         self.data = []
 
-        # Iterate over the categories
+        # Iterate over allowed category folders
         for category in os.listdir(root_dir):
+            if category not in self.allowed_categories:
+                continue
             category_path = os.path.join(root_dir, category)
+            if not os.path.isdir(category_path):
+                continue
 
-            # Iterate over class names (real/fake)
+            # Now iterate over the two class subfolders ('0_real' and '1_fake')
             for class_name in self.classes:
                 class_path = os.path.join(category_path, class_name)
+                if not os.path.isdir(class_path):
+                    continue
 
-                # Iterate over files
+                # Iterate over image files in the class folder
                 for file_name in os.listdir(class_path):
                     file_path = os.path.join(class_path, file_name)
-
-                    # Append a tuple (file_path, class_index)
-                    self.data.append((file_path, self.classes.index(class_name)))
+                    if os.path.isfile(file_path):
+                        # Append tuple (file_path, class_index)
+                        self.data.append((file_path, self.classes.index(class_name)))
 
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, index):
         img_path, label = self.data[index]
-
-        # Load image
         image = Image.open(img_path).convert("RGB")
-
-        # Apply transforms if any
         if self.transform:
             image = self.transform(image)
-
         return image, label
-
+    
+    
 class Ojha_CVPR23(Dataset):
     def __init__(self, root_dir, transform=None):
         self.transform = transform
