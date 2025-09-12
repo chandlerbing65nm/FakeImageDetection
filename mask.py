@@ -19,11 +19,13 @@ import pywt
 from scipy.fftpack import dct, idct
 
 class FrequencyMaskGenerator:
-    def __init__(self, ratio: float = 0.3, band: str = 'low+high', transform_type: str = 'fourier') -> None:
+    def __init__(self, ratio: float = 0.3, band: str = 'low+high', transform_type: str = 'fourier', channel: str = 'all') -> None:
         self.ratio = ratio
         self.band = band  # 'low', 'mid', 'high', 'all', 'low+high', 'low+mid', 'mid+high', 'prog'
         self.transform_type = transform_type  # 'fourier', 'cosine', 'wavelet'
         self.alpha = 1
+        # Channel to apply masking: 'all', 'r', 'g', 'b', or '0'/'1'/'2'
+        self.channel = channel
 
     def transform(self, image: Image.Image) -> Image.Image:
         image_array = np.array(image).astype(np.complex64)
@@ -109,7 +111,20 @@ class FrequencyMaskGenerator:
             y_indices_all.extend(y_indices)
             x_indices_all.extend(x_indices)
 
-        mask[y_indices_all, x_indices_all, :] = 0
+        # Apply masking on the selected channel(s)
+        ch = self.channel
+        if isinstance(ch, str):
+            ch_l = ch.lower()
+            mapping = {'all': None, 'r': 0, 'g': 1, 'b': 2, '0': 0, '1': 1, '2': 2}
+            ch_idx = mapping.get(ch_l, None)
+        else:
+            ch_idx = int(ch)
+
+        if ch_idx is None:
+            # Mask all channels (default behavior)
+            mask[y_indices_all, x_indices_all, :] = 0
+        else:
+            mask[y_indices_all, x_indices_all, ch_idx] = 0
         return mask
 
     def _dct2(self, a):

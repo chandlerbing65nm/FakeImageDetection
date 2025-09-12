@@ -17,7 +17,6 @@ import torchvision.models as vis_models
 from dataset import *
 from augment import ImageAugmentor
 from mask import *
-from utils import *
 from networks.resnet import resnet50
 from networks.resnet_npr import resnet50 as resnet50_npr
 from networks.resnet_mod import resnet50 as _resnet50, ChannelLinear
@@ -55,7 +54,8 @@ def train_augment(augmentor, mask_generator=None, args=None):
 
     if args is not None and args.mask_type:
         if args.mask_type == 'rotate':
-            transform_list.append(transforms.RandomRotation(degrees=args.ratio))
+            # args.ratio is expected in [0,1] for rotate; convert to degrees
+            transform_list.append(transforms.RandomRotation(degrees=args.ratio * 180.0))
         elif args.mask_type == 'translate':
             transform_list.append(transforms.RandomAffine(degrees=0, translate=(args.ratio, args.ratio)))
         elif args.mask_type == 'shear':
@@ -63,7 +63,22 @@ def train_augment(augmentor, mask_generator=None, args=None):
         elif args.mask_type == 'scale':
             transform_list.append(transforms.RandomAffine(degrees=0, scale=(1 - args.ratio, 1 + args.ratio)))
         elif args.mask_type == 'rotate_translate':
-            transform_list.append(transforms.RandomAffine(degrees=args.ratio, translate=(args.ratio, args.ratio)))
+            # Combine rotation (degrees) and translation (fraction)
+            transform_list.append(transforms.RandomAffine(degrees=args.ratio * 180.0, translate=(args.ratio, args.ratio)))
+
+    # Optionally combine geometric augmentation with frequency masking via args.combine_aug
+    if (
+        args is not None 
+        and hasattr(args, 'combine_aug') 
+        and args.combine_aug != 'none'
+        and args.mask_type in ['fourier', 'cosine', 'wavelet']
+    ):
+        if args.combine_aug == 'rotate':
+            transform_list.append(transforms.RandomRotation(degrees=args.ratio * 180.0))
+        elif args.combine_aug == 'translate':
+            transform_list.append(transforms.RandomAffine(degrees=0, translate=(args.ratio, args.ratio)))
+        elif args.combine_aug == 'rotate_translate':
+            transform_list.append(transforms.RandomAffine(degrees=args.ratio * 180.0, translate=(args.ratio, args.ratio)))
 
     transform_list.extend([
         transforms.RandomCrop(224),
@@ -71,7 +86,7 @@ def train_augment(augmentor, mask_generator=None, args=None):
         transforms.ToTensor(),
     ])
 
-    if args is not None and args.model_name == 'CLIP':
+    if args is not None and ('CLIP' in args.model_name):
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
@@ -90,7 +105,7 @@ def val_augment(augmentor, mask_generator=None, args=None):
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ])
-    if args is not None and args.model_name == 'CLIP':
+    if args is not None and ('CLIP' in args.model_name):
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))
@@ -102,7 +117,7 @@ def test_augment(augmentor, mask_generator=None, args=None):
         transforms.CenterCrop(224),
         transforms.ToTensor(),
     ]
-    if args is not None and args.model_name == 'CLIP':
+    if args is not None and ('CLIP' in args.model_name):
         transform_list.append(transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)))
     else:
         transform_list.append(transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)))

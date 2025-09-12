@@ -11,6 +11,7 @@ import argparse
 import wandb
 import torchvision.models as vis_models
 import re
+import random
 
 from torchvision.models import (
     mobilenet_v2, 
@@ -107,32 +108,41 @@ def main(
     }
 
     if ratio > 1.0 or ratio < 0.0:
-        raise valueError(f"Invalid mask ratio {ratio}")
+        raise ValueError(f"Invalid mask ratio {ratio}")
     else:
         # Create a MaskGenerator
         if mask_type in ['fourier', 'cosine', 'wavelet']:
-            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type)
+            mask_generator = FrequencyMaskGenerator(ratio=ratio, band=band, transform_type=mask_type, channel=args.mask_channel)
         elif mask_type == 'pixel':
             mask_generator = PixelMaskGenerator(ratio=ratio)
         elif mask_type == 'patch':
             mask_generator = PatchMaskGenerator(ratio=ratio)
         elif mask_type == 'rotate':
             mask_generator = None
-            args.ratio = (args.ratio / 100) * 180
+            args.ratio = args.ratio / 100.0
         elif mask_type == 'translate':
             mask_generator = None
-            args.ratio = args.ratio / 100
+            args.ratio = args.ratio / 100.0
+        elif mask_type == 'rotate_translate':
+            # Use a normalized ratio (0-1). utils.train_augment will convert to degrees for rotation.
+            mask_generator = None
+            args.ratio = args.ratio / 100.0
         elif mask_type == 'nomask':
             mask_generator = None
         else:
             raise ValueError(f"Unsupported mask type: {mask_type}")
+
+    # If we are combining geometric augmentation with a frequency mask,
+    # normalize args.ratio to [0,1] for the geometric ops in train_augment.
+    if mask_type in ['fourier', 'cosine', 'wavelet'] and getattr(args, 'combine_aug', 'none') != 'none':
+        args.ratio = args.ratio / 100.0
 
     train_transform = train_augment(ImageAugmentor(train_opt), mask_generator, args)
     val_transform = val_augment(ImageAugmentor(val_opt), mask_generator, args)
 
 
     # Creating training dataset from images
-    train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/training', transform=train_transform)
+    train_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/training', transform=train_transform)
     if args.debug:
         subset_size = int(0.02 * len(train_data))
         subset_indices = random.sample(range(len(train_data)), subset_size)
@@ -141,7 +151,7 @@ def main(
     train_loader = DataLoader(train_data, batch_size=batch_size, sampler=train_sampler, num_workers=4)
 
     # Creating validation dataset from images
-    val_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/validation', transform=val_transform)
+    val_data = ForenSynths('/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/validation', transform=val_transform)
     # val_sampler = DistributedSampler(val_data, shuffle=False)
     # val_loader = DataLoader(val_data, batch_size=batch_size, sampler=val_sampler, num_workers=4)
     val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=4)
@@ -333,6 +343,12 @@ if __name__ == "__main__":
         help='Type of mask generator'
         )
     parser.add_argument(
+        '--combine_aug',
+        default='none',
+        choices=['none', 'rotate', 'translate', 'rotate_translate'],
+        help='Optionally combine geometric augmentation (rotate/translate) with frequency masking'
+        )
+    parser.add_argument(
         '--batch_size', 
         type=int, 
         default=64, 
@@ -343,6 +359,13 @@ if __name__ == "__main__":
         type=int, 
         default=50, 
         help='Masking ratio'
+        )
+    parser.add_argument(
+        '--mask_channel',
+        type=str,
+        default='all',
+        choices=['all','r','g','b','0','1','2'],
+        help='Channel to apply frequency masking (fourier/cosine/wavelet)'
         )
     parser.add_argument(
         '--lr', 
@@ -356,15 +379,25 @@ if __name__ == "__main__":
     finetune = 'ft' if args.pretrained else ''
     band = '' if args.band == 'all' else args.band
 
+    # Add a channel suffix for frequency-based masking when a specific channel is selected
+    channel_suffix = ''
+    if args.mask_type in ['fourier', 'cosine', 'wavelet'] and args.mask_channel != 'all':
+        channel_suffix = f"_ch{args.mask_channel}"
+
+    # Add a combine-augmentation suffix (e.g., _rotate, _translate, _rotate_translate)
+    combine_suffix = ''
+    if args.mask_type in ['fourier', 'cosine', 'wavelet'] and getattr(args, 'combine_aug', 'none') != 'none':
+        combine_suffix = f"_{args.combine_aug}"
+
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        ckpt_folder = f'./checkpoints/mask_{ratio}'
+        ckpt_folder = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
-        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}{args.mask_type}mask'
-        wandb_name = f"mask_{ratio}_{model_name}{finetune}_{band}{args.mask_type}"
+        save_path = f'{ckpt_folder}/{model_name}{finetune}_{band}{args.mask_type}mask{combine_suffix}{channel_suffix}'
+        wandb_name = f"mask_{ratio}_{model_name}{finetune}_{band}{args.mask_type}{combine_suffix}{channel_suffix}"
     else:
         ratio = 0
-        ckpt_folder = f'./checkpoints/mask_{ratio}'
+        ckpt_folder = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}'
         os.makedirs(ckpt_folder, exist_ok=True)
         save_path = f'{ckpt_folder}/{model_name}{finetune}'
         wandb_name = f"mask_{ratio}_{model_name}{finetune}"

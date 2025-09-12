@@ -71,6 +71,13 @@ if __name__ == "__main__":
         help='Ratio of mask to apply'
         )
     parser.add_argument(
+        '--mask_channel',
+        type=str,
+        default='all',
+        choices=['all','r','g','b','0','1','2'],
+        help='Channel to apply frequency masking (fourier/cosine/wavelet)'
+        )
+    parser.add_argument(
         '--batch_size', 
         type=int, 
         default=64, 
@@ -103,9 +110,14 @@ if __name__ == "__main__":
     finetune = 'ft' if args.pretrained else ''
     band = '' if args.band == 'all' else args.band
 
+    # Add a channel suffix for frequency-based masking when a specific channel is selected
+    channel_suffix = ''
+    if args.mask_type in ['fourier', 'cosine', 'wavelet'] and args.mask_channel != 'all':
+        channel_suffix = f"_ch{args.mask_channel}"
+
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask.pth'
+        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask{channel_suffix}.pth'
     else:
         ratio = 0
         checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
@@ -113,7 +125,7 @@ if __name__ == "__main__":
     # Define the path to the results file
     results_path = f'results/{args.data_type.lower()}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{ratio}.txt'
+    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{channel_suffix}{ratio}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
