@@ -327,7 +327,9 @@ if __name__ == "__main__":
             'patch',
             'translate',
             'rotate',
-            'nomask'], 
+            'rotate_translate',
+            'nomask'
+            ], 
         help='Type of mask generator'
         )
     parser.add_argument(

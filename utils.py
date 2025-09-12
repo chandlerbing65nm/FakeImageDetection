@@ -62,6 +62,8 @@ def train_augment(augmentor, mask_generator=None, args=None):
             transform_list.append(transforms.RandomAffine(degrees=0, shear=args.ratio))
         elif args.mask_type == 'scale':
             transform_list.append(transforms.RandomAffine(degrees=0, scale=(1 - args.ratio, 1 + args.ratio)))
+        elif args.mask_type == 'rotate_translate':
+            transform_list.append(transforms.RandomAffine(degrees=args.ratio, translate=(args.ratio, args.ratio)))
 
     transform_list.extend([
         transforms.RandomCrop(224),
