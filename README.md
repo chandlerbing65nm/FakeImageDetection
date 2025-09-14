@@ -4,9 +4,9 @@
 [Paper](https://arxiv.org/abs/2401.06506)
 </div>
 
-<p align="center">
+<!-- <p align="center">
   <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="350" height="350">
-</p>
+</p> -->
 
 >We study universal deepfake detection.
 >Our  goal is to detect synthetic images from a range of generative AI approaches, particularly emerging ones which are unseen during training of the deepfake detector.
@@ -58,78 +58,90 @@ Ojha_CVPR2023/
 └── ...
 ```
 
-Make sure to change the path based on where you saved the data: [link1](https://github.com/chandlerbing65nm/FakeDetection/blob/9699fa5137420ffc611885fc79479a99cd313438/train.py#L113C1-L120C97) [link2](https://github.com/chandlerbing65nm/FakeDetection/blob/9699fa5137420ffc611885fc79479a99cd313438/test.py#L114C1-L145C47)
+Paths to datasets are currently hardcoded in `train.py` and `test.py` under `/mnt/SCRATCH/chadolor/Datasets/...`. Please update these paths to match your environment before running.
 
 ## &#9733; Model Weights
 
-You can download the model weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing). Put the files under the repository and don't change the name or anything!
+You can download sample weights [here](https://drive.google.com/drive/folders/1ePTY4x2qvD7AVlNJXFLozFbUF6Y0_hET?usp=sharing).
 
-File structure should strictly be like this:
+By default, both training and testing use an absolute checkpoints directory under:
 ```
-FakeImageDetection/checkpoints/
+/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/
+```
+
+Within that directory, checkpoints are grouped by mask ratio (percent):
+```
+/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/
 ├── mask_0/
-│   ├── rn50ft.pth (Wang et al.)
-│   ├── rn50_modft.pth (Gragnaniello et al.)
-│   ├── clipft.pth (Ojha et al.)
+│   ├── rn50ft.pth
+│   ├── rn50_modft.pth
+│   ├── clipft.pth
 │   └── ...
 ├── mask_15/
-│   ├── rn50ft_midspectralmask.pth
-│   ├── rn50ft_lowspectralmask.pth
-│   ├── rn50ft_highspectralmask.pth
+│   ├── rn50ft_lowfouriermask.pth
+│   ├── rn50ft_midfouriermask.pth
+│   ├── rn50ft_highfouriermask.pth
 │   ├── rn50ft_pixelmask.pth
 │   ├── rn50ft_patchmask.pth
-│   ├── rn50ft_spectralmask.pth (Wang et al. + Ours)
-│   ├── rn50_modft_spectralmask.pth (Gragnaniello et al. + Ours)
-│   ├── clipft_spectralmask.pth (Ojha et al. + Ours)
+│   ├── rn50ft_fouriermask_rotate_chr.pth       # example: frequency + combine_aug + channel suffix
 │   └── ...
 └── ...
 ```
+Notes:
+- Filename pattern encodes model, band, mask_type, optional `combine_aug` (e.g., `_rotate`, `_translate`, `_rotate_translate`), and optional channel suffix (e.g., `_chr`).
+- If you prefer to store checkpoints under the repo (e.g., `FakeImageDetection/checkpoints/`), adjust the save/load paths in `train.py` and `test.py` accordingly.
 
 ## &#9733; Testing Script (test.py)
 
 ### Description
-The script `test.py` is designed for evaluating trained models on multiple datasets. The script leverages metrics such as Average Precision, Accuracy, and Area Under the Curve (AUC) for evaluation.
+`test.py` evaluates trained models on the Wang_CVPR2020 and Ojha_CVPR2023 datasets. Metrics reported per sub-dataset are Average Precision (AP), Accuracy (Acc), and AUC (all as percentages). When `--data_type both` is used, results are saved into a single file under `results/both`, and an `Overall Averages` row is appended at the end.
 
 ### Basic Command
 
-```bash
+```
 python -m torch.distributed.launch --nproc_per_node=GPU_NUM test.py -- [options]
 ```
-Command-Line Options
-```bash
---model_name : Type of the model. Choices include various ResNet and ViT variants.
---mask_type  : Type of mask generator for data augmentation. Choices include 'patch', 'spectral', etc.
---pretrained : Use pretrained model.
---ratio      : Masking ratio for data augmentation.
---band       : Frequency band to randomly mask.
---batch_size : Batch size for evaluation. Default is 64.
---data_type  : Type of dataset for evaluation. Choices are 'Wang_CVPR20' and 'Ojha_CVPR23'.
---device     : Device to use for evaluation (default: auto-detect).
+
+Key options:
+```
+--model_name    : RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
+--mask_type     : fourier, cosine, wavelet, pixel, patch, translate, rotate, rotate_translate, nomask
+--band          : all, low, mid, high, low+mid, low+high, mid+high (optionally append +prog for progressive masking)
+--mask_channel  : all, r, g, b, 0, 1, 2 (applies to frequency masks only)
+--combine_aug   : none, rotate, translate, rotate_translate (applies in addition to frequency masks)
+--ratio         : integer percent (e.g., 15)
+--batch_size    : default 64
+--data_type     : Wang_CVPR20, Ojha_CVPR23, or both (default both)
 ```
 
 ### Bash Command
-Edit testing bash script `test.sh`:
+Example testing launcher `test.sh`:
 
-```bash
+```
 #!/bin/bash
 
 # Define the arguments for your test script
 GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
-DATA_TYPE="Wang_CVPR20"  # Wang_CVPR20 or Ojha_CVPR23
-MODEL_NAME="clip" # clip, RN50_mod or RN50
-MASK_TYPE="nomask" # spectral, pixel, patch or nomask
-BAND="all" # all, low, mid, high
-RATIO=15
+DATA_TYPE="both"  # both, or Wang_CVPR20, or Ojha_CVPR23
+MODEL_NAME="RN50" # RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
+MASK_TYPE="fourier"   # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate, rotate_translate
+BAND="all" # all, low, mid, high, low+mid, low+high, mid+high
+RATIO=15 # automatically becomes RATIO=0 if MASK_TYPE="nomask"
 BATCH_SIZE=64
+MASK_CHANNEL="all"    # all, r, g, b, 0, 1, 2 (applies to fourier/cosine/wavelet)
+COMBINE_AUG="rotate"   # none, rotate, translate, rotate_translate (combine with frequency masking)
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
-
 echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
+# Randomize master port between 29000 and 29999 to avoid clashes
+MASTER_PORT=$((29000 + RANDOM % 1000))
+echo "Using master port: $MASTER_PORT"
+
 # Run the test command
-python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
+python -m torch.distributed.launch --nproc_per_node=$NUM_GPU --master_port=$MASTER_PORT test.py \
   -- \
   --data_type $DATA_TYPE \
   --pretrained \
@@ -137,29 +149,26 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU test.py \
   --mask_type $MASK_TYPE \
   --band $BAND \
   --ratio $RATIO \
+  --mask_channel $MASK_CHANNEL \
+  --combine_aug $COMBINE_AUG \
   --batch_size $BATCH_SIZE \
-  --other_model
 ```
 
 Now, use this to run testing:
-```bash
+```
 bash test.sh "0" # gpu id/s to use
-``` 
+```
 
 ### Results
-You can find the results in this structure:
+Results are saved under:
 
-```bash
-results/
-├── mask_15/
-│   ├── ojha_cvpr23/
-│   │   ├── rn50ft_spectralmask.txt
-│   │   └── ...
-│   └── wang_cvpr20/
-│       ├── rn50ft_spectralmask.txt
-│       └── ...
-└── ...
 ```
+results/
+└── both/
+    └── rn50ft_fouriermask_rotate_chr15.txt   # example filename
+```
+
+- Each file includes the header, the per-dataset rows formatted as `Dataset, Avg.Prec.(%), Acc.(%), AUC(%)`, and an `AVERAGE` line summarizing all evaluated datasets in the run.
 
 
 ## &#9733; Training Script (train.py)
@@ -174,7 +183,6 @@ To run the script in a distributed environment:
 
 ```bash
 python -m torch.distributed.launch --nproc_per_node=GPU_NUM train.py -- [options]
-
 ```
 
 Command-Line Options
@@ -203,8 +211,6 @@ Edit training bash script `train.sh`:
 
 # Get the current date
 current_date=$(date)
-
-# Print the current date
 echo "The current date is: $current_date"
 
 # Define the arguments for your training script
@@ -212,21 +218,27 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 NUM_EPOCHS=10000
 PROJECT_NAME="Frequency-Masking"
-MODEL_NAME="clip" # RN50_mod, RN50, clip
-MASK_TYPE="spectral" # nomask, spectral, pixel, patch
-BAND="all" # all, low, mid, high
+MODEL_NAME="RN50" # RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
+MASK_TYPE="rotate_translate" # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate, rotate_translate
+BAND="all" # all, low, mid, high, low+mid, low+high, mid+high  ##### add +prog if using progressive masking
 RATIO=15
 BATCH_SIZE=128
+MASK_CHANNEL="all" # all, r, g, b, 0, 1, 2 (applies to fourier/cosine/wavelet)
+COMBINE_AUG="none" # none, rotate, translate, rotate_translate (combine with frequency masking)
 WANDB_ID="2w0btkas"
 RESUME="from_last" # from_last or from_best
+learning_rate=0.0001 # 0.0001 * NUM_GPU
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs
-
 echo "Using $NUM_GPU GPUs with IDs: $GPUs"
 
+# Randomize master port between 29000 and 29999 to avoid clashes
+MASTER_PORT=$((29000 + RANDOM % 1000))
+echo "Using master port: $MASTER_PORT"
+
 # Run the distributed training command
-python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
+python -m torch.distributed.launch --nproc_per_node=$NUM_GPU --master_port=$MASTER_PORT train.py \
   -- \
   --num_epochs $NUM_EPOCHS \
   --project_name $PROJECT_NAME \
@@ -234,13 +246,15 @@ python -m torch.distributed.launch --nproc_per_node=$NUM_GPU train.py \
   --mask_type $MASK_TYPE \
   --band $BAND \
   --ratio $RATIO \
+  --mask_channel $MASK_CHANNEL \
+  --combine_aug $COMBINE_AUG \
+  --lr ${learning_rate} \
   --batch_size $BATCH_SIZE \
   --early_stop \
   --pretrained \
   # --resume_train $RESUME \
+  # --clip_grad \
   # --debug \
-  # --wandb_online \
-  # --wandb_run_id $WANDB_ID \
 ```
 
 Now, use this to run training:
@@ -249,8 +263,18 @@ bash train.sh "0,1,2,4" # gpu ids to use
 ```
 
 Important:
-- When starting the training (from 1st epoch), please comment out  `--resume_train $RESUME \` and `--debug \`. And if you don't want to use `wandb` logging, comment out `--wandb_online \` and `--wandb_run_id $WANDB_ID \`. In short, just comment out the last three lines in the bash script.
-- If you notice that the training process stalls during an epoch (e.g., epoch 20+ or 30+), please interrupt it by pressing ctrl+c. The bash script is configured to resume training from the last saved epoch (if you uncomment `--resume_train $RESUME \`).
+- When starting the training (from 1st epoch), you can comment out `--resume_train $RESUME` and `--clip_grad`/`--debug`. If you don't want Weights & Biases logging, keep `--wandb_online` commented out and avoid setting `--wandb_run_id`.
+- If training stalls mid-epoch, interrupt with Ctrl+C and resume from the last or best epoch using `--resume_train`.
+
+## ★ Notes & Known Issues
+
+- Paths for datasets and checkpoints are hardcoded under `/mnt/SCRATCH/chadolor/...` in multiple scripts (`train.py`, `test.py`). Please update for your environment.
+- CLIP freezing bug in `networks/clip_models.py`:
+  - In `CLIPModel.__init__()`, `param.requires_grad = freeze` should use the `unfreeze` argument (e.g., `param.requires_grad = unfreeze`).
+- CLIP checkpoint saving/loading consistency:
+  - `earlystop.py` saves only `fc` when `model_name == 'clip'`, while other parts use names like `CLIP_vitl14`. Align naming or condition (e.g., check `'CLIP' in model_name`).
+- `prune.py` is provided as a pruning utility and may require adjustments (paths, arguments) to match your environment.
+- Distributed launch: scripts currently use `torch.distributed.launch`. Consider `torchrun` for newer PyTorch versions.
 
 ## &#9733; License
 
@@ -261,11 +285,11 @@ This project is licensed under the [Apache License](LICENSE).
 If you use this code in your research, please consider citing it. Below is the BibTeX entry for citation:
 
 ```bibtex
-@misc{doloriel2024frequency,
-      title={Frequency Masking for Universal Deepfake Detection}, 
-      author={Chandler Timm Doloriel and Ngai-Man Cheung},
-      year={2024},
-      eprint={2401.06506},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{Doloriel2024FrequencyMF,
+  title={Frequency Masking for Universal Deepfake Detection},
+  author={Chandler Timm C. Doloriel and Ngai-Man Cheung},
+  journal={ICASSP 2024 - 2024 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  year={2024},
+  pages={13466-13470},
+  url={https://api.semanticscholar.org/CorpusID:266977102}
 }

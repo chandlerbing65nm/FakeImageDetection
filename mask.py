@@ -128,14 +128,14 @@ class FrequencyMaskGenerator:
         return mask
 
     def _dct2(self, a):
-        return dct(dct(a, axis=0, norm='ortho'), axis=1, norm='ortho')
+        return dct(dct(a, axis=0, norm='forward'), axis=1, norm='forward')
 
     def _idct2(self, a):
-        return idct(idct(a, axis=1, norm='ortho'), axis=0, norm='ortho')
+        return idct(idct(a, axis=1, norm='backward'), axis=0, norm='backward')
 
     def _wavelet_transform(self, a):
         # Perform wavelet decomposition on axes (0, 1)
-        coeffs = pywt.wavedecn(a, wavelet='haar', level=2, axes=(0, 1))
+        coeffs = pywt.wavedecn(a, wavelet='haar', level=1, axes=(0, 1))
         
         # Convert to array and slices with the same axes
         arr, coeff_slices = pywt.coeffs_to_array(coeffs, axes=(0, 1))

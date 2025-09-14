@@ -14,4 +14,4 @@
 conda init
 conda activate fakeimagedetector
 
-bash train.sh '0'
+bash test.sh '0'

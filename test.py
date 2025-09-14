@@ -49,6 +49,7 @@ if __name__ == "__main__":
             'patch',
             'translate',
             'rotate',
+            'rotate_translate',
             'nomask'], 
         help='Type of mask generator'
         )
@@ -58,6 +59,12 @@ if __name__ == "__main__":
         type=str,
         choices=[
             'all', 'low', 'mid', 'high', 'low+mid', 'low+high', 'mid+high',]
+        )
+    parser.add_argument(
+        '--combine_aug',
+        default='none',
+        choices=['none', 'rotate', 'translate', 'rotate_translate'],
+        help='Optionally combine geometric augmentation (rotate/translate) with frequency masking'
         )
     parser.add_argument(
         '--pretrained', 
@@ -85,10 +92,10 @@ if __name__ == "__main__":
         )
     parser.add_argument(
         '--data_type', 
-        default="Wang_CVPR20", 
+        default="both", 
         type=str, 
-        choices=['Wang_CVPR20', 'Ojha_CVPR23'], 
-        help="Dataset Type"
+        choices=['Wang_CVPR20', 'Ojha_CVPR23', 'both'], 
+        help="Dataset Type. Use 'both' to evaluate on Wang_CVPR20 and Ojha_CVPR23 sequentially."
         )
     parser.add_argument('--local_rank', type=int, default=0, help='Local rank for distributed training')
 
@@ -115,17 +122,23 @@ if __name__ == "__main__":
     if args.mask_type in ['fourier', 'cosine', 'wavelet'] and args.mask_channel != 'all':
         channel_suffix = f"_ch{args.mask_channel}"
 
+    # Add a combine-augmentation suffix (e.g., _rotate, _translate, _rotate_translate) for frequency masking
+    combine_suffix = ''
+    if args.mask_type in ['fourier', 'cosine', 'wavelet'] and getattr(args, 'combine_aug', 'none') != 'none':
+        combine_suffix = f"_{args.combine_aug}"
+
     if args.mask_type != 'nomask':
         ratio = args.ratio
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask{channel_suffix}.pth'
+        checkpoint_path = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}/{model_name}{finetune}_{band}{args.mask_type}mask{combine_suffix}{channel_suffix}.pth'
     else:
         ratio = 0
-        checkpoint_path = f'checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
+        checkpoint_path = f'/mnt/SCRATCH/chadolor/Datasets/Projects/FakeImageDetector/checkpoints/mask_{ratio}/{model_name}{finetune}.pth'
 
     # Define the path to the results file
-    results_path = f'results/{args.data_type.lower()}'
+    results_dir = 'both' if args.data_type == 'both' else args.data_type.lower()
+    results_path = f'results/{results_dir}'
     os.makedirs(results_path, exist_ok=True)
-    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{channel_suffix}{ratio}.txt'
+    filename = f'{model_name}{finetune}_{band}{args.mask_type}mask{combine_suffix}{channel_suffix}{ratio}.txt'
 
     # Pretty print the arguments
     print("\nSelected Configuration:")
@@ -140,75 +153,101 @@ if __name__ == "__main__":
     print(f"Results saved to: {results_path}/{filename}")
     print("-" * 30, "\n")
 
-    if args.data_type == 'Wang_CVPR20':
-        datasets = {
-            'ProGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/progan',
-            'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/cyclegan',
-            'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/biggan',
-            'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stylegan',
-            'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/gaugan',
-            'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/stargan',
-            'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/deepfake',
-            'SITD': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/seeingdark',
-            'SAN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/san',
-            'CRN': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/crn',
-            'IMLE': '/mnt/SCRATCH/chadolor/Datasets/Wang_CVPR2020/testing/imle',
+    # Define both dataset groups
+    data_groups = {
+        'Wang_CVPR20': {
+            'ProGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/progan',
+            'CycleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/cyclegan',
+            'BigGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/biggan',
+            'StyleGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stylegan',
+            'GauGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/gaugan',
+            'StarGAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/stargan',
+            'DeepFake': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/deepfake',
+            'SITD': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/seeingdark',
+            'SAN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/san',
+            'CRN': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/crn',
+            'IMLE': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Wang_CVPR2020/testing/imle',
+        },
+        'Ojha_CVPR23': {
+            'Guided': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/guided',
+            'LDM_200': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_200',
+            'LDM_200_cfg': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_200_cfg',
+            'LDM_100': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/ldm_100',
+            'Glide_100_27': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_100_27',
+            'Glide_50_27': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_50_27',
+            'Glide_100_10': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/glide_100_10',
+            'DALL-E': '/mnt/SCRATCH/chadolor/Datasets/Datasets/Ojha_CVPR2023/dalle',       
         }
-    elif args.data_type == 'Ojha_CVPR23':
-        datasets = {
-            'Guided': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/guided',
-            'LDM_200': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200',
-            'LDM_200_cfg': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_200_cfg',
-            'LDM_100': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/ldm_100',
-            'Glide_100_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_27',
-            'Glide_50_27': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_50_27',
-            'Glide_100_10': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/glide_100_10',
-            'DALL-E': '/mnt/SCRATCH/chadolor/Datasets/Ojha_CVPR2023/dalle',       
-        }
-    else:
-        raise ValueError("wrong dataset type")
+    }
 
-    # Initialize a counter
-    dataset_count = len(datasets)
+    selected_types = [args.data_type] if args.data_type != 'both' else list(data_groups.keys())
 
-    for dataset_name, dataset_path in datasets.items():
-        if dist.get_rank() == 0:
-            print(f"\nEvaluating {dataset_name}")
+    # Accumulators for overall averages across all evaluated datasets
+    total_count = 0
+    sum_ap = 0.0
+    sum_acc = 0.0
+    sum_auc = 0.0
 
-        avg_ap, avg_acc, auc = evaluate_model(
-            args.model_name,
-            args.data_type,
-            args.mask_type,
-            ratio/100,
-            dataset_path,
-            args.batch_size,
-            checkpoint_path,
-            device,
-            args,
-        )
-        if dist.get_rank() == 0:
-            # Write the results to the file
-            with open(f'{results_path}/{filename}', 'a') as file:
-                if file.tell() == 0: # Check if the file is empty
-                    file.write("Selected Configuration:\n")
-                    file.write("-" * 28 + "\n")
-                    file.write(f"Device: {args.local_rank}\n")
-                    file.write(f"Dataset Type: {args.data_type}\n")
-                    file.write(f"Model type: {args.model_name}\n")
-                    file.write(f"Ratio of mask: {ratio}\n")
-                    file.write(f"Batch Size: {args.batch_size}\n")
-                    file.write(f"Mask Type: {args.mask_type}\n")
-                    file.write(f"Checkpoint Type: {checkpoint_path}\n")
-                    file.write(f"Results saved to: {results_path}/{filename}\n")
-                    file.write("-" * 28 + "\n\n")
-                    file.write("Dataset, Avg.Prec., Acc., AUC\n")
-                    file.write("-" * 28)
-                    file.write("\n")
-                file.write(f"{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc:.3f}\n")
+    for dtype in selected_types:
+        datasets = data_groups[dtype]
 
-            # Decrement the counter
-            dataset_count -= 1
-            if dataset_count == 0:
+        # Initialize a counter
+        dataset_count = len(datasets)
+
+        for dataset_name, dataset_path in datasets.items():
+            if dist.get_rank() == 0:
+                print(f"\nEvaluating [{dtype}] {dataset_name}")
+
+            avg_ap, avg_acc, auc = evaluate_model(
+                args.model_name,
+                dtype,
+                args.mask_type,
+                ratio/100,
+                dataset_path,
+                args.batch_size,
+                checkpoint_path,
+                device,
+                args,
+            )
+            if dist.get_rank() == 0:
+                # Write the results to the file
                 with open(f'{results_path}/{filename}', 'a') as file:
-                    file.write("-" * 28 + "\n")
-                    file.write("\n")
+                    if file.tell() == 0: # Check if the file is empty
+                        file.write("Selected Configuration:\n")
+                        file.write("-" * 28 + "\n")
+                        file.write(f"Device: {args.local_rank}\n")
+                        file.write(f"Dataset Type: {args.data_type}\n")
+                        file.write(f"Model type: {args.model_name}\n")
+                        file.write(f"Ratio of mask: {ratio}\n")
+                        file.write(f"Batch Size: {args.batch_size}\n")
+                        file.write(f"Mask Type: {args.mask_type}\n")
+                        file.write(f"Checkpoint Type: {checkpoint_path}\n")
+                        file.write(f"Results saved to: {results_path}/{filename}\n")
+                        file.write("-" * 28 + "\n\n")
+                        file.write("Dataset, Avg.Prec.(%), Acc.(%), AUC(%)\n")
+                        file.write("-" * 28)
+                        file.write("\n")
+                    file.write(f"{dtype}:{dataset_name}, {avg_ap*100:.2f}, {avg_acc*100:.2f}, {auc*100:.2f}\n")
+
+                # Decrement the counter
+                dataset_count -= 1
+                if dataset_count == 0:
+                    with open(f'{results_path}/{filename}', 'a') as file:
+                        file.write("-" * 28 + "\n")
+                        file.write("\n")
+
+            # Update accumulators
+            sum_ap += avg_ap
+            sum_acc += avg_acc
+            sum_auc += auc
+            total_count += 1
+
+    # Write overall averages across all evaluated datasets
+    if dist.get_rank() == 0 and total_count > 0:
+        avg_ap_all = (sum_ap / total_count) * 100.0
+        avg_acc_all = (sum_acc / total_count) * 100.0
+        avg_auc_all = (sum_auc / total_count) * 100.0  # convert AUC to %
+        with open(f'{results_path}/{filename}', 'a') as file:
+            file.write("Overall Averages (across all datasets)\n")
+            file.write("-" * 28 + "\n")
+            file.write(f"AVERAGE, {avg_ap_all:.2f}, {avg_acc_all:.2f}, {avg_auc_all:.2f}\n")
