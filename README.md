@@ -8,12 +8,12 @@
   <img src="https://github.com/chandlerbing65nm/FakeDetection/assets/62779617/d0564928-96ea-48ff-b2c9-93743340128b" width="350" height="350">
 </p> -->
 
->We study universal deepfake detection.
+<!-- >We study universal deepfake detection.
 >Our  goal is to detect synthetic images from a range of generative AI approaches, particularly emerging ones which are unseen during training of the deepfake detector.
 >Universal deepfake detection requires outstanding generalization capability.
 >Motivated by recently proposed masked image modeling which has demonstrated excellent generalization in self-supervised pre-training, we make the first attempt to explore masked image modeling for universal deepfake detection. We study spatial and frequency domain masking in training deepfake detector.
 >Based on empirical analysis, we propose a novel deepfake detector via frequency masking.
->Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods. 
+>Our focus on frequency domain is different from most spatial domain  detection. Comparative analyses reveal substantial performance gains over existing methods.  -->
 
 ## PLEASE READ DOCUMENTATION BELOW
 
@@ -83,7 +83,7 @@ Within that directory, checkpoints are grouped by mask ratio (percent):
 │   ├── rn50ft_highfouriermask.pth
 │   ├── rn50ft_pixelmask.pth
 │   ├── rn50ft_patchmask.pth
-│   ├── rn50ft_fouriermask_rotate_chr.pth       # example: frequency + combine_aug + channel suffix
+│   ├── rn50ft_fouriermask.pth    
 │   └── ...
 └── ...
 ```
@@ -165,7 +165,7 @@ Results are saved under:
 ```
 results/
 └── both/
-    └── rn50ft_fouriermask_rotate_chr15.txt   # example filename
+    └── rn50ft_fouriermask.txt   # example filename
 ```
 
 - Each file includes the header, the per-dataset rows formatted as `Dataset, Avg.Prec.(%), Acc.(%), AUC(%)`, and an `AVERAGE` line summarizing all evaluated datasets in the run.
@@ -291,5 +291,4 @@ If you use this code in your research, please consider citing it. Below is the B
   journal={ICASSP 2024 - 2024 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
   year={2024},
   pages={13466-13470},
-  url={https://api.semanticscholar.org/CorpusID:266977102}
 }

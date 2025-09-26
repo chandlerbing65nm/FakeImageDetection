@@ -5,12 +5,12 @@ GPUs="$1"
 NUM_GPU=$(echo $GPUs | awk -F, '{print NF}')
 DATA_TYPE="both"  # both, or Wang_CVPR20, or Ojha_CVPR23
 MODEL_NAME="RN50" # RN50, RN50_mod, RN50_npr, CLIP_vitl14, MNv2, SWIN_t, VGG11
-MASK_TYPE="fourier"   # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate, rotate_translate
+MASK_TYPE="rotate_translate"   # nomask, fourier, pixel, patch, cosine, wavelet, translate, rotate, rotate_translate
 BAND="all" # all, low, mid, high, low+mid, low+high, mid+high
 RATIO=15 # automatically becomes RATIO=0 if MASK_TYPE="nomask"
 BATCH_SIZE=64
 MASK_CHANNEL="all"    # all, r, g, b, 0, 1, 2 (applies to fourier/cosine/wavelet)
-COMBINE_AUG="translate"   # none, rotate, translate, rotate_translate (combine with frequency masking)
+COMBINE_AUG="none"   # none, rotate, translate, rotate_translate (combine with frequency masking)
 
 # Set the CUDA_VISIBLE_DEVICES environment variable to use GPUs
 export CUDA_VISIBLE_DEVICES=$GPUs

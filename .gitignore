@@ -11,6 +11,9 @@ results/
 logs/
 clip_features/
 weights/
+results/
+common/
+checkpoints/
 *.pkl
 *.pth
 *.done
