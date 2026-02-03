@@ -1,7 +1,12 @@
 <div align="center">
 
 # Frequency Masking for Universal DeepFake Detection
-[Paper](https://arxiv.org/abs/2401.06506)
+[ICASSP 2024](https://arxiv.org/abs/2401.06506)
+
+
+# Towards Sustainable Universal Deepfake Detection with Frequency-Domain Masking
+[ACM TOMM 2026](https://arxiv.org/abs/2512.08042)
+
 </div>
 
 <!-- <p align="center">
